@@ -1,0 +1,1390 @@
+<title>Cyrill Cajucom Portfolio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@600;700&family=Kaushan+Script&family=Poppins:wght@600&family=Righteous&family=Gaegu:wght@400;700&family=Instrument+Sans:wght@400;600&family=Lilita+One&family=VT323&display=swap">
+<style>
+/* Layout: a real-time 3D room you fly out of, then a full-screen CRT you pan around in. */
+:root {
+  color-scheme: dark;
+  --ink: #0d0d0e;
+  --paper: #f4f1e8;
+  --yellow: #ffe600;
+  --green: #1f8a3a;
+  --amber: #ffd166;
+  --display: Anton, Impact, "Arial Narrow", sans-serif;
+  --body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: VT323, Consolas, monospace;
+}
+html, body { height: 100%; overflow: hidden; overscroll-behavior: none; -webkit-text-size-adjust: 100%; }
+body { background: #050404; color: var(--paper); font-family: var(--body); }
+[hidden] { display: none !important; }
+:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+
+/* ---------- Room. Models and textures are CC0 from Poly Haven. ---------- */
+#room { position: fixed; inset: 0; overflow: hidden; background: #050404; }
+#room3d { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 45%, rgba(0,0,0,.6) 100%); }
+.hint, .loading {
+  position: absolute; left: 16px; right: 16px; margin: 0; text-align: center; pointer-events: none;
+  font: 400 clamp(18px, 2vw, 24px)/1.15 var(--mono); letter-spacing: .08em; color: var(--amber); text-shadow: 0 1px 3px #000;
+}
+.hint { bottom: calc(14px + env(safe-area-inset-bottom, 0px)); transition: opacity .4s; }
+.loading { top: 50%; }
+#room:not(.ready) .hint { opacity: 0; }
+#room.ready .loading { display: none; }
+.zoom .hint, .zoom #tip { opacity: 0; }
+#tip {
+  position: fixed; z-index: 3; left: 0; top: 0; padding: 4px 8px; pointer-events: none; background: #000; color: var(--paper);
+  font: 400 20px/1 var(--mono); letter-spacing: .04em; border-radius: 3px; white-space: nowrap;
+}
+/* The TV's controls live on the 3D dials. These real controls appear when reached by keyboard. */
+#tv-controls { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+#tv-controls:focus-within {
+  width: auto; height: auto; overflow: visible; clip-path: none; left: 50%; bottom: 52px; transform: translateX(-50%);
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; align-items: center; padding: 12px 16px; max-width: calc(100vw - 32px); box-sizing: border-box;
+  background: #000; border: 2px solid var(--paper); border-radius: 8px; font: 400 20px/1 var(--mono);
+}
+#tv-controls button { font: inherit; padding: 8px 12px; color: var(--paper); background: #000; border: 2px solid var(--paper); border-radius: 6px; cursor: pointer; }
+#tv-controls label { display: flex; gap: 8px; align-items: center; }
+
+/* ---------- Inside the TV ---------- */
+#crt { position: fixed; inset: 0; width: 100%; height: 100%; display: block; visibility: hidden; z-index: 1; touch-action: none; cursor: grab; }
+#crt.full { visibility: visible; animation: fade-in .35s both; }
+@keyframes fade-in { from { opacity: 0; } }
+#ui { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
+body:not(.inside) #ui { display: none; }
+#ui button { pointer-events: auto; }
+.sticker { position: absolute; padding: 0; background: none; border: 0; cursor: pointer; filter: drop-shadow(0 6px 8px rgba(0,0,0,.6)); transition: transform .18s; }
+.sticker svg { display: block; width: 100%; height: auto; }
+#btn-about:hover { animation: wobble .5s ease-in-out; }
+@keyframes wobble { 20% { transform: rotate(-11deg) scale(1.08); } 45% { transform: rotate(9deg) scale(1.08); } 70% { transform: rotate(-5deg) scale(1.04); } 100% { transform: none; } }
+#btn-talk { transform: rotate(-13deg); }
+#btn-talk:hover, #btn-talk:focus-visible { transform: rotate(-9deg) scale(1.04); }
+#btn-talk svg { overflow: visible; }
+.face-b { opacity: 0; }
+#btn-about { width: clamp(64px, 7vw, 104px); left: calc(clamp(14px, 4vw, 64px) + env(safe-area-inset-left, 0px)); top: calc(clamp(14px, 4vw, 48px) + env(safe-area-inset-top, 0px)); }
+#btn-talk { width: clamp(132px, 17vw, 260px); right: calc(clamp(8px, 3vw, 56px) + env(safe-area-inset-right, 0px)); bottom: calc(clamp(8px, 3vw, 40px) + env(safe-area-inset-bottom, 0px)); }
+#back {
+  position: absolute; top: calc(clamp(16px, 4vw, 48px) + env(safe-area-inset-top, 0px)); right: calc(clamp(16px, 4vw, 64px) + env(safe-area-inset-right, 0px));
+  background: #000; color: var(--paper); border: 2px solid var(--paper); border-radius: 6px; padding: 11px 14px;
+  font: 400 22px/1 var(--mono); letter-spacing: .04em; cursor: pointer;
+}
+#back:hover { background: var(--paper); color: #000; }
+@media (max-width: 600px), (max-height: 480px) { #back { min-height: 44px; padding: 7px 11px; font-size: 18px; } } /* still a full finger target, but no bigger than the cards around it */
+@media (max-height: 480px) { #back { top: calc(10px + env(safe-area-inset-top, 0px)); } } /* clears the top card on a sideways phone */
+* { -webkit-tap-highlight-color: transparent; }
+canvas { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; } /* a long press must not offer to save the picture */
+.sticker, #back, #room3d { touch-action: manipulation; }
+
+dialog {
+  width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); box-sizing: border-box; padding: 0 clamp(18px, 4vw, 34px) 26px; border: 0; border-radius: 14px; overflow: auto;
+  background: #0b0b0b; color: var(--paper);
+}
+dialog::backdrop { background: rgba(0,0,0,.82); }
+.tape { margin: 18px -40px 22px; padding: 7px 40px; transform: rotate(-1.2deg); background: var(--yellow); color: #000; font: 400 clamp(20px, 4vw, 28px)/1 var(--display); text-transform: uppercase; letter-spacing: .03em; }
+dialog p { margin: 0 0 14px; max-width: 58ch; font-size: 16px; line-height: 1.5; color: #d8d6cf; }
+dialog .address { font: 400 28px/1.1 var(--mono); user-select: all; overflow-wrap: anywhere; color: var(--yellow); }
+.keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px 22px; margin: 20px 0 0; }
+.keys div { min-width: 0; }
+.keys dt { font: 400 20px/1.1 var(--display); color: var(--yellow); text-transform: uppercase; letter-spacing: .03em; }
+.keys dd { margin: 3px 0 0; font-size: 14px; line-height: 1.35; color: #d8d6cf; }
+dialog .row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+dialog button { font: 600 15px/1 var(--body); padding: 11px 16px; border: 2px solid var(--yellow); border-radius: 8px; background: var(--yellow); color: #000; cursor: pointer; }
+dialog button.ghost { background: none; color: var(--yellow); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div id="room">
+  <h1 class="sr-only">Cyrill Cajucom, portfolio</h1>
+  <canvas id="room3d" aria-hidden="true"></canvas>
+  <div class="vignette"></div>
+  <p class="loading">Warming up the tube...</p>
+  <p class="hint">Click the screen to go inside. The dials work too.</p>
+  <div id="tv-controls">
+    <button id="screen" type="button">Go inside the TV</button>
+    <button id="power" type="button" aria-pressed="true">Power</button>
+    <label>Volume <input id="vol" type="range" min="0" max="100" value="0"></label>
+    <label>Channel <input id="chan" type="range" min="1" max="4" step="1" value="1"></label>
+  </div>
+  <div id="tip" hidden></div>
+</div>
+<canvas id="crt" aria-hidden="true"></canvas>
+
+<div id="ui">
+  <button id="btn-about" class="sticker" type="button" aria-label="Help and about">
+    <svg viewBox="0 0 120 92" aria-hidden="true">
+      <defs><g id="lemon-shape"><ellipse cx="60" cy="46" rx="33" ry="27"/><rect x="19" y="38" width="82" height="16" rx="8"/></g></defs>
+      <use href="#lemon-shape" fill="#ffe600" stroke="#ffe600" stroke-width="24"/>
+      <use href="#lemon-shape" fill="#000" stroke="#000" stroke-width="8"/>
+      <use href="#lemon-shape" fill="#ffe600"/>
+      <text x="60" y="61" text-anchor="middle" font-family="Lilita One, Impact, sans-serif" font-size="38" fill="#000" transform="rotate(10 60 46)">?</text>
+    </svg>
+  </button>
+  <button id="btn-talk" class="sticker" type="button" aria-label="Open to work. Say hello">
+    <svg viewBox="0 0 300 200" aria-hidden="true">
+      <defs>
+        <polygon id="sticker-shape" points="150,36 270,100 150,164 30,100" stroke-linejoin="round"/>
+        <clipPath id="sticker-body"><polygon id="sticker-body-area"/></clipPath>
+        <clipPath id="sticker-flap"><polygon id="sticker-flap-area"/></clipPath>
+        <linearGradient id="sticker-back" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#9c9c95"/><stop offset=".3" stop-color="#ffffff"/><stop offset=".75" stop-color="#ecece6"/><stop offset="1" stop-color="#c9c9c2"/>
+        </linearGradient>
+      </defs>
+      <g clip-path="url(#sticker-body)">
+        <use href="#sticker-shape" fill="#1f8a3a" stroke="#1f8a3a" stroke-width="34"/>
+        <use href="#sticker-shape" fill="none" stroke="#ffe600" stroke-width="15"/>
+        <use href="#sticker-shape" fill="#1f8a3a" stroke="#1f8a3a" stroke-width="9"/>
+        <g class="face-a" text-anchor="middle" fill="#ffe600">
+          <text x="150" y="92" font-family="Lilita One, Impact, sans-serif" font-size="36">OPEN</text>
+          <text x="150" y="124" font-family="Lilita One, Impact, sans-serif" font-size="36">TO WORK</text>
+          <text x="150" y="145" font-family="Instrument Sans, Segoe UI, sans-serif" font-weight="600" font-size="14">Let's talk</text>
+        </g>
+        <g class="face-b" text-anchor="middle" fill="#ffe600">
+          <text x="162" y="92" font-family="Lilita One, Impact, sans-serif" font-size="36">SAY</text>
+          <text x="162" y="124" font-family="Lilita One, Impact, sans-serif" font-size="36">HELLO</text>
+          <text x="160" y="143" font-family="Instrument Sans, Segoe UI, sans-serif" font-weight="600" font-size="13">Contact me</text>
+        </g>
+      </g>
+      <g style="filter: drop-shadow(3px 5px 4px rgba(0,0,0,.55))">
+        <g id="sticker-fold">
+          <g clip-path="url(#sticker-flap)"><use href="#sticker-shape" fill="url(#sticker-back)" stroke="url(#sticker-back)" stroke-width="34"/></g>
+        </g>
+      </g>
+    </svg>
+  </button>
+  <button id="back" type="button">&#9167; Back to room</button>
+  <nav class="sr-only" aria-label="Projects" id="project-nav"></nav>
+  <div class="sr-only" id="live" aria-live="polite"></div>
+</div>
+
+<dialog id="about" aria-labelledby="about-title">
+  <h2 id="about-title" class="tape">Cyrill Cajucom / Help</h2>
+  <p>This is placeholder text for your bio. Say what you make, who you make it for, and where you're based.</p>
+  <dl class="keys">
+    <div><dt>Click</dt><dd>Look closer, click again to open</dd></div>
+    <div><dt>Wheel</dt><dd>Zoom in on the screen nearest your mouse</dd></div>
+    <div><dt>Mouse</dt><dd>Look around the room</dd></div>
+    <div><dt>Drag</dt><dd>Tug the board</dd></div>
+    <div><dt>Arrows</dt><dd>Step to the next screen or story</dd></div>
+    <div><dt>Enter or space</dt><dd>Look closer, then open</dd></div>
+    <div><dt>Esc</dt><dd>Back</dd></div>
+    <div><dt>Home</dt><dd>Back to the whole board</dd></div>
+    <div><dt>R</dt><dd>Random project</dd></div>
+    <div><dt>?</dt><dd>This page</dd></div>
+  </dl>
+  <div class="row"><button type="button" data-close>Close</button></div>
+</dialog>
+<dialog id="contact" aria-labelledby="contact-title">
+  <h2 id="contact-title" class="tape">Say hello</h2>
+  <p>Placeholder address. Replace it with the one you want clients to use.</p>
+  <p class="address" id="address">you@example.com</p>
+  <div class="row"><button type="button" id="copy">Copy address</button><button type="button" class="ghost" data-close>Close</button></div>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/environments/RoomEnvironment.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/utils/BufferGeometryUtils.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const DIVE_MS = reduced ? 0 : 1800;
+const DISPLAY = 'Anton, Impact, sans-serif', LETTERING = '"Lilita One", Impact, sans-serif', BODY = '"Instrument Sans", "Segoe UI", sans-serif', MONO = 'VT323, Consolas, monospace';
+const COARSE = matchMedia('(pointer: coarse)').matches;
+const room = $('#room'), crt = $('#crt'), tip = $('#tip');
+const vol = $('#vol'), chan = $('#chan'), powerBtn = $('#power'), backBtn = $('#back'), live = $('#live');
+
+/* ---------- Placeholder project art. Swap each draw() for a real image later. ---------- */
+const text = (g, s, x, y, size, font = DISPLAY, color = '#fff', align = 'center') => {
+  g.font = `${size}px ${font}`; g.fillStyle = color; g.textAlign = align; g.textBaseline = 'middle'; g.fillText(s, x, y);
+};
+const box = (g, x, y, w, h, r, color) => { g.fillStyle = color; g.beginPath(); g.roundRect(x, y, w, h, r); g.fill(); };
+const circle = (g, x, y, r, color) => { g.fillStyle = color; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); };
+function phone(g, x, y, w, h, bg, fg) {
+  box(g, x, y, w, h, w * .12, bg);
+  box(g, x + w * .12, y + h * .08, w * .4, h * .04, 3, fg);
+  for (let i = 0; i < 5; i++) { box(g, x + w * .12, y + h * (.2 + i * .15), w * .76, h * .1, 4, fg); }
+}
+const art = {
+  orbit(g, w, h) {
+    const l = g.createLinearGradient(0, 0, 0, h); l.addColorStop(0, '#160c52'); l.addColorStop(.6, '#c62e6d'); l.addColorStop(1, '#ffb347');
+    g.fillStyle = l; g.fillRect(0, 0, w, h);
+    circle(g, w * .72, h * .36, h * .24, '#ffd9a0');
+    g.strokeStyle = '#fff'; g.lineWidth = 3; g.beginPath(); g.ellipse(w * .72, h * .36, h * .42, h * .08, -.35, 0, 7); g.stroke();
+    text(g, 'WORKS', w / 2, h * .72, h * .3);
+  },
+  field(g, w, h) { // a page from the notebook, with the cat who runs it
+    g.fillStyle = '#f5f2e8'; g.fillRect(0, 0, w, h);
+    g.strokeStyle = 'rgba(96,136,196,.55)'; g.lineWidth = Math.max(1, h * .006); for (let y = h * .09; y < h; y += h * .1) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
+    g.strokeStyle = 'rgba(226,84,92,.75)'; g.beginPath(); g.moveTo(w * .14, 0); g.lineTo(w * .14, h); g.stroke();
+    const cx = w * .55, cy = h * .55, r = h * .32;
+    g.lineWidth = h * .018; g.strokeStyle = '#26252b'; g.lineJoin = 'round';
+    for (const k of [-1, 1]) { g.fillStyle = '#f6c531'; g.beginPath(); g.moveTo(cx + k * r * .5, cy - r * .78); g.lineTo(cx + k * r * .8, cy - r * 1.24); g.lineTo(cx + k * r * 1.06, cy - r * .42); g.fill(); g.stroke(); }
+    g.fillStyle = '#f6c531'; g.beginPath(); g.ellipse(cx, cy, r * 1.17, r * 1.02, 0, 0, 7); g.fill(); g.stroke();
+    g.fillStyle = '#fff1c7'; g.beginPath(); g.ellipse(cx, cy + r * .46, r * .64, r * .42, 0, 0, 7); g.fill();
+    for (const k of [-1, 1]) {
+      const ex = cx + k * r * .47, ey = cy - r * .06;
+      g.fillStyle = '#e4851b'; g.beginPath(); g.arc(ex, ey, r * .335, 0, 7); g.fill(); g.stroke(); circle(g, ex, ey, r * .21, '#1c1720'); circle(g, ex - r * .08, ey - r * .1, r * .07, '#fff');
+      g.beginPath(); g.moveTo(ex - r * .36, ey - r * .27); g.lineTo(ex + r * .36, ey - r * .27); g.stroke();
+    }
+    g.fillStyle = '#e77f85'; g.beginPath(); g.moveTo(cx - r * .11, cy + r * .14); g.lineTo(cx + r * .11, cy + r * .14); g.lineTo(cx, cy + r * .27); g.fill();
+    g.beginPath(); g.moveTo(cx - r * .25, cy + r * .46); g.quadraticCurveTo(cx - r * .1, cy + r * .3, cx, cy + r * .38); g.quadraticCurveTo(cx + r * .1, cy + r * .3, cx + r * .25, cy + r * .46); g.stroke();
+  },
+  soft(g, w, h) {
+    g.fillStyle = '#f0cc35'; g.fillRect(0, 0, w, h);
+    const r = Math.min(h * .26, w * .17);
+    [['#e6455a', .22], ['#2d7fd0', .5], ['#fff', .78]].forEach(([c, x]) => {
+      const cx = w * x, cy = h * .6;
+      circle(g, cx, cy, r, c);
+      circle(g, cx - r * .28, cy - r * .16, r * .1, '#000'); circle(g, cx + r * .28, cy - r * .16, r * .1, '#000');
+      g.strokeStyle = '#000'; g.lineWidth = 3; g.beginPath(); g.arc(cx, cy + r * .08, r * .32, .3, Math.PI - .3); g.stroke();
+    });
+    text(g, 'SOFT CLUB', w / 2, h * .14, h * .2, DISPLAY, '#000');
+  },
+  hero(g, w, h) {
+    g.fillStyle = '#d6d6d6'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#a9a9a9';
+    for (let i = 0; i < 20; i++) { const a = i / 20 * Math.PI * 2, b = a + Math.PI / 20; g.beginPath(); g.moveTo(w / 2, h * .55); g.lineTo(w / 2 + Math.cos(a) * w * 1.2, h * .55 + Math.sin(a) * w * 1.2); g.lineTo(w / 2 + Math.cos(b) * w * 1.2, h * .55 + Math.sin(b) * w * 1.2); g.fill(); }
+    g.beginPath();
+    for (let i = 0; i < 28; i++) {
+      const a = i / 28 * Math.PI * 2, r = (i % 2 ? .22 : .46 + .1 * Math.sin(i * 2.4)) * w;
+      g.lineTo(w / 2 + Math.cos(a) * r * 1.08, h * .55 + Math.sin(a) * r);
+    }
+    g.closePath(); g.fillStyle = '#fff'; g.fill(); g.strokeStyle = '#000'; g.lineWidth = 4; g.stroke();
+    const outlined = (s, y, size, fill) => { g.font = `${size}px ${DISPLAY}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round'; g.lineWidth = size * .2; g.strokeStyle = '#000'; g.strokeText(s, 0, y); g.fillStyle = fill; g.fillText(s, 0, y); };
+    g.save(); g.translate(w / 2, 0);
+    outlined('HELLO', h * .12, w * .12, '#fff'); outlined('MY NAME IS', h * .22, w * .12, '#fff');
+    g.save(); g.translate(0, h * .52); g.rotate(-.12); g.transform(1, 0, -.12, 1, 0, 0); outlined('CYRILL', 0, w * .27, '#ffe600'); g.restore();
+    outlined("AND I'M A", h * .74, w * .07, '#fff'); outlined('YOUR ROLE HERE', h * .85, w * .12, '#fff');
+    g.restore();
+  },
+};
+const COPY = 'Placeholder case study. Replace this with the problem, what you did, and what changed because of it.';
+// Placeholder story pictures. Swap each draw() for a real photo later.
+const story = (name, sky, draw) => ({ name, draw(g, w, h) { const l = g.createLinearGradient(0, 0, 0, h); sky.forEach((c, i) => l.addColorStop(i / (sky.length - 1), c)); g.fillStyle = l; g.fillRect(0, 0, w, h); draw(g, w, h); } });
+const STORIES = [
+  story('Winter 24', ['#120b09', '#2c1610', '#3a1d14'], (g, w, h) => {
+    g.fillStyle = '#0b0705'; g.beginPath(); g.moveTo(0, h * .22); g.lineTo(w / 2, h * .03); g.lineTo(w, h * .22); g.lineTo(w, 0); g.lineTo(0, 0); g.fill();
+    const cx = w * .27, cy = h * .56, r = h * .22;
+    circle(g, cx, cy, r * 1.25, '#1b0f0a'); circle(g, cx, cy, r, '#f4f0e6');
+    g.strokeStyle = '#111'; g.lineWidth = r * .12; g.beginPath(); g.moveTo(cx - r * .75, cy); g.quadraticCurveTo(cx, cy - r * .6, cx + r * .75, cy + r * .2); g.moveTo(cx - r * .5, cy + r * .35); g.quadraticCurveTo(cx, cy, cx + r * .5, cy - r * .3); g.stroke();
+    g.fillStyle = '#4a2015'; g.fillRect(w * .52, h * .3, w * .38, h * .7);
+    g.fillStyle = '#9fb4b8'; g.fillRect(w * .56, h * .36, w * .3, h * .64); g.fillStyle = '#4a2015'; g.fillRect(w * .56, h * .62, w * .3, h * .015);
+    g.fillStyle = '#c47a4e'; g.beginPath(); g.moveTo(w * .56, h * .5); g.lineTo(w * .8, h * .4); g.lineTo(w * .56, h * .8); g.fill();
+  }),
+  story('Summer 25', ['#274a3a', '#2f6a51', '#7c5230'], (g, w, h) => {
+    g.fillStyle = '#6b3f20'; g.fillRect(0, h * .55, w, h * .45);
+    g.save(); g.translate(w * .32, h * .3); g.rotate(-.35); g.fillStyle = '#e6d9b8'; g.beginPath(); g.ellipse(0, 0, h * .3, h * .17, 0, 0, 7); g.fill(); g.fillStyle = '#1c1c1c'; g.fillRect(h * .2, -h * .025, h * .95, h * .05); g.restore();
+    g.save(); g.translate(w * .28, h * .76); g.rotate(-.12); g.fillStyle = '#bcbcbc'; g.fillRect(-w * .17, -h * .12, w * .34, h * .24); g.fillStyle = '#262626'; g.fillRect(-w * .14, -h * .09, w * .28, h * .18); g.restore();
+    box(g, w * .58, h * .78, w * .28, h * .1, 6, '#111'); circle(g, w * .72, h * .78, h * .07, '#2a2a2a');
+  }),
+  story('Night Shift', ['#0d0204', '#2a0508', '#100204'], (g, w, h) => {
+    circle(g, w * .64, h * .13, w * .3, '#d3561d');
+    g.fillStyle = '#3d090d'; g.fillRect(w * .08, h * .34, w * .84, h * .3);
+    [.2, .42, .64].forEach(x => { g.fillStyle = '#ff3b30'; g.fillRect(w * x, h * .42, w * .12, h * .1); });
+    g.fillStyle = '#060101'; g.fillRect(0, h * .72, w, h * .28);
+    g.strokeStyle = '#7d1218'; g.lineWidth = 3; [.3, .5, .7].forEach(x => { g.beginPath(); g.moveTo(w * x, h * .72); g.lineTo(w * (x + .08), h * .96); g.stroke(); });
+  }),
+  story('Dawn Run', ['#f4b37b', '#b96f88', '#22375e'], (g, w, h) => {
+    circle(g, w * .5, h * .44, w * .18, '#ffe2a8');
+    g.fillStyle = '#16243f'; g.fillRect(0, h * .55, w, h * .45);
+    g.fillStyle = '#ffd08a'; for (let i = 0; i < 9; i++) g.fillRect(w * (.34 + (i % 3) * .05), h * (.58 + i * .04), w * (.32 - i * .02), h * .008);
+    g.fillStyle = '#0a1224'; g.beginPath(); g.moveTo(0, h * .55); g.lineTo(w * .26, h * .47); g.lineTo(w * .42, h * .55); g.fill();
+  }),
+];
+// wide and tall place each card on the one page as [x, y, scale], for landscape and portrait screens.
+const hero = { hero: true, t: 'Cyrill', c: 'Hello', w: 430, h: 500, depth: 1, wide: [0, -10, 1.25], tall: [0, -340, 1.15], draw: art.hero };
+const stories = { stories: true, t: 'Stories', c: 'Stories', w: 340, h: 225, depth: .9, wide: [520, 152, 1.335], tall: [197, 362, 1.1], draw: STORIES[0].draw };
+const projects = [
+  { t: 'Works', c: 'Projects', sub: "Everything I've made", theme: 'clouds', portal: true, w: 340, h: 225, depth: 1.15, wide: [-520, -172, 1.335], tall: [-197, 92, 1.1], draw: art.orbit },
+  { t: 'Field Notes', c: 'Personal', sub: "Everything that isn't a project", theme: 'paper', notebook: true, w: 340, h: 225, depth: 1.15, wide: [520, -172, 1.335], tall: [197, 92, 1.1], draw: art.field },
+  { t: 'Soft Club', c: 'Illustration', w: 340, h: 225, depth: .9, wide: [-520, 152, 1.335], tall: [-197, 362, 1.1], draw: art.soft },
+];
+const items = [hero, stories, ...projects];
+const TICKER = 'THIS IS YOUR NEWS TICKER. SAY WHAT YOU ARE UP TO, OR WHAT YOU WON.     ';
+const PAGE = { wide: { w: 1640, h: 1040 }, tall: { w: 830, h: 1700 } }; // world size that must fit the screen, with room for the tube's curved edge
+
+/* ---------- Scene state ---------- */
+const S = 1.045, K = .055; // S and K must match the shader
+const PULL = 70; // how far the board can be tugged before it stops giving, in world units
+const elastic = v => Math.sign(v) * PULL * (1 - 1 / (Math.abs(v) / PULL + 1));
+const STORY_MS = 4200;
+const pan = { x: 0, y: 0 }, tug = { x: 0, y: 0 }, look = { x: 0, y: 0 }, lookTarget = { x: 0, y: 0 }, cam = { x: 0, y: 0 };
+let vx = 0, vy = 0, glitch = 0, scan = 0, shaderVx = 0, shaderVy = 0;
+// Camera: focus is the selected card, zoomGoal is where the wheel or a click wants it (0 whole board, 1 close up), zoomNow chases it.
+let focus = null, zoomGoal = 0, zoomNow = 0, zoomK = 1, popAt = 0, storyIndex = 0, storyAt = 0, tickerX = 0, wheelTimer = 0;
+let gate = null, gateWorld = null; // box 1's gate lives in gate.js
+let book = null; // box 2's notebook lives in notebook.js
+let works = null; // box 1's page behind the door lives in works.js
+let W = 0, H = 0, pr = 1, maxPr = 1, sc = 1, mode = 'room', view = null, drag = null, hover = null, focusCard = null, dirty = true, tvOn = true, channel = 1;
+
+// Same warp as the fragment shader, so clicks land on what the curved screen shows.
+function toScene(x, y) {
+  const u = (x / W * 2 - 1) * S, v = (y / H * 2 - 1) * S;
+  return [(u * (1 + K * v * v) + 1) / 2 * W, (v * (1 + K * u * u) + 1) / 2 * H];
+}
+// depth: cards shift by different amounts when the board moves
+const place = c => [W / 2 + (c.x + (pan.x + look.x) * c.depth - cam.x) * sc * zoomK, H / 2 + (c.y + (pan.y + look.y) * c.depth - cam.y) * sc * zoomK];
+const sizeOf = c => [c.w * c.s * sc * zoomK, c.h * c.s * sc * zoomK];
+function hit(x, y) {
+  const [sx, sy] = toScene(x, y);
+  for (let i = items.length - 1; i >= 0; i--) {
+    const c = items[i], [px, py] = place(c), [w, h] = sizeOf(c);
+    if (focus && focus.theme && zoomGoal && c !== focus) continue; // its background hides the rest of the board
+    if (Math.abs(sx - px) < w / 2 && Math.abs(sy - py) < h / 2) return c;
+  }
+  return null;
+}
+function nearest(x, y) {
+  const [sx, sy] = toScene(x, y);
+  let best = hero, bestD = Infinity;
+  for (const c of items) { const [px, py] = place(c), d = Math.hypot(sx - px, sy - py); if (d < bestD) { bestD = d; best = c; } }
+  return best;
+}
+const closeUpZoom = c => { // a tall screen leaves room below the card for the lettering, and a background needs room around the card
+  const tall = W < H, fitH = tall ? .5 : c.theme ? .52 : .6, fitW = tall ? .88 : c.theme ? .42 : .72;
+  return Math.max(1, Math.min(H * fitH / (c.h * c.s * sc), W * fitW / (c.w * c.s * sc)));
+};
+function setFocus(c) { // select a card: the camera flies to it and its lettering pops
+  if (focus !== c) { popAt = 0; focus = c; }
+  zoomGoal = 1;
+  live.textContent = c.stories ? `Stories. ${STORIES[storyIndex].name}.` : `${c.t}, ${c.c}.`;
+  syncBack();
+}
+function clearFocus() { zoomGoal = 0; popAt = 0; live.textContent = ''; syncBack(); }
+function stepStory(d) {
+  storyIndex = (storyIndex + d + STORIES.length) % STORIES.length; storyAt = performance.now(); stories.bmp = null;
+  if (focus === stories) { popAt = 0; glitch = reduced ? 0 : .5; } // only a selected story gets the tear and a fresh pop; on the board it just changes
+}
+function stepFocus(d) {
+  if (focus === stories && zoomGoal) { stepStory(d); return; }
+  const i = focus ? items.indexOf(focus) : -1; setFocus(items[(i + d + items.length) % items.length]);
+}
+function syncBack() { backBtn.textContent = view || zoomGoal ? '◀ Back to board' : '⏏ Back to room'; }
+
+/* ---------- Scene drawing (2D canvas, then pushed through the CRT shader) ---------- */
+const gl = crt.getContext('webgl', { antialias: false, alpha: false });
+const sceneCanvas = gl ? document.createElement('canvas') : crt; // no WebGL: show the flat scene
+const g = sceneCanvas.getContext('2d');
+const dotTile = document.createElement('canvas'); dotTile.width = dotTile.height = 40;
+{ const d = dotTile.getContext('2d'); d.fillStyle = 'rgba(255,255,255,.12)'; d.fillRect(19, 19, 2, 2); }
+const dots = g.createPattern(dotTile, 'repeat');
+
+function bitmap(c, pw, ph, zoom = 1) {
+  const b = document.createElement('canvas'); b.width = Math.ceil(pw * maxPr); b.height = Math.ceil(ph * maxPr);
+  const x = b.getContext('2d'), s = pw / c.w, r = 14 * s;
+  x.scale(maxPr, maxPr); x.beginPath(); x.roundRect(0, 0, pw, ph, r); x.clip();
+  x.save(); x.translate(pw / 2, ph / 2); x.scale(zoom, zoom); x.translate(-pw / 2, -ph / 2); x.scale(s, s);
+  c.draw(x, c.w, ph / s); x.restore();
+  x.strokeStyle = 'rgba(255,255,255,.16)'; x.lineWidth = 2; x.stroke(); // keeps dark cards visible on the dark board
+  return b;
+}
+// Cards redraw sharp at close-up size the first time they're selected.
+function cardBitmap(c) {
+  if (c.stories) c.draw = STORIES[storyIndex].draw;
+  const big = c === focus && zoomK > 1.05, key = big ? 'bigBmp' : 'bmp', m = big ? closeUpZoom(c) : 1;
+  if (c.stories && big && c.bigFor !== storyIndex) { c.bigBmp = null; c.bigFor = storyIndex; }
+  return c[key] || (c[key] = bitmap(c, c.w * c.s * sc * m, c.h * c.s * sc * m));
+}
+function outlined(s, x, y, size, fill) {
+  g.font = `${size}px ${LETTERING}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
+  g.lineWidth = size * .2; g.strokeStyle = '#000'; g.strokeText(s, x, y); g.fillStyle = fill; g.fillText(s, x, y);
+}
+function drawBurst(x, y, rx, ry, seed) { // a comic splash that re-draws its spikes, so it boils
+  g.beginPath();
+  for (let i = 0; i < 26; i++) {
+    const a = i / 26 * Math.PI * 2, n = Math.abs(Math.sin((i + 1) * 12.9898 + seed * 4.1)), r = i % 2 ? .42 + n * .08 : .72 + n * .5;
+    g.lineTo(x + Math.cos(a) * rx * r, y + Math.sin(a) * ry * r);
+  }
+  g.closePath(); g.fillStyle = '#fff'; g.fill();
+}
+const backOut = t => 1 + 2.7 * (t - 1) ** 3 + 1.7 * (t - 1) ** 2;
+function drawLettering(s, y, now) {
+  const t = reduced ? 9 : (now - popAt) / 1000, fit = Math.min(Math.max(30, H * (W < H ? .055 : .075)), W * .84 / (s.length * .5)), pop = reduced ? 1 : backOut(Math.min(1, t / .28));
+  const burst = reduced ? 0 : t < .18 ? t / .18 * 1.08 : t < .95 ? 1 : Math.max(0, 1 - (t - .95) / .2);
+  const width = s.length * fit * .5;
+  if (burst > 0) drawBurst(W / 2, y, width * .92 * burst, fit * 2.1 * burst, Math.floor(t * 9));
+  const shake = !reduced && t < .55 ? (1 - t / .55) * 5 : 0;
+  outlined(s.toUpperCase(), W / 2 + (Math.random() - .5) * shake, y + (Math.random() - .5) * shake, fit * Math.max(.01, pop), '#ffe600');
+}
+function storyFrame(x, y, w, h, progress) { // rounded border with the story's progress running clockwise from the top
+  const r = w * .08, l = x - w / 2, t = y - h / 2, length = 2 * (w + h) - 8 * r + 2 * Math.PI * r;
+  const path = () => { g.beginPath(); g.moveTo(x, t); g.arcTo(l + w, t, l + w, t + h, r); g.arcTo(l + w, t + h, l, t + h, r); g.arcTo(l, t + h, l, t, r); g.arcTo(l, t, x, t, r); g.closePath(); };
+  g.lineWidth = Math.max(2, w * .012); g.strokeStyle = 'rgba(255,255,255,.72)'; path(); g.stroke();
+  g.strokeStyle = '#ffe600'; g.setLineDash([progress * length, length]); path(); g.stroke(); g.setLineDash([]);
+}
+function drawCard(c, now, alpha) {
+  const [px, py] = place(c), [bw, bh] = sizeOf(c), grow = 1 + (c.k || 0) * .05, w = bw * grow, h = bh * grow, since = now - (c.shakeAt || -1e9);
+  const shake = reduced || since > 420 ? 0 : (1 - since / 420); // the little shake when the mouse arrives
+  g.save(); g.globalAlpha = alpha;
+  g.translate(px + Math.sin(since * .09) * 3.5 * shake, py + Math.cos(since * .11) * 2 * shake); g.rotate(Math.sin(since * .06) * .03 * shake);
+  if (c.stories && c === focus && zoomNow > .2) { // neighbours peek out behind the current story
+    const dim = Math.min(1, zoomNow) * alpha * .4, nw = w * .86, nh = h * .86;
+    [[-1, -.62], [1, .62]].forEach(([d, side]) => {
+      const n = STORIES[(storyIndex + d + STORIES.length) % STORIES.length];
+      n.bmp = n.bmp || bitmap({ w: c.w, h: c.h, draw: n.draw }, c.w * c.s * sc * closeUpZoom(c) * .86, c.h * c.s * sc * closeUpZoom(c) * .86);
+      g.globalAlpha = dim; g.drawImage(n.bmp, side * w * Math.min(1, zoomNow) - nw / 2, -nh / 2, nw, nh);
+    });
+    g.globalAlpha = alpha;
+  }
+  if (c.theme === 'paper' && c.themeK) { g.globalAlpha = alpha * c.themeK; box(g, -w / 2 + 7, -h / 2 + 9, w, h, w * .04, 'rgba(30,40,60,.24)'); g.globalAlpha = alpha; } // a paper cutout's shadow
+  g.drawImage(cardBitmap(c), -w / 2, -h / 2, w, h);
+  if (c.stories) storyFrame(0, 0, w, h, reduced ? 1 : Math.min(1, (now - storyAt) / STORY_MS));
+  if (c === focusCard) { g.strokeStyle = '#ffe600'; g.lineWidth = 4; g.strokeRect(-w / 2 - 6, -h / 2 - 6, w + 12, h + 12); }
+  g.restore();
+  if ((c.k || 0) > .2 && c !== focus) {
+    const label = c.hero ? 'About' : c.stories ? 'Stories' : `${c.t} / ${c.c}`, size = Math.max(18, 22 * sc);
+    g.font = `${size}px ${MONO}`; const tw = g.measureText(label).width + 16;
+    g.globalAlpha = Math.min(1, c.k * 1.4) * alpha; g.fillStyle = '#000'; g.fillRect(px - tw / 2, py + h / 2 + 8, tw, size + 8);
+    text(g, label, px, py + h / 2 + 12 + size / 2, size, MONO, '#fff'); g.globalAlpha = 1;
+  }
+}
+function drawTicker(alpha) {
+  const size = Math.max(15, Math.min(30, H * .036, W * .046)), bh = size * 1.75, tall = W < H, stickerTop = tall ? $('#btn-talk').getBoundingClientRect().top : 0; // on a tall screen it runs full width, above the sticker
+  const x = W * (tall ? .07 : .09), y = stickerTop ? toScene(W / 2, stickerTop - 4)[1] - bh : H * .925 - bh / 2, right = tall ? W * .93 : W - Math.max(150, Math.min(W * .19, 280)), bw = right - x;
+  g.save(); g.globalAlpha = alpha;
+  g.fillStyle = '#000'; g.fillRect(x, y, bw, bh);
+  g.beginPath(); g.rect(x, y, bw, bh); g.clip();
+  g.font = `${size}px ${DISPLAY}`; const tw = g.measureText(TICKER).width;
+  for (let o = -(tickerX % tw); o < bw + tw; o += tw) text(g, TICKER, x + o + size * 3.2, y + bh / 2 + 1, size, DISPLAY, '#fff', 'left');
+  g.restore();
+  g.globalAlpha = alpha; g.fillStyle = '#ffe600'; g.fillRect(x - 4, y - 3, size * 2.9, bh + 6);
+  text(g, 'NEW!', x - 4 + size * 1.45, y + bh / 2 + 1, size, DISPLAY, '#000'); g.globalAlpha = 1;
+}
+/* ---------- Backgrounds a selected card opens onto ---------- */
+const seeded = seed => () => (seed = seed * 16807 % 2147483647) / 2147483647;
+const CLOUD_W = 384, CLOUD_H = 216;
+const CLOUD_SKY = ['#40b0cf', '#37a8cc', '#55b0cd', '#6fb0cb', '#86abca', '#9ba6c8', '#a89bc1', '#b18cb7', '#b37cab'];
+const pk = '#fb74b6', rose = '#e57fbb', mag = '#c85aa4', plum = '#a94f9c', vio = '#8f6bad', pur = '#6a4f9a', navy = '#38559b', steel = '#4a6fa8', blu = '#2a9ac6', mist = '#5fa4c4', lil = '#9a8fbf', mau = '#b17cab';
+// Far to near: how fast the layer drifts, then its puffs as [x, y, x radius, y radius, colour], in fractions of the sky.
+const CLOUD_LAYERS = [
+  [.5, [[.12, .12, .1, .06, '#66a6c4'], [.12, .2, .16, .14, mist], [.2, .3, .1, .08, '#6c9fc0'], [.07, .33, .09, .06, blu], [.42, .09, .11, .06, blu], [.52, .13, .04, .02, blu], [.62, .16, .07, .05, vio], [.68, .12, .03, .04, vio], [.88, .3, .1, .07, blu], [.95, .24, .04, .06, blu]]],
+  [1, [[.78, .42, .2, .2, pur], [.66, .3, .08, .08, '#6a5ba3'], [.72, .4, .09, .1, steel], [.85, .46, .1, .12, steel], [.92, .42, .08, .1, navy], [.88, .5, .06, .08, navy], [.74, .6, .06, .1, plum], [.82, .44, .03, .04, plum], [.92, .62, .07, .06, pur], [.07, .56, .09, .12, pur], [.08, .56, .04, .03, navy], [.4, .4, .06, .03, vio], [.55, .52, .05, .05, mist], [.64, .6, .06, .03, lil]]],
+  [1.7, [[.5, .33, .07, .1, pk], [.55, .3, .05, .06, rose], [.57, .4, .05, .07, mag], [.53, .44, .03, .03, pk], [.18, .5, .1, .08, pk], [.22, .6, .05, .05, pk], [.1, .5, .03, .03, rose], [.19, .67, .05, .06, mag], [.28, .7, .06, .08, lil], [.36, .75, .07, .06, pk], [.42, .72, .08, .07, pk], [.48, .76, .06, .04, mag], [.46, .72, .04, .03, rose]]],
+  [2.6, [[.84, .86, .2, .12, mau], [.72, .84, .06, .07, mau], [.18, .76, .06, .08, pur], [.28, .82, .07, .05, pur], [.06, .9, .08, .1, pur], [.3, .94, .2, .08, navy], [.12, .95, .1, .06, navy], [.58, .72, .08, .1, blu], [.54, .78, .04, .05, blu], [.62, .92, .08, .08, navy], [.5, .97, .1, .05, navy], [.84, .97, .12, .05, blu], [.46, .88, .03, .04, pk]]],
+];
+let clouds = null;
+function buildClouds() {
+  const rnd = seeded(7), canvasOf = () => { const c = document.createElement('canvas'); c.width = CLOUD_W; c.height = CLOUD_H; return c; };
+  const sky = canvasOf(), sx = sky.getContext('2d');
+  for (let y = 0; y < CLOUD_H;) { // stepped bands that stutter between neighbouring colours
+    const h = 2 + Math.floor(rnd() * 4), i = Math.max(0, Math.min(CLOUD_SKY.length - 1, Math.round(y / CLOUD_H * (CLOUD_SKY.length - 1) + (rnd() - .5) * 1.6)));
+    sx.fillStyle = CLOUD_SKY[i]; sx.fillRect(0, y, CLOUD_W, h); y += h;
+  }
+  const layers = CLOUD_LAYERS.map(([speed, puffs]) => {
+    const canvas = canvasOf(), x = canvas.getContext('2d'), img = x.createImageData(CLOUD_W, CLOUD_H);
+    const disc = (cx, cy, r, c) => { // hard pixels, wrapping sideways so the layer can drift forever
+      for (let dy = -Math.ceil(r); dy <= r; dy++) for (let dx = -Math.ceil(r); dx <= r; dx++) {
+        const px = ((Math.round(cx) + dx) % CLOUD_W + CLOUD_W) % CLOUD_W, py = Math.round(cy) + dy;
+        if (dx * dx + dy * dy > r * r || py < 0 || py >= CLOUD_H) continue;
+        img.data.set([c[0], c[1], c[2], 255], (py * CLOUD_W + px) * 4);
+      }
+    };
+    for (const [cx, cy, rx, ry, hex] of puffs) {
+      const c = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)), ax = cx * CLOUD_W, ay = cy * CLOUD_H, bx = rx * CLOUD_W, by = ry * CLOUD_H;
+      for (let i = 0; i < 14; i++) { const a = i / 14 * 6.283; disc(ax + Math.cos(a) * bx * .55, ay + Math.sin(a) * by * .55, Math.min(bx, by) * .62, c); }
+      disc(ax, ay, Math.min(bx, by) * .9, c);
+      for (let i = 0, n = Math.ceil((bx + by) * .55); i < n; i++) { // the scalloped edge
+        const a = rnd() * 6.283, t = .72 + rnd() * .3;
+        disc(ax + Math.cos(a) * bx * t, ay + Math.sin(a) * by * t, 2.5 + rnd() * 4.5, c);
+      }
+    }
+    x.putImageData(img, 0, 0);
+    return { canvas, speed };
+  });
+  const stars = Array.from({ length: 26 }, () => [Math.floor(rnd() * CLOUD_W), Math.floor(rnd() * CLOUD_H * .48), rnd() * 6.283]);
+  const canvas = canvasOf();
+  return { sky, layers, stars, canvas, x: canvas.getContext('2d') };
+}
+function drawClouds(now) {
+  const c = clouds || (clouds = buildClouds()), t = reduced ? 0 : now / 1000;
+  c.x.drawImage(c.sky, 0, 0);
+  c.x.fillStyle = '#fff';
+  for (const [x, y, p] of c.stars) if (reduced || Math.sin(t * 1.3 + p) > -.4) c.x.fillRect(x, y, 1, 1);
+  c.layers.forEach((l, i) => {
+    const o = ((Math.round(l.speed * t + look.x * .12 * (i + 1)) % CLOUD_W) + CLOUD_W) % CLOUD_W; // whole pixels only, or it stops looking like pixel art
+    c.x.drawImage(l.canvas, o, 0); c.x.drawImage(l.canvas, o - CLOUD_W, 0);
+  });
+  const sparkle = (x, y, r) => { c.x.fillRect(x - r, y, r * 2 + 1, 1); c.x.fillRect(x, y - r, 1, r * 2 + 1); };
+  sparkle(138, 72, reduced || Math.sin(t * 1.1) > 0 ? 3 : 2);
+  const k = Math.max(W / CLOUD_W, H / CLOUD_H), w = CLOUD_W * k, h = CLOUD_H * k;
+  g.imageSmoothingEnabled = false; g.drawImage(c.canvas, (W - w) / 2, (H - h) / 2, w, h); g.imageSmoothingEnabled = true;
+}
+const PAPER_LINE = '#7ba3d6', PAPER_RED = '#e8756a';
+const STONES = { wide: [[.87, .24, .19, 3], [.11, .76, .23, 11], [.89, .67, .09, 23]], tall: [[.84, .13, .2, 3], [.1, .9, .26, 11]] };
+let paper = null;
+function buildPaper() {
+  const layer = () => { const c = document.createElement('canvas'); c.width = Math.ceil(W * maxPr); c.height = Math.ceil(H * maxPr); const x = c.getContext('2d'); x.scale(maxPr, maxPr); return [c, x]; };
+  const [base, bx] = layer(), [lines, lx] = layer(), [stones, sx] = layer(), rnd = seeded(41), pitch = Math.max(18, H * .03), span = Math.min(W, H);
+  bx.fillStyle = '#f1f2ee'; bx.fillRect(0, 0, W, H);
+  const grain = document.createElement('canvas'); grain.width = grain.height = 160;
+  const gx = grain.getContext('2d');
+  for (let i = 0; i < 5200; i++) { gx.fillStyle = `rgba(${rnd() < .5 ? '70,80,100' : '255,255,255'},${.03 + rnd() * .05})`; gx.fillRect(rnd() * 160, rnd() * 160, 1 + rnd(), 1 + rnd()); }
+  bx.fillStyle = bx.createPattern(grain, 'repeat'); bx.fillRect(0, 0, W, H);
+  // A wobbly loop. The same seed at a smaller size gives the next raked ring in.
+  const loop = (path, cx, cy, r, seed) => {
+    const a = seed * 1.7, b = seed * 2.3, c = seed * .9;
+    for (let i = 0; i <= 72; i++) { const t = i / 72 * 6.2832, m = r * (1 + .07 * Math.sin(2 * t + a) + .05 * Math.sin(3 * t + b) + .02 * Math.sin(5 * t + c)); path[i ? 'lineTo' : 'moveTo'](cx + Math.cos(t) * m, cy + Math.sin(t) * m); }
+    path.closePath();
+  };
+  const placed = STONES[W < H ? 'tall' : 'wide'].map(([x, y, r, seed]) => [x * W, y * H, r * span, seed]);
+  const rows = new Path2D(), rings = new Path2D(), keepOut = new Path2D();
+  keepOut.rect(0, 0, W, H);
+  for (let y = pitch * .6; y < H; y += pitch) { rows.moveTo(0, y); rows.lineTo(W, y); }
+  for (const [x, y, r, seed] of placed) {
+    loop(keepOut, x, y, r, seed);
+    for (let m = r; m > r * .46; m -= pitch) loop(rings, x, y, m, seed);
+  }
+  const ink = (path, color) => { lx.lineWidth = 1.5; lx.save(); lx.translate(0, 1.3); lx.strokeStyle = '#fff'; lx.stroke(path); lx.restore(); lx.strokeStyle = color; lx.stroke(path); };
+  lx.save(); lx.clip(keepOut, 'evenodd'); ink(rows, PAPER_LINE);
+  const margins = new Path2D(); for (const m of W < H ? [.08] : [.07, .93]) { margins.moveTo(m * W, 0); margins.lineTo(m * W, H); }
+  ink(margins, PAPER_RED); lx.restore();
+  ink(rings, PAPER_LINE);
+  // Each stone is a marker-drawn paper cutout.
+  const cutout = (x, y, r, seed) => {
+    const shape = new Path2D(); loop(shape, x, y, r, seed);
+    sx.save(); sx.translate(r * .1, r * .14); sx.fillStyle = 'rgba(30,40,60,.22)'; sx.fill(shape); sx.restore();
+    sx.fillStyle = '#a3a5a8'; sx.fill(shape);
+    sx.strokeStyle = '#26282b'; sx.lineWidth = Math.max(2, r * .035); sx.lineJoin = 'round'; sx.stroke(shape);
+    sx.lineWidth = Math.max(1.2, r * .02); sx.beginPath();
+    for (let i = 0; i < 5; i++) { const hx = x + r * (.1 + i * .12), hy = y + r * (.1 + i * .04); sx.moveTo(hx, hy); sx.lineTo(hx + r * .16, hy + r * .2); }
+    sx.stroke();
+  };
+  const tuft = (x, y, s) => { // a marker-drawn clump of grass
+    sx.fillStyle = '#6cc25a'; sx.strokeStyle = '#2b3a28'; sx.lineWidth = 1.4; sx.lineJoin = 'round'; sx.beginPath(); sx.moveTo(x - s * .6, y);
+    [[-.75, -.7], [-.25, -.25], [-.1, -1], [.1, -.28], [.6, -.8], [.35, -.15], [.8, -.35]].forEach(([tx, ty]) => sx.lineTo(x + tx * s, y + ty * s));
+    sx.lineTo(x + s * .6, y); sx.closePath(); sx.fill(); sx.stroke();
+  };
+  for (const [x, y, r, seed] of placed) {
+    cutout(x + r * .08, y - r * .1, r * .36, seed + 2);
+    if (r > span * .15) { cutout(x - r * .2, y + r * .16, r * .22, seed + 9); tuft(x + r * .3, y + r * .3, r * .17); tuft(x - r * .38, y + r * .4, r * .12); }
+  }
+  return { base, lines, lx, stones, pitch, last: null, n: null, raked: false };
+}
+// Dragging combs a band of new rows through whatever is there, the way a rake redraws sand. No rake is shown.
+function rakeTo(x, y) {
+  const p = paper; if (!p) return;
+  if (!p.last) { p.last = { x, y }; return; }
+  const dx = x - p.last.x, dy = y - p.last.y, d = Math.hypot(dx, dy);
+  if (d < 6) return;
+  const n = { x: -dy / d, y: dx / d }, prev = p.n || n, half = p.pitch * 2.5, lx = p.lx;
+  const smooth = { x: prev.x * .6 + n.x * .4, y: prev.y * .6 + n.y * .4 }, m = Math.hypot(smooth.x, smooth.y) || 1;
+  smooth.x /= m; smooth.y /= m;
+  lx.save(); lx.globalCompositeOperation = 'destination-out'; lx.beginPath();
+  lx.moveTo(p.last.x + prev.x * half, p.last.y + prev.y * half); lx.lineTo(x + smooth.x * half, y + smooth.y * half);
+  lx.lineTo(x - smooth.x * half, y - smooth.y * half); lx.lineTo(p.last.x - prev.x * half, p.last.y - prev.y * half); lx.closePath(); lx.fill(); lx.restore();
+  const comb = (color, shift) => {
+    lx.strokeStyle = color; lx.lineWidth = 1.5; lx.lineCap = 'round'; lx.beginPath();
+    for (let i = -2; i <= 2; i++) { const o = i * p.pitch; lx.moveTo(p.last.x + prev.x * o, p.last.y + prev.y * o + shift); lx.lineTo(x + smooth.x * o, y + smooth.y * o + shift); }
+    lx.stroke();
+  };
+  comb('#fff', 1.3); comb(PAPER_LINE, 0);
+  p.last = { x, y }; p.n = smooth; p.raked = true;
+}
+function drawPaper(now) {
+  const p = paper || (paper = buildPaper()), alpha = g.globalAlpha;
+  g.drawImage(p.base, 0, 0, W, H); g.drawImage(p.lines, 0, 0, W, H); g.drawImage(p.stones, 0, 0, W, H);
+  if (!p.raked && !COARSE) { // says it can be touched, until someone has (touch screens get this in the hint)
+    const s = 'Drag on the paper', size = Math.max(16, H * .02);
+    g.font = `${size}px ${MONO}`; const tw = g.measureText(s).width + 24, x = W * .09, y = H * .875;
+    g.globalAlpha = alpha * (reduced ? 1 : .75 + .25 * Math.sin(now / 500));
+    box(g, x, y, tw, size * 1.7, size * .85, '#26323c'); text(g, s, x + tw / 2, y + size * .85 + 1, size, MONO, '#f1f2ee');
+    g.globalAlpha = alpha;
+  }
+}
+const THEMES = { clouds: drawClouds, paper: drawPaper };
+const paperOpen = () => focus && focus.theme === 'paper' && zoomGoal && (focus.themeK || 0) > .5 && !view;
+function caption(s, y, size, font, onPaper) { // words that sit directly on a background
+  if (onPaper) { text(g, s, W / 2, y, size, font, '#26323c'); return; }
+  g.font = `${size}px ${font}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round'; g.lineWidth = size * .24; g.strokeStyle = '#1c2350'; g.strokeText(s, W / 2, y);
+  g.fillStyle = '#fff'; g.fillText(s, W / 2, y);
+}
+function drawBoard(now) {
+  g.fillStyle = '#0d0d0e'; g.fillRect(0, 0, W, H);
+  const k = sc * zoomK;
+  g.save(); g.translate(W / 2 + (pan.x + look.x - cam.x) * k, H / 2 + (pan.y + look.y - cam.y) * k); g.scale(k, k); g.fillStyle = dots;
+  g.fillRect(cam.x - pan.x - look.x - W / 2 / k - 40, cam.y - pan.y - look.y - H / 2 / k - 40, W / k + 80, H / k + 80); g.restore();
+  let backdrop = 0;
+  for (const c of items) if (c.themeK) { g.globalAlpha = c.themeK; THEMES[c.theme](now); g.globalAlpha = 1; backdrop = Math.max(backdrop, c.themeK); }
+  const others = (1 - Math.min(1, zoomNow) * (COARSE || W < H ? .92 : .75)) * (1 - backdrop); // on a phone the neighbours sit right behind the lettering
+  if (others > .01) for (const c of items) if (c !== focus) drawCard(c, now, others);
+  if (focus) drawCard(focus, now, 1);
+  if (focus && zoomNow > .5) {
+    const fade = Math.min(1, (zoomNow - .5) * 3), [, py] = place(focus), [, h] = sizeOf(focus), onPaper = focus.theme === 'paper';
+    g.globalAlpha = fade;
+    const label = focus.stories ? 'Stories' : focus.c, labelSize = Math.max(18, H * .028);
+    if (focus.theme) caption(label, W < H ? py - h / 2 - Math.max(24, H * .04) : H * .095, labelSize, BODY, onPaper);
+    else text(g, label, W / 2, Math.max(H * .075, py - h / 2 - Math.max(24, H * .04)), labelSize, BODY, '#f4f1e8');
+    g.globalAlpha = 1;
+    if (popAt) {
+      const ly = Math.min(H * .93, py + h / 2 + Math.max(38, H * (W < H ? .11 : .075)));
+      drawLettering(focus.stories ? STORIES[storyIndex].name : focus.t, ly, now);
+      const after = reduced ? 1 : Math.max(0, Math.min(1, (now - popAt - 1000) / 300)); // waits for the burst to clear
+      let below = ly + Math.max(28, H * .055);
+      if (focus.sub && H > 480) { // a sideways phone only has room for the hint
+        g.globalAlpha = after; caption(focus.sub, below, Math.max(16, H * .024), BODY, onPaper); g.globalAlpha = 1;
+        below += Math.max(22, H * .034);
+      }
+      if (COARSE) { // touch has no hover to say what happens next
+        const hint = focus.stories ? 'Tap or swipe for next picture' : focus.hero ? 'Tap for about · Swipe for next' : onPaper ? 'Tap card to open · Drag the paper' : 'Tap to open · Swipe for next';
+        g.globalAlpha = after;
+        if (focus.theme) caption(hint, Math.min(H - 14, below), Math.max(16, H * .02), MONO, onPaper);
+        else text(g, hint, W / 2, Math.min(H - 14, below), Math.max(16, H * .02), MONO, '#f4f1e8');
+        g.globalAlpha = 1;
+      }
+    }
+  }
+  if (zoomNow < .9) drawTicker(1 - Math.min(1, zoomNow / .6));
+}
+function wrapLines(s, maxW) {
+  const lines = []; let line = '';
+  for (const word of s.split(' ')) {
+    if (line && g.measureText(line + ' ' + word).width > maxW) { lines.push(line); line = word; } else line = line ? line + ' ' + word : word;
+  }
+  return [...lines, line];
+}
+function drawProject() {
+  const { c, p } = view, cw = Math.min(W - 64, Math.max(560, W * .5)), x = (W - cw) / 2, heroH = Math.round(cw * .62), detailH = Math.round(cw * .46);
+  const ease = 1 - (1 - p) ** 3;
+  c.heroBmp = c.heroBmp || bitmap(c, cw, heroH);
+  c.detailBmp = c.detailBmp || bitmap(c, cw, detailH, 1.7);
+  g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
+  g.globalAlpha = ease;
+  let y = Math.max(72, H * .1) - view.scroll + (1 - ease) * 50;
+  text(g, c.c, W / 2, y, Math.max(20, 24 * sc), BODY, '#f4f1e8'); y += 44;
+  const titleSize = Math.min(cw * .13, 88);
+  g.drawImage(c.heroBmp, x, y, cw, heroH); y += heroH + 30 + titleSize / 2;
+  text(g, c.t.toUpperCase(), W / 2, y, titleSize, DISPLAY, '#ffe600'); y += titleSize * .85;
+  const bodySize = Math.max(17, Math.min(21, cw * .03));
+  g.font = `${bodySize}px ${BODY}`;
+  for (const line of wrapLines(COPY, Math.min(cw, 620))) { text(g, line, W / 2, y, bodySize, BODY, '#d8d6cf'); y += bodySize * 1.5; }
+  y += 30;
+  g.drawImage(c.detailBmp, x, y, cw, detailH); y += detailH + 44;
+  text(g, 'End of case study', W / 2, y, 22, MONO, '#8b8a85'); y += 80;
+  g.globalAlpha = 1;
+  view.max = Math.max(0, y + view.scroll - H);
+}
+function drawScene() {
+  g.setTransform(pr, 0, 0, pr, 0, 0);
+  g.imageSmoothingQuality = 'high';
+  view ? drawProject() : gate ? drawGate(performance.now()) : book ? drawBook(performance.now()) : works ? drawWorks(performance.now()) : drawBoard(performance.now());
+}
+
+/* ---------- CRT shader ---------- */
+let uni;
+if (gl) {
+  const shader = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw Error(gl.getShaderInfoLog(s)); return s; };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, shader(gl.VERTEX_SHADER, 'attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0.,1.);}'));
+  gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, `precision highp float;
+    varying vec2 uv; uniform sampler2D tex; uniform vec2 res, vel; uniform float time, glitch, scan, calm;
+    void main(){
+      vec2 q = (uv*2.-1.)*${S.toFixed(3)}; vec2 o = q;
+      q.x *= 1.+${K.toFixed(3)}*o.y*o.y; q.y *= 1.+${K.toFixed(3)}*o.x*o.x;
+      float r2 = dot(q,q);
+      vec2 st = q*.5+.5;
+      st.x += glitch*.05*sin(st.y*70.+time*40.);
+      vec2 spread = q*(.0006+.0032*r2*r2)+vel; // colour fringing grows at the edges and while panning
+      vec3 c = vec3(0.), sum = vec3(0.);
+      for(int i=0;i<7;i++){
+        float t = float(i)/6.;
+        vec3 w = vec3(1.-smoothstep(0.,.5,t), 1.-abs(t-.5)*2., smoothstep(.5,1.,t));
+        c += texture2D(tex, st+spread*(t-.5)).rgb*w; sum += w;
+      }
+      c /= sum;
+      float n = fract(sin(dot(gl_FragCoord.xy+mod(time,10.)*91.,vec2(12.9898,78.233)))*43758.5453);
+      c += (n-.5)*(.035+glitch*.8);
+      c *= 1.-scan*.2*(.5+.5*sin(gl_FragCoord.y*2.094));
+      c *= 1.-scan*.05*step(2.,mod(gl_FragCoord.x,3.));
+      c *= 1.+calm*(.03*smoothstep(.09,0.,abs(fract(uv.y-time*.07)-.5))+.008*sin(time*50.));
+      c *= 1.-.45*smoothstep(.7,2.1,r2);
+      vec2 b = vec2(res.x/res.y,1.), a = abs(q)*b-b+.12;
+      float d = length(max(a,0.))+min(max(a.x,a.y),0.)-.12;
+      gl_FragColor = vec4(c*(1.-smoothstep(-.03,.005,d)),1.);
+    }`));
+  gl.bindAttribLocation(prog, 0, 'p'); gl.linkProgram(prog); gl.useProgram(prog);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+  gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  const at = n => gl.getUniformLocation(prog, n);
+  uni = { res: at('res'), vel: at('vel'), time: at('time'), glitch: at('glitch'), scan: at('scan'), calm: at('calm') };
+  gl.uniform1f(uni.calm, reduced ? 0 : 1);
+  // shortcut: a lost WebGL context leaves the screen frozen until reload, add webglcontextrestored handling if this shows up in the wild.
+}
+
+/* ---------- 3D room (three.js) ---------- */
+const TV_SCALE = 1.2, CABINET_SCALE = .65, TV_Z = .34, FOV = 30;
+const CABINET_TOP = .68 * CABINET_SCALE;
+// Positions on the TV model's front, in its own metres. SCREEN is measured from the mesh: the glass is domed, z at its edge, z + bulge at its centre.
+const SCREEN = { x: -.0655, y: .259, w: .383, h: .29, z: .171, bulge: .021 };
+const DIALS = { channel: [.217, .349], volume: [.217, .266], power: [.255, .205] };
+let renderer, scene3d, camera, screenMesh, screenTex, screenGlow, tvSpill, tvHalo, ledMesh, sparks, fxTarget, fxScene, fxCamera, fxMaterial, roomHits = [], roomReady = false, noRoom = false;
+const home = { pos: null, look: null }, camLook = { v: null }, mouse = { x: 0, y: 0 };
+let dive = null, roomFrames = 0, tube = 0, powerAt = -1e9;
+
+/* ---------- What the TV shows in the room: drawn straight onto its own canvas ---------- */
+const SCREEN_W = 792, SCREEN_H = 600; // same shape as the glass
+const screenCanvas = document.createElement('canvas'); screenCanvas.width = SCREEN_W; screenCanvas.height = SCREEN_H;
+const sg = screenCanvas.getContext('2d');
+const noiseTile = document.createElement('canvas'); noiseTile.width = noiseTile.height = 128;
+{
+  const x = noiseTile.getContext('2d'), d = x.createImageData(128, 128);
+  for (let i = 0; i < d.data.length; i += 4) d.data[i] = d.data[i + 1] = d.data[i + 2] = Math.random() * 255, d.data[i + 3] = 255;
+  x.putImageData(d, 0, 0);
+}
+const staticNoise = sg.createPattern(noiseTile, 'repeat');
+const BAR_COLORS = ['#e8e8e8', '#e8e800', '#00e8e8', '#00e000', '#e800e8', '#e80000', '#0000e8'];
+const testCard = document.createElement('canvas'); testCard.width = SCREEN_W; testCard.height = SCREEN_H;
+{
+  const x = testCard.getContext('2d'), bw = SCREEN_W / 7;
+  BAR_COLORS.forEach((c, i) => { x.fillStyle = c; x.fillRect(i * bw, 0, bw + 1, SCREEN_H * .68); });
+  [...BAR_COLORS].reverse().forEach((c, i) => { x.fillStyle = i % 2 ? '#141414' : c; x.fillRect(i * bw, SCREEN_H * .68, bw + 1, SCREEN_H * .08); });
+  ['#00214c', '#f4f4f4', '#32006a', '#141414'].forEach((c, i) => { x.fillStyle = c; x.fillRect(i * SCREEN_W * .19, SCREEN_H * .76, i === 3 ? SCREEN_W : SCREEN_W * .19 + 1, SCREEN_H * .24); });
+}
+const scanlines = document.createElement('canvas'); scanlines.width = 4; scanlines.height = 4;
+{ const x = scanlines.getContext('2d'); x.fillStyle = 'rgba(0,0,0,.22)'; x.fillRect(0, 0, 4, 2); }
+const scanPattern = sg.createPattern(scanlines, 'repeat');
+const tubeEdge = sg.createRadialGradient(SCREEN_W / 2, SCREEN_H / 2, SCREEN_H * .42, SCREEN_W / 2, SCREEN_H / 2, SCREEN_W * .66);
+tubeEdge.addColorStop(0, 'rgba(0,0,0,0)'); tubeEdge.addColorStop(1, 'rgba(0,0,0,.72)');
+const prompt3d = COARSE ? 'PLEASE TAP HERE' : 'PLEASE CLICK HERE';
+let tears = [], tearsUntil = 0;
+// A band of the picture with its own wobble, re-rolled every moment so the signal keeps slipping.
+function rollTears(now) {
+  tears = []; tearsUntil = now + 260 + Math.random() * 620;
+  let y = 0;
+  while (y < SCREEN_H) {
+    const h = 40 + Math.random() * 190, wild = Math.random() < .35;
+    tears.push({ y, h, amp: wild ? 40 + Math.random() * 90 : 4 + Math.random() * 16, freq: .012 + Math.random() * .05, speed: .002 + Math.random() * .007, shift: wild ? (Math.random() - .5) * 220 : (Math.random() - .5) * 18, jag: 2 + Math.random() * (wild ? 14 : 6) });
+    y += h;
+  }
+}
+function paintGlitchBars(now) {
+  if (now > tearsUntil) rollTears(now);
+  for (const t of tears) for (let y = t.y; y < Math.min(t.y + t.h, SCREEN_H); y += 2) {
+    const o = t.shift + t.amp * Math.sin(y * t.freq + now * t.speed) + (Math.random() - .5) * t.jag, x = ((o % SCREEN_W) + SCREEN_W) % SCREEN_W;
+    sg.drawImage(testCard, 0, y, SCREEN_W, 2, x, y, SCREEN_W, 2);
+    sg.drawImage(testCard, 0, y, SCREEN_W, 2, x - SCREEN_W, y, SCREEN_W, 2);
+  }
+  const bw = 500, bh = 74, by = SCREEN_H / 2 - bh / 2;
+  sg.fillStyle = '#000'; sg.fillRect((SCREEN_W - bw) / 2, by, bw, bh);
+  text(sg, prompt3d, SCREEN_W / 2, by + bh / 2 + 2, 46, DISPLAY, '#fff');
+}
+function paintStatic(alpha) {
+  sg.save(); sg.globalAlpha = alpha; sg.translate(Math.random() * -128, Math.random() * -128); sg.scale(2, 2); sg.fillStyle = staticNoise; sg.fillRect(0, 0, SCREEN_W, SCREEN_H); sg.restore();
+}
+function paintScreen(now) {
+  if (channel === 1) paintGlitchBars(now);
+  else if (channel === 2) paintStatic(1);
+  else if (channel === 3) sg.drawImage(testCard, 0, 0);
+  else {
+    sg.fillStyle = '#0a23c9'; sg.fillRect(0, 0, SCREEN_W, SCREEN_H);
+    ['PLAY ▶', 'SP 0:00:00', '', 'CYRILL CAJUCOM', 'SHOWREEL'].forEach((s, i) => text(sg, s, 110, SCREEN_H / 2 + (i - 2) * 74, 62, MONO, '#fff', 'left'));
+  }
+  if (channel !== 2) paintStatic(.16);
+  sg.fillStyle = scanPattern; sg.fillRect(0, 0, SCREEN_W, SCREEN_H);
+  sg.fillStyle = tubeEdge; sg.fillRect(0, 0, SCREEN_W, SCREEN_H);
+  if (osdText) { sg.fillStyle = 'rgba(0,0,0,.55)'; sg.fillRect(SCREEN_W - 340, 24, 310, 76); text(sg, osdText, SCREEN_W - 50, 62, 60, MONO, '#8dff9a', 'right'); }
+  if (reduced) return;
+  // Tube warm-up from the CodePen: a white line opens, fills the screen, then fades into the picture. Power off runs it backwards, faster.
+  const t = (now - powerAt) / (tvOn ? 2400 : 450);
+  if (t < 1) {
+    const phase = tvOn ? t * 4 : 1 - t, w = Math.min(1, tvOn ? phase / .75 : phase / .4), h = phase < .75 ? .008 : Math.min(1, (phase - .75) / .25);
+    const lineH = tvOn ? h : Math.max(.008, (phase - .4) / .6);
+    sg.globalAlpha = tvOn ? (t < .25 ? 1 : 1 - (t - .25) / .75) : 1;
+    sg.fillStyle = '#000'; sg.fillRect(0, 0, SCREEN_W, SCREEN_H);
+    sg.fillStyle = '#fff'; sg.fillRect(SCREEN_W * (1 - w) / 2, SCREEN_H * (1 - lineH) / 2, SCREEN_W * w, SCREEN_H * lineH);
+    sg.globalAlpha = 1;
+  }
+}
+
+const FLICKER = [[0, 1], [.07, .86], [.09, 1], [.31, .9], [.33, .6], [.35, 1], [.42, .55], [.44, .97], [.61, .9], [.72, .78], [.74, 1], [.88, .92], [1, 1]];
+// An old TV's light: small dips, with the odd double blink. Stays well under 3 big flashes a second.
+function flickerAt(now) {
+  if (reduced) return 1;
+  const t = now / 5300 % 1; let i = 1;
+  while (FLICKER[i][0] < t) i++;
+  const [a, va] = FLICKER[i - 1], [b, vb] = FLICKER[i];
+  return va + (vb - va) * (t - a) / (b - a);
+}
+
+async function initRoom() {
+  if (!window.THREE || !THREE.GLTFLoader || !gl) throw Error('3D unavailable');
+  renderer = new THREE.WebGLRenderer({ canvas: $('#room3d'), antialias: true, powerPreference: 'high-performance' });
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.physicallyCorrectLights = true;
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.autoUpdate = false; // nothing in the room moves, so one shadow pass is enough
+  scene3d = new THREE.Scene(); scene3d.background = new THREE.Color(0x030303);
+  camera = new THREE.PerspectiveCamera(FOV, 1, .02, 30);
+  home.pos = new THREE.Vector3(); home.look = new THREE.Vector3(); camLook.v = new THREE.Vector3();
+
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene3d.environment = pmrem.fromScene(new THREE.RoomEnvironment(), .04).texture;
+
+  const aniso = renderer.capabilities.getMaxAnisotropy(), loader = new THREE.TextureLoader();
+  const map = async (url, rx, ry, srgb) => {
+    const t = await loader.loadAsync(url);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry); t.anisotropy = aniso;
+    if (srgb) t.encoding = THREE.sRGBEncoding;
+    return t;
+  };
+  const surface = async (name, rx, ry) => new THREE.MeshStandardMaterial({
+    map: await map(`textures/${name}.jpg`, rx, ry, true), normalMap: await map(`textures/${name}-nor.jpg`, rx, ry), roughnessMap: await map(`textures/${name}-rough.jpg`, rx, ry), envMapIntensity: .03,
+  });
+  const WALL_W = 14, WALL_H = 6, FLOOR_D = 7;
+  const [wallMat, floorMat, tvScene, cabinetScene] = await Promise.all([
+    surface('brick', WALL_W / .95, WALL_H / .95), surface('floor', WALL_W / 1.7, FLOOR_D / 1.7),
+    // .json and .wasm are plain glTF and its buffer, renamed because the artifact host won't serve .gltf or .bin.
+    new THREE.GLTFLoader().loadAsync('models/Television_01/Television_01.json'), new THREE.GLTFLoader().loadAsync('models/modern_wooden_cabinet/modern_wooden_cabinet.json'),
+  ]);
+  wallMat.normalScale.set(1.6, 1.6);
+
+  const wall = new THREE.Mesh(new THREE.PlaneGeometry(WALL_W, WALL_H), wallMat);
+  wall.position.y = WALL_H / 2; wall.receiveShadow = true; scene3d.add(wall);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(WALL_W, FLOOR_D), floorMat);
+  floor.rotation.x = -Math.PI / 2; floor.position.z = FLOOR_D / 2; floor.receiveShadow = true; scene3d.add(floor);
+  const skirting = new THREE.Mesh(new THREE.BoxGeometry(WALL_W, .1, .02), new THREE.MeshStandardMaterial({ color: 0x1a120c, roughness: .55, envMapIntensity: .1 }));
+  skirting.position.set(0, .05, .01); skirting.castShadow = skirting.receiveShadow = true; scene3d.add(skirting);
+
+  const prepare = (root, envLevel) => root.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; o.material.envMapIntensity = envLevel; } });
+  const cabinet = cabinetScene.scene; cabinet.scale.setScalar(CABINET_SCALE); cabinet.position.z = TV_Z + .06; prepare(cabinet, .18); scene3d.add(cabinet);
+  const tv = tvScene.scene; tv.scale.setScalar(TV_SCALE); tv.position.set(0, CABINET_TOP, TV_Z); prepare(tv, .06); scene3d.add(tv);
+
+  // Rabbit-ear antenna.
+  const chrome = new THREE.MeshStandardMaterial({ color: 0xb8b8b8, metalness: 1, roughness: .35, envMapIntensity: .55 });
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(.045, .055, .018, 32), new THREE.MeshStandardMaterial({ color: 0x151515, roughness: .4, envMapIntensity: .5 }));
+  base.position.set(0, .466, -.1); tv.add(base);
+  for (const side of [-1, 1]) {
+    const rod = new THREE.Mesh(new THREE.CylinderGeometry(.0028, .0048, .42, 10), chrome);
+    rod.position.set(side * .08, .466 + .195, -.1); rod.rotation.z = -side * .41; rod.castShadow = true; tv.add(rod);
+  }
+
+  // The picture adds light on top of the model's own dusty glass, so a dark picture shows the real glass.
+  screenTex = new THREE.CanvasTexture(screenCanvas); screenTex.encoding = THREE.sRGBEncoding; screenTex.generateMipmaps = false; screenTex.minFilter = THREE.LinearFilter;
+  const geo = new THREE.PlaneGeometry(SCREEN.w, SCREEN.h, 24, 18), pos = geo.attributes.position;
+  for (let i = 0; i < pos.count; i++) pos.setZ(i, .0015 + SCREEN.bulge * (1 - (pos.getX(i) / (SCREEN.w / 2)) ** 2) * (1 - (pos.getY(i) / (SCREEN.h / 2)) ** 2)); // follows the dome, a hair above it
+  const cornerCanvas = document.createElement('canvas'); cornerCanvas.width = 396; cornerCanvas.height = 300; // the tube's rounded corners
+  {
+    const x = cornerCanvas.getContext('2d');
+    x.fillStyle = '#000'; x.fillRect(0, 0, 396, 300);
+    x.filter = 'blur(2px)'; x.fillStyle = '#fff'; x.beginPath(); x.roundRect(3, 3, 390, 294, 34); x.fill();
+  }
+  screenMesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: screenTex, alphaMap: new THREE.CanvasTexture(cornerCanvas), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, toneMapped: false }));
+  screenMesh.position.set(SCREEN.x, SCREEN.y, SCREEN.z); tv.add(screenMesh);
+
+  ledMesh = new THREE.Mesh(new THREE.SphereGeometry(.0035, 12, 8), new THREE.MeshBasicMaterial({ color: 0x66ff55, toneMapped: false }));
+  ledMesh.position.set(DIALS.power[0] - .024, DIALS.power[1], .214); tv.add(ledMesh);
+
+  // Invisible hit areas for the controls moulded into the model.
+  const hitArea = (size, action, label, x, y) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(size, size, .02)); m.visible = false; m.position.set(x, y, .22); tv.add(m);
+    roomHits.push({ object: m, action, label });
+  };
+  hitArea(.085, nextChannel, 'Next channel', ...DIALS.channel);
+  hitArea(.085, nextVolume, 'Volume', ...DIALS.volume);
+  hitArea(.06, () => setPower(!tvOn), 'Power', ...DIALS.power);
+  tv.traverse(o => { if (o.isMesh && o.visible && o !== screenMesh) roomHits.push({ object: o, action: enter, label: 'Go inside' }); });
+  roomHits.unshift({ object: screenMesh, action: enter, label: 'Go inside' });
+
+  // Soft bloom around the tube.
+  const glowCanvas = document.createElement('canvas'); glowCanvas.width = glowCanvas.height = 128;
+  {
+    const x = glowCanvas.getContext('2d'), l = x.createRadialGradient(64, 64, 8, 64, 64, 64);
+    l.addColorStop(0, 'rgba(255,255,255,1)'); l.addColorStop(.5, 'rgba(255,255,255,.32)'); l.addColorStop(1, 'rgba(255,255,255,0)');
+    x.fillStyle = l; x.fillRect(0, 0, 128, 128);
+  }
+  screenGlow = new THREE.Mesh(new THREE.PlaneGeometry(SCREEN.w * 1.9, SCREEN.h * 1.9), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(glowCanvas), color: 0xa8c4ff, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, toneMapped: false }));
+  screenGlow.position.set(SCREEN.x, SCREEN.y, .23); tv.add(screenGlow);
+
+  // Coloured sparks hanging in the air between the camera and the screen; the dive flies through them.
+  const SPARK_COUNT = 320, sparkPos = new Float32Array(SPARK_COUNT * 3), sparkCol = new Float32Array(SPARK_COUNT * 3), tint = new THREE.Color();
+  for (let i = 0; i < SPARK_COUNT; i++) {
+    sparkPos.set([(Math.random() - .5) * 1.6, CABINET_TOP + SCREEN.y * TV_SCALE + (Math.random() - .5) * 1.1, TV_Z + .35 + Math.random() * 3], i * 3);
+    tint.set(BAR_COLORS[i % BAR_COLORS.length]); sparkCol.set([tint.r, tint.g, tint.b], i * 3);
+  }
+  const sparkGeo = new THREE.BufferGeometry();
+  sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3)); sparkGeo.setAttribute('color', new THREE.BufferAttribute(sparkCol, 3));
+  sparks = new THREE.Points(sparkGeo, new THREE.PointsMaterial({ size: .012, vertexColors: true, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
+  sparks.visible = false; scene3d.add(sparks);
+
+  // Dive effect, refined from the glitch and bloom CodePen as one pass: torn rows, colour split, dropped blocks, bloom, flash.
+  fxTarget = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
+  fxScene = new THREE.Scene(); fxCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  fxMaterial = new THREE.ShaderMaterial({
+    uniforms: { map: { value: fxTarget.texture }, amount: { value: 0 }, time: { value: 0 }, flash: { value: 0 } },
+    depthTest: false, depthWrite: false,
+    vertexShader: 'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
+    fragmentShader: `uniform sampler2D map; uniform float amount, time, flash; varying vec2 vUv;
+      float rnd(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+      void main(){
+        vec2 uv = vUv; float tick = floor(time * 11.);
+        float rows = mix(7., 34., rnd(vec2(tick, 1.)));
+        float row = floor(uv.y * rows);
+        uv.x += step(1. - amount * .55, rnd(vec2(row, tick))) * (rnd(vec2(row, tick + 3.)) - .5) * .34 * amount;
+        uv.x += sin(uv.y * 46. + time * 24.) * .005 * amount;
+        vec2 block = floor(vUv * vec2(18., 11.));
+        if (rnd(block + tick) > 1. - amount * .1) uv = fract(uv + rnd(block) * .28);
+        float split = amount * (.008 + .03 * rnd(vec2(tick, 5.)));
+        vec3 c = vec3(texture2D(map, uv + vec2(split, 0.)).r, texture2D(map, uv).g, texture2D(map, uv - vec2(split, 0.)).b);
+        vec3 glow = vec3(0.);
+        for (int i = 0; i < 12; i++) {
+          float a = float(i) * 2.399, r = .006 + float(i) * .0035;
+          glow += max(texture2D(map, uv + vec2(cos(a), sin(a)) * r).rgb - .55, 0.);
+        }
+        c += glow / 12. * amount * 3.5;
+        c = mix(c, vec3(rnd(block + 1.), rnd(block + 2.), rnd(block + 3.)), step(1. - amount * .035, rnd(block * 1.7 + tick)));
+        c += (rnd(vUv * 900. + time) - .5) * .14 * amount;
+        c += flash;
+        gl_FragColor = vec4(c, 1.);
+        #include <tonemapping_fragment>
+        #include <encodings_fragment>
+      }`,
+  });
+  fxScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), fxMaterial));
+
+  // Lights: almost nothing but the TV, plus a faint lamp so the furniture keeps its shape.
+  scene3d.add(new THREE.HemisphereLight(0x8fa3c8, 0x241a12, .03));
+  const lamp = new THREE.SpotLight(0xffc896, 1.5, 7, .62, 1, 2);
+  lamp.position.set(-.5, 3.1, 2.1); lamp.target.position.set(0, .7, TV_Z);
+  lamp.castShadow = true; lamp.shadow.mapSize.set(2048, 2048); lamp.shadow.radius = 6; lamp.shadow.bias = -.0004; lamp.shadow.camera.near = .5; lamp.shadow.camera.far = 7;
+  scene3d.add(lamp, lamp.target);
+  // A spot aimed away from the TV, so its glow lands on the cabinet and floor but not back on its own glass.
+  tvSpill = new THREE.SpotLight(0x9fc0ff, 1, 5, 1.2, 1, 2);
+  tvSpill.position.set(SCREEN.x * TV_SCALE, CABINET_TOP + SCREEN.y * TV_SCALE, TV_Z + .32); tvSpill.target.position.set(0, 0, TV_Z + 1.5); scene3d.add(tvSpill, tvSpill.target);
+  tvHalo = new THREE.PointLight(0x8aa8e8, 1, 3.5, 2); tvHalo.position.set(0, CABINET_TOP + .3, .34); scene3d.add(tvHalo);
+
+  renderer.shadowMap.needsUpdate = true;
+  roomReady = true;
+  resize();
+  powerAt = performance.now(); // the TV warms up as the room appears
+  camera.position.copy(home.pos); camLook.v.copy(home.look);
+  room.classList.add('ready');
+}
+
+function frameRoom() {
+  const a = W / H, viewH = Math.max(1.7, .86 / a), d = viewH / (2 * Math.tan(FOV * Math.PI / 360));
+  camera.aspect = a; camera.updateProjectionMatrix();
+  home.pos.set(0, .78, TV_Z + d); home.look.set(0, .66, TV_Z);
+  const size = renderer.getDrawingBufferSize(new THREE.Vector2());
+  fxTarget.setSize(size.x, size.y);
+}
+function screenTarget() {
+  const y = CABINET_TOP + SCREEN.y * TV_SCALE, x = SCREEN.x * TV_SCALE, z = TV_Z + (SCREEN.z + SCREEN.bulge) * TV_SCALE;
+  const h = Math.min(SCREEN.h, SCREEN.w / (W / H)) * TV_SCALE * .9; // fill the view from inside the bezel
+  return { pos: new THREE.Vector3(x, y, z + h / (2 * Math.tan(FOV * Math.PI / 360))), look: new THREE.Vector3(x, y, z) };
+}
+function startDive(to, done) {
+  dive = { from: camera.position.clone(), fromLook: camLook.v.clone(), to, t0: performance.now(), done, outward: mode === 'dive' && to.pos.equals(home.pos) };
+}
+function renderRoom(now) {
+  tube = reduced ? (tvOn ? 1 : 0) : tvOn ? Math.min(1, (now - powerAt) / 700) : Math.max(0, 1 - (now - powerAt) / 450);
+  const f = tvOn ? flickerAt(now) : 0, glow = f * tube;
+  tvSpill.intensity = 5 * glow; tvHalo.intensity = 1.5 * glow;
+  ledMesh.material.color.setHex(tvOn ? 0x66ff55 : 0xe03a3a);
+  screenMesh.visible = tube > 0;
+  screenGlow.visible = tube > 0; screenGlow.material.opacity = .07 * glow;
+  if (screenMesh.visible && roomFrames++ % 2 === 0) { paintScreen(now); screenTex.needsUpdate = true; } // TV picture at half rate: it costs a repaint and a texture upload
+  let fx = 0, flash = 0, finish = null;
+  if (dive) {
+    const t = DIVE_MS ? Math.min(1, (now - dive.t0) / DIVE_MS) : 1, e = t < .5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
+    camera.position.lerpVectors(dive.from, dive.to.pos, e); camLook.v.lerpVectors(dive.fromLook, dive.to.look, e);
+    const nearScreen = dive.outward ? 1 - t : t; // effects build as the camera nears the glass, in both directions
+    if (!reduced) { fx = Math.min(1, Math.max(0, (nearScreen - .18) / .62)) ** 1.5; flash = Math.max(0, (nearScreen - .9) / .1) ** 2 * .9; }
+    if (t === 1) finish = dive.done, dive = null;
+  } else if (mode === 'room') {
+    camera.position.x += (home.pos.x + mouse.x * .05 - camera.position.x) * .05;
+    camera.position.y += (home.pos.y - mouse.y * .025 - camera.position.y) * .05;
+    camera.position.z += (home.pos.z - camera.position.z) * .05;
+    camLook.v.lerp(home.look, .05);
+  }
+  camera.lookAt(camLook.v);
+  sparks.visible = fx > 0; sparks.material.opacity = Math.min(1, fx * 2);
+  if (fx > 0) {
+    renderer.setRenderTarget(fxTarget); renderer.render(scene3d, camera); renderer.setRenderTarget(null);
+    fxMaterial.uniforms.amount.value = fx; fxMaterial.uniforms.flash.value = flash; fxMaterial.uniforms.time.value = now / 1000 % 100;
+    renderer.render(fxScene, fxCamera);
+  } else renderer.render(scene3d, camera);
+  if (finish) finish();
+}
+function roomPick(e) {
+  const r = new THREE.Raycaster();
+  r.setFromCamera({ x: e.clientX / W * 2 - 1, y: -e.clientY / H * 2 + 1 }, camera);
+  // Hit areas sit in front of the TV, so the nearest thing wins.
+  const found = r.intersectObjects(roomHits.map(h => h.object), false)[0];
+  return found ? roomHits.find(h => h.object === found.object) : null;
+}
+function screenPoint(local = [SCREEN.x, SCREEN.y]) { // viewport px of a spot on the TV's front
+  const v = new THREE.Vector3(local[0], local[1], SCREEN.z).multiplyScalar(TV_SCALE).add(new THREE.Vector3(0, CABINET_TOP, TV_Z)).project(camera);
+  return [(v.x + 1) / 2 * W, (1 - v.y) / 2 * H];
+}
+
+let layoutShape = null;
+function resize() {
+  if (!innerWidth || !innerHeight) return; // hidden or collapsed window: a 0 size would poison the camera with NaN
+  W = innerWidth; H = innerHeight;
+  const nextPr = Math.min(devicePixelRatio || 1, 2, Math.sqrt(3.7e6 / (W * H))); // sharp on phones and retina, capped so 4K doesn't choke the shader
+  if (nextPr !== maxPr) { maxPr = nextPr; items.forEach(c => { c.bmp = null; }); }
+  pr = maxPr * (mode === 'room' ? .5 : 1); // the picture in the room is tiny, so don't spend the GPU on it
+  sceneCanvas.width = Math.round(W * pr); sceneCanvas.height = Math.round(H * pr);
+  if (gl) { crt.width = sceneCanvas.width; crt.height = sceneCanvas.height; gl.viewport(0, 0, crt.width, crt.height); gl.uniform2f(uni.res, crt.width, crt.height); }
+  const shape = W / H < 1 ? 'tall' : 'wide', next = Math.min(W / PAGE[shape].w, H / PAGE[shape].h); // the whole page always fits one screen
+  if (next !== sc || shape !== layoutShape) {
+    sc = next; layoutShape = shape;
+    items.forEach(c => { [c.x, c.y, c.s] = c[shape]; c.bmp = c.bigBmp = null; });
+    STORIES.forEach(n => { n.bmp = null; });
+  }
+  items.forEach(c => { c.heroBmp = c.detailBmp = null; });
+  paper = null; // shortcut: raked marks are lost when the window changes size, fine while they're only play
+  dirty = true;
+  if (roomReady) {
+    renderer.setPixelRatio(COARSE && gate ? Math.min(maxPr, 1.25) : COARSE && book ? Math.min(maxPr, 1.5) : maxPr); renderer.setSize(W, H, false); frameRoom();
+    if (mode === 'room' && !camera.position.lengthSq()) { camera.position.copy(home.pos); camLook.v.copy(home.look); } // first real size after loading while hidden
+  }
+}
+addEventListener('resize', resize);
+
+function step(dt) {
+  if (!drag) { // let go and the board springs back: there's nothing else out there to scroll to
+    tug.x = Math.abs(tug.x) < .05 ? 0 : tug.x * .86;
+    tug.y = Math.abs(tug.y) < .05 ? 0 : tug.y * .86;
+  }
+  const px = elastic(tug.x), py = elastic(tug.y);
+  look.x += (lookTarget.x / Math.sqrt(zoomK) - look.x) * .07; look.y += (lookTarget.y / Math.sqrt(zoomK) - look.y) * .07;
+  zoomNow = reduced ? zoomGoal : zoomNow + (zoomGoal - zoomNow) * .13;
+  if (!zoomGoal && zoomNow < .002) { zoomNow = 0; focus = null; }
+  const e = zoomNow * zoomNow * (3 - 2 * zoomNow), camX = focus ? focus.x * e : 0, camY = focus ? (focus.y + H * .035 / (sc * closeUpZoom(focus))) * e : 0;
+  zoomK = focus ? 1 + (closeUpZoom(focus) - 1) * e : 1;
+  vx = px - pan.x + (cam.x - camX); vy = py - pan.y + (cam.y - camY); pan.x = px; pan.y = py; cam.x = camX; cam.y = camY;
+  if (focus && zoomGoal && zoomNow > .85 && !popAt) popAt = performance.now();
+  if (mode !== 'room' && !view) {
+    tickerX += dt * .07;
+    if (COARSE && !reduced) { const t = performance.now(); lookTarget.x = Math.sin(t / 2900) * 14; lookTarget.y = Math.cos(t / 3700) * 10; } // no mouse to look around with, so the board drifts by itself
+    if (!storyAt) storyAt = performance.now();
+    if (!reduced && performance.now() - storyAt > STORY_MS) stepStory(1);
+    dirty = true; // the ticker and the story border never stop moving
+  }
+  for (const c of items) {
+    const target = c === hover ? 1 : 0, k = c.k || 0;
+    if (Math.abs(target - k) > .004) { c.k = k + (target - k) * .2; dirty = true; } else c.k = target;
+    if (c.theme) {
+      const goal = c === focus && zoomGoal && !view ? 1 : 0, now = c.themeK || 0;
+      c.themeK = reduced || Math.abs(goal - now) < .01 ? goal : now + (goal - now) * .12;
+    }
+  }
+  if (view) {
+    if (view.p < 1) { view.p = reduced ? 1 : Math.min(1, view.p + .05); dirty = true; }
+    const d = view.target - view.scroll;
+    if (Math.abs(d) > .3) { view.scroll += d * .18; dirty = true; }
+  }
+  glitch = Math.max(0, glitch - dt / 320);
+  scan += ((mode === 'room' ? 0 : gate || book || works ? .3 : 1) - scan) * .03; // the detail in these two shouldn't sit behind heavy scanlines
+  const clampVel = v => Math.max(-.011, Math.min(.011, v));
+  shaderVx += (clampVel(vx * sc / W * 3) - shaderVx) * .25;
+  shaderVy += (clampVel(-vy * sc / H * 3) - shaderVy) * .25;
+}
+let lastFrame = 0;
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dt = now - lastFrame; lastFrame = now;
+  step(dt);
+  if (mode !== 'room') { // the portfolio only needs drawing once you're heading inside
+    if (dirty) {
+      drawScene();
+      if (gl) gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, sceneCanvas);
+      dirty = false;
+    }
+    if (gl) {
+      gl.uniform1f(uni.time, now / 1000 % 1000); gl.uniform1f(uni.glitch, glitch); gl.uniform1f(uni.scan, scan);
+      gl.uniform2f(uni.vel, shaderVx, shaderVy);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+  }
+  if (roomReady && mode !== 'inside') renderRoom(now);
+}
+
+/* ---------- TV controls ---------- */
+let osdText = '', osdTimer, audioCtx, hissGain;
+function showOsd(s) { osdText = s; clearTimeout(osdTimer); osdTimer = setTimeout(() => { osdText = ''; }, 2200); }
+function updateSound() {
+  const v = +vol.value / 100;
+  if (v && !audioCtx) {
+    audioCtx = new AudioContext();
+    const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * 2, audioCtx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const src = audioCtx.createBufferSource(); src.buffer = buf; src.loop = true;
+    hissGain = audioCtx.createGain(); hissGain.gain.value = 0;
+    src.connect(hissGain).connect(audioCtx.destination); src.start();
+  }
+  if (hissGain) hissGain.gain.setTargetAtTime(tvOn ? v * (channel === 2 ? .22 : .03) : 0, audioCtx.currentTime, .05);
+}
+function setChannel(n) {
+  if (n === channel) return;
+  channel = n; chan.value = n;
+  showOsd(`CH 0${n}`); updateSound();
+}
+function setPower(on) {
+  tvOn = on; powerAt = performance.now(); powerBtn.setAttribute('aria-pressed', on);
+  if (on) showOsd(`CH 0${channel}`);
+  updateSound();
+}
+const nextChannel = () => { if (!tvOn) setPower(true); setChannel(channel % 4 + 1); };
+const nextVolume = () => { vol.value = (+vol.value + 20) % 120; vol.dispatchEvent(new Event('input')); };
+powerBtn.addEventListener('click', () => setPower(!tvOn));
+chan.addEventListener('input', () => setChannel(+chan.value));
+vol.addEventListener('input', () => { showOsd(`VOL ${'|'.repeat(Math.round(vol.value / 10)).padEnd(10, '.')}`); updateSound(); });
+$('#screen').addEventListener('click', () => enter());
+
+$('#room3d').addEventListener('pointermove', e => {
+  if (!roomReady || mode !== 'room') return;
+  mouse.x = e.clientX / W * 2 - 1; mouse.y = e.clientY / H * 2 - 1;
+  const h = e.pointerType === 'mouse' ? roomPick(e) : null;
+  $('#room3d').style.cursor = h ? 'pointer' : '';
+  tip.hidden = !h;
+  if (h) { tip.textContent = h.label; tip.style.transform = `translate(${Math.min(e.clientX + 14, W - 130)}px, ${e.clientY + 18}px)`; }
+});
+$('#room3d').addEventListener('pointerleave', () => { tip.hidden = true; mouse.x = mouse.y = 0; });
+$('#room3d').addEventListener('click', e => {
+  if (!roomReady || mode !== 'room') return;
+  const h = roomPick(e);
+  if (h) h.action();
+});
+
+/* ---------- Dive in and out of the screen ---------- */
+// Move focus for keyboard users only, so mouse and touch users never see a stray focus ring.
+let usedKeyboard = false;
+addEventListener('keydown', () => { usedKeyboard = true; }, true);
+addEventListener('pointerdown', () => { usedKeyboard = false; }, true);
+const keyboardFocus = el => { if (usedKeyboard) el.focus({ preventScroll: true }); };
+function arrive() {
+  mode = 'inside';
+  crt.classList.add('full');
+  glitch = reduced ? 0 : 1.6; // carry the dive's tearing into the portfolio, then let it settle
+  document.body.classList.remove('zoom'); document.body.classList.add('inside');
+  tip.hidden = true;
+  setTimeout(() => { room.hidden = true; }, reduced ? 0 : 350);
+  keyboardFocus($('#btn-about'));
+}
+function enter() {
+  if (mode !== 'room') return;
+  if (!tvOn) setPower(true);
+  setChannel(1);
+  mode = 'dive'; resize();
+  document.body.classList.add('zoom');
+  startDive(screenTarget(), arrive);
+}
+function leave() {
+  if (mode !== 'inside' || noRoom) return;
+  mode = 'dive';
+  document.body.classList.remove('inside');
+  crt.classList.remove('full');
+  room.hidden = false;
+  document.body.classList.add('zoom');
+  camera.position.copy(screenTarget().pos); camLook.v.copy(screenTarget().look);
+  resize();
+  startDive({ pos: home.pos, look: home.look }, () => {
+    mode = 'room';
+    document.body.classList.remove('zoom');
+    resize(); keyboardFocus($('#screen'));
+  });
+}
+
+/* ---------- Project view ---------- */
+function openProject(c, viaKeyboard = false, passedGate = false) {
+  if (c.portal && !passedGate && typeof openGate === 'function') { openGate(c, viaKeyboard); return; }
+  if (c.notebook && !passedGate && typeof openBook === 'function') { openBook(c, viaKeyboard); return; }
+  view = { c, p: 0, scroll: 0, target: 0, max: 0, viaKeyboard };
+  hover = null; focusCard = null; glitch = reduced ? 0 : 1; dirty = true;
+  syncBack();
+  live.textContent = `${c.t}, ${c.c}. ${COPY}`;
+  crt.style.cursor = 'grab';
+  keyboardFocus(backBtn);
+}
+function closeProject() {
+  const c = view.c, viaKeyboard = view.viaKeyboard;
+  view = null; glitch = reduced ? 0 : 1; dirty = true;
+  syncBack(); live.textContent = ''; backBtn.hidden = noRoom;
+  if (viaKeyboard) navButtons.get(c).focus();
+}
+const goBack = () => { if (view) closeProject(); else if (gate) closeGate(); else if (book) closeBook(); else if (works) closeWorks(); else if (zoomGoal) clearFocus(); else leave(); };
+backBtn.addEventListener('click', goBack);
+
+/* ---------- Input inside the TV ---------- */
+// First click selects a card, a click on the selected one opens it.
+function activate(c, viaKeyboard = false) {
+  if (focus !== c || !zoomGoal) setFocus(c);
+  else if (c.hero) $('#about').showModal();
+  else if (c.stories) stepStory(1);
+  else openProject(c, viaKeyboard);
+}
+crt.addEventListener('pointerdown', e => {
+  if (mode !== 'inside') return;
+  drag = { x: e.clientX, y: e.clientY, startX: e.clientX, startY: e.clientY, moved: 0, vy: 0, at: 0, rake: paperOpen() && !hit(e.clientX, e.clientY) }; focusCard = null; dirty = true;
+  if (drag.rake && paper) { paper.last = null; paper.n = null; }
+  crt.setPointerCapture(e.pointerId); crt.style.cursor = 'grabbing';
+  if (e.pointerType === 'touch' && !view && !gate && !book && !works) { const c = hit(e.clientX, e.clientY); if (c) { c.shakeAt = performance.now(); hover = c; } } // a press gets the hover's shake and label
+  if (e.pointerType === 'touch' && works && !view) worksHover(e.clientX, e.clientY);
+});
+crt.addEventListener('pointermove', e => {
+  if (mode !== 'inside') return;
+  if (e.pointerType === 'mouse') { lookTarget.x = -(e.clientX / W * 2 - 1) * 46; lookTarget.y = -(e.clientY / H * 2 - 1) * 34; } // the mouse looks around the board
+  if (!drag) {
+    if (e.pointerType === 'mouse' && book) { if (book.phase === 'ride') bookHover(e.clientX, e.clientY); }
+    else if (e.pointerType === 'mouse' && works && !view) worksHover(e.clientX, e.clientY);
+    else if (e.pointerType === 'mouse' && !view && !gate) {
+      const c = hit(e.clientX, e.clientY);
+      if (c && c !== hover) c.shakeAt = performance.now();
+      hover = c; crt.style.cursor = c ? 'pointer' : 'grab';
+    }
+    return;
+  }
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  drag.x = e.clientX; drag.y = e.clientY; drag.moved += Math.abs(dx) + Math.abs(dy);
+  if (drag.moved > 6) hover = null;
+  drag.vy = dy; drag.at = performance.now();
+  if (view) view.target = view.scroll = Math.max(0, Math.min(view.max, view.scroll - dy));
+  else if (gate) return;
+  else if (book) { if (book.phase === 'ride') bookDrag(dx); return; }
+  else if (works) { worksDrag(dy); if (drag.moved > 6) works.hover = null; return; }
+  else if (drag.rake) rakeTo(...toScene(e.clientX, e.clientY));
+  else { tug.x += dx / sc; tug.y += dy / sc; }
+  dirty = true;
+});
+function endDrag(e) {
+  if (!drag) return;
+  const clicked = drag.moved < 6 && e.type === 'pointerup', { startX, startY, vy, at, rake } = drag;
+  drag = null; crt.style.cursor = 'grab';
+  if (e.pointerType === 'touch') hover = null;
+  if (gate) { if (clicked) gateClick(); return; }
+  if (book) { if (book.phase === 'ride') { if (clicked) bookClick(e.clientX, e.clientY); else if (e.type === 'pointerup') bookFling(); } return; }
+  if (works && !view) { if (clicked) { works.pull = 0; worksClick(e.clientX, e.clientY); } else worksRelease(vy, at); if (e.pointerType === 'touch') works.hover = null; return; }
+  if (clicked && !view) {
+    const c = hit(e.clientX, e.clientY);
+    if (c) activate(c); else if (zoomGoal) clearFocus();
+  } else if (e.type === 'pointerup' && e.pointerType === 'touch') {
+    const sx = e.clientX - startX, sy = e.clientY - startY;
+    if (view) { if (performance.now() - at < 80) view.target = Math.max(0, Math.min(view.max, view.scroll - vy * 14)); } // a flick keeps the page moving
+    else if (!rake && focus && zoomGoal && Math.max(Math.abs(sx), Math.abs(sy)) > 44) {
+      // Sideways follows stepFocus, so it turns story pictures. Up and down always change card, or nothing could leave Stories.
+      if (Math.abs(sx) > Math.abs(sy)) stepFocus(sx < 0 ? 1 : -1);
+      else setFocus(items[(items.indexOf(focus) + (sy < 0 ? 1 : -1) + items.length) % items.length]);
+    }
+  }
+}
+crt.addEventListener('pointerup', endDrag);
+crt.addEventListener('pointercancel', endDrag);
+crt.addEventListener('wheel', e => {
+  if (mode !== 'inside') return;
+  e.preventDefault();
+  if (gate) return;
+  if (book) { if (book.phase === 'ride') bookMove((e.deltaY + e.deltaX) * .018); return; }
+  if (works && !view) { worksWheel(e.deltaY); return; }
+  if (view) view.target = Math.max(0, Math.min(view.max, view.target + e.deltaY));
+  else {
+    // Wheel up zooms toward whatever is nearest the mouse and selects it without a click. Letting go snaps to in or out.
+    const opening = zoomGoal === 0 || zoomGoal < .35;
+    zoomGoal = Math.max(0, Math.min(1, zoomGoal - e.deltaY * .0016));
+    if (zoomGoal > 0 && opening) { const c = nearest(e.clientX, e.clientY); if (c !== focus) { focus = c; popAt = 0; } }
+    clearTimeout(wheelTimer);
+    wheelTimer = setTimeout(() => { if (zoomGoal >= .4 && focus) setFocus(focus); else clearFocus(); }, 170);
+    dirty = true;
+  }
+}, { passive: false });
+addEventListener('keydown', e => {
+  if (mode !== 'inside' || document.querySelector('dialog[open]')) return;
+  if (e.key === 'Escape' || e.key === 'Backspace') { goBack(); return; }
+  if (gate) { if ((e.key === 'Enter' || e.key === ' ') && document.activeElement !== backBtn) { e.preventDefault(); gateClick(); } return; }
+  if (book) { const step = { ArrowRight: 7, ArrowDown: 7, ArrowLeft: -7, ArrowUp: -7 }[e.key]; if (step) { e.preventDefault(); if (book.phase === 'ride') bookMove(step); } return; }
+  if (works && !view) { worksKey(e); return; }
+  if (e.key === '?') { $('#about').showModal(); return; }
+  if (view) {
+    const dy = { ArrowUp: -90, ArrowDown: 90 }[e.key];
+    if (dy) { e.preventDefault(); view.target = Math.max(0, Math.min(view.max, view.target + dy)); dirty = true; }
+    return;
+  }
+  const inField = document.activeElement && document.activeElement.tagName === 'BUTTON';
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); stepFocus(1); }
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); stepFocus(-1); }
+  else if (e.key === 'Home') clearFocus();
+  else if (e.key === 'r' || e.key === 'R') setFocus(projects[Math.floor(Math.random() * projects.length)]);
+  else if ((e.key === 'Enter' || e.key === ' ') && !inField) { e.preventDefault(); activate(focus || hero, true); }
+});
+
+// Screen readers and keyboards get real buttons; focusing one rings that card on the board.
+const navButtons = new Map();
+for (const c of [stories, ...projects]) {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'sr-only'; b.textContent = c.stories ? 'Stories' : `${c.t}, ${c.c}`;
+  b.addEventListener('focus', () => { if (!view) { focusCard = c; dirty = true; } });
+  b.addEventListener('blur', () => { focusCard = null; dirty = true; });
+  b.addEventListener('click', () => { c.stories ? setFocus(c) : openProject(c, true); });
+  $('#project-nav').append(b); navButtons.set(c, b);
+}
+
+/* ---------- The sticker's peel: its corner really folds back over a moving crease ---------- */
+const PEEL_REST = 9, PEEL_OPEN = 44; // the flap reaches twice this far, so it has to stop short of the text
+const peelDir = [Math.cos(-.32), Math.sin(-.32)], peelFrom = [13, 112]; // from the lower left corner, heading into the sticker
+let peelNow = PEEL_REST, peelGoal = PEEL_REST, peelRunning = false;
+function drawPeel(d) {
+  const [ux, uy] = peelDir, px = peelFrom[0] + ux * d, py = peelFrom[1] + uy * d, far = 900, vx = -uy, vy = ux;
+  const pts = sign => [[px + vx * far, py + vy * far], [px - vx * far, py - vy * far], [px - vx * far + sign * ux * far, py - vy * far + sign * uy * far], [px + vx * far + sign * ux * far, py + vy * far + sign * uy * far]].map(p => p.join()).join(' ');
+  $('#sticker-body-area').setAttribute('points', pts(1));
+  $('#sticker-flap-area').setAttribute('points', pts(-1));
+  // Reflect the cut-off corner across the crease.
+  const dot = px * ux + py * uy;
+  $('#sticker-fold').setAttribute('transform', `matrix(${1 - 2 * ux * ux} ${-2 * ux * uy} ${-2 * ux * uy} ${1 - 2 * uy * uy} ${2 * dot * ux} ${2 * dot * uy})`);
+  const back = $('#sticker-back');
+  back.setAttribute('x1', px); back.setAttribute('y1', py); back.setAttribute('x2', px - ux * Math.max(d, 1)); back.setAttribute('y2', py - uy * Math.max(d, 1));
+  const flipped = d > (PEEL_REST + PEEL_OPEN) / 2;
+  $('.face-a').style.opacity = flipped ? 0 : 1; $('.face-b').style.opacity = flipped ? 1 : 0;
+}
+function runPeel() {
+  peelNow += (peelGoal - peelNow) * .2;
+  if (reduced || Math.abs(peelGoal - peelNow) < .2) { peelNow = peelGoal; peelRunning = false; }
+  drawPeel(peelNow);
+  if (peelRunning) requestAnimationFrame(runPeel);
+}
+function setPeel(open) { peelGoal = open ? PEEL_OPEN : PEEL_REST; if (!peelRunning) { peelRunning = true; requestAnimationFrame(runPeel); } }
+const talk = $('#btn-talk');
+talk.addEventListener('pointerenter', () => setPeel(true)); talk.addEventListener('pointerleave', () => setPeel(false));
+talk.addEventListener('focus', () => { if (usedKeyboard) setPeel(true); }); talk.addEventListener('blur', () => setPeel(false));
+drawPeel(PEEL_REST);
+
+/* ---------- Dialogs ---------- */
+$('#btn-about').addEventListener('click', () => $('#about').showModal());
+$('#btn-talk').addEventListener('click', () => $('#contact').showModal());
+document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => b.closest('dialog').close()));
+document.querySelectorAll('dialog').forEach(d => d.addEventListener('click', e => { if (e.target === d) d.close(); }));
+$('#copy').addEventListener('click', async e => {
+  try { await navigator.clipboard.writeText($('#address').textContent); e.target.textContent = 'Copied'; }
+  catch { getSelection().selectAllChildren($('#address')); e.target.textContent = 'Press Ctrl+C to copy'; }
+});
+
+/* ---------- Boot ---------- */
+if (COARSE) {
+  $('.hint').textContent = 'Tap the screen to go inside';
+  $('.keys').innerHTML = [['Tap', 'Look closer, tap again to open'], ['Swipe', 'Next or previous screen'], ['Swipe sideways on Stories', 'Next or previous picture'], ['Drag', 'Tug the board'], ['Back', 'Back to the board, then the room']].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+}
+resize();
+requestAnimationFrame(frame);
+Promise.all([`40px Anton`, `40px "Lilita One"`, `30px VT323`, `400 20px "Instrument Sans"`].map(f => document.fonts.load(f)))
+  .catch(() => {}) // blocked fonts fall back to the stacks above
+  .then(() => { items.forEach(c => { c.bmp = c.heroBmp = c.detailBmp = null; }); dirty = true; });
+// If the 3D room can't load, the portfolio still has to work: skip straight to it.
+initRoom().catch(err => {
+  console.warn('3D room unavailable:', err);
+  noRoom = true; mode = 'dive'; backBtn.hidden = true; resize(); arrive();
+});
+</script>
+<script src="gate.js"></script>
+<script src="notebook.js"></script>
+<script src="works.js"></script>
