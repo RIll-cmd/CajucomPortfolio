@@ -207,7 +207,10 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     };
     await clickOrbit();
     await page.screenshot({ path: `${name}-d-white.png` });
-    await page.waitForFunction(() => gate && gate.phase === 'load', null, { timeout: 180000 });
+    await page.waitForFunction(() => gate && gate.phase === 'load', null, { timeout: 180000 }).catch(async e => {
+      console.log('gate stalled', JSON.stringify(await page.evaluate(() => ({ phase: gate && gate.phase, built: gateBuilt, builder: !!gateBuilder, world: !!gateWorld, works: !!works, mode, dirty, hidden: document.hidden, lost: renderer.getContext().isContextLost() }))), 'errors', errors);
+      throw e;
+    });
     // Software rendering is too slow to catch this on the clock, so hold loading halfway.
     await page.evaluate(() => { window.heldLoad = setInterval(() => { if (gate) gate.at = performance.now() - GATE_LOAD_MS / 2; }, 10); });
     await page.waitForTimeout(1500);
@@ -250,15 +253,16 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     assert.strictEqual(await page.evaluate(() => works.page), 0, 'arrow up goes back one section');
     const pageOf = kind => page.evaluate(k => works.pages.findIndex(p => p.kind === k), kind);
     const settle = () => page.waitForFunction(() => { window.settled = (window.settled || 0) + 1; return true; }).then(() => page.waitForTimeout(1200));
-    // Filters: Design leaves out the development-only projects, and All brings them back.
+    // Filters: Solo leaves out the thesis, and All brings it back.
     const onCount = () => page.evaluate(() => WORKS_WORDS.items.filter(i => i.on).length);
     const allCount = await onCount();
     await page.evaluate(i => worksJump(i), await pageOf('portfolio')); await settle();
     const spotOf = label => page.evaluate(l => { for (let y = 20; y < H; y += 6) for (let x = 20; x < W; x += 6) { const h = worksHit(x, y); if (h && h.label === l) return [x, y]; } return null; }, label);
-    const pill = await spotOf('Design');
-    assert.ok(pill, 'the Design filter can be clicked');
+    const pill = await spotOf('Solo');
+    assert.ok(pill, 'the Solo filter can be clicked');
     await page.mouse.click(...pill);
-    assert.ok(await onCount() < allCount, 'Design hides some projects');
+    assert.ok(await onCount() < allCount, 'Solo hides the thesis');
+    assert.ok(await page.evaluate(() => WORKS_WORDS.items.filter(i => i.src).every(i => i.pic.naturalWidth > 0)), 'the project screenshots load');
     await settle();
     await page.screenshot({ path: `${name}-k-filter.png` });
     await page.keyboard.press('ArrowLeft');
@@ -272,8 +276,12 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     assert.ok(frame, 'the first project can be clicked');
     await page.mouse.click(...frame);
     assert.strictEqual(await page.evaluate(() => view && view.c.t), first, 'a project opens');
+    assert.ok(await page.evaluate(() => !linksBox.hidden && linksBox.querySelector('a').href.includes('github.com/RIll-cmd/')), 'the project links to its repo');
+    await page.waitForTimeout(800);
+    await page.screenshot({ path: `${name}-p-case.png` });
     await page.click('#back');
     assert.strictEqual(await page.evaluate(() => [!!works, view].join()), 'true,', 'back returns to the works page');
+    assert.strictEqual(await page.evaluate(() => linksBox.hidden), true, 'the links leave with the project');
     if (device) { // real touches: a long enough drag moves one section without opening anything, a short one settles back, and a tap opens
       const finger = await context.newCDPSession(page);
       const touch = (type, x, y) => finger.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });

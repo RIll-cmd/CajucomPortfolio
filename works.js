@@ -1,26 +1,34 @@
 /* Box 1's page, behind the door: one full screen at a time through a night sky, in navy, teal and coral.
-   All project names, tags, words and screenshots are placeholders, kept together here so they're easy to swap. */
+   The words and projects are kept together here so they're easy to change. */
+function worksEyeArt(x, w, h) { // Wake&Brake has no screenshots yet, so this sketches what it measures: the six points round an eye, and eye closure over time
+  x.fillStyle = '#0e1d39'; x.fillRect(0, 0, w, h);
+  const cx = w * .5, cy = h * .4, rx = w * .24, ry = h * .15; x.lineWidth = Math.max(2, w * .005); x.strokeStyle = '#f4ecd8';
+  x.beginPath(); x.moveTo(cx - rx, cy); x.quadraticCurveTo(cx, cy - ry * 2, cx + rx, cy); x.quadraticCurveTo(cx, cy + ry * 2, cx - rx, cy); x.stroke();
+  x.fillStyle = '#27527a'; x.beginPath(); x.arc(cx, cy, ry * .9, 0, 7); x.fill(); x.fillStyle = '#0a1226'; x.beginPath(); x.arc(cx, cy, ry * .42, 0, 7); x.fill();
+  x.fillStyle = '#3fc1b0'; for (const [a, b] of [[-1, 0], [1, 0], [-.42, -.98], [.42, -.98], [-.42, .98], [.42, .98]]) { x.beginPath(); x.arc(cx + a * rx, cy + b * ry, Math.max(3, w * .011), 0, 7); x.fill(); }
+  x.strokeStyle = '#ff8a5c'; x.lineWidth = Math.max(2, w * .006); x.lineJoin = 'round'; x.beginPath();
+  for (let i = 0; i <= 60; i++) { const t = i / 60, dip = i % 15 > 12 ? .9 : 0, sag = t > .7 ? (t - .7) * 1.3 : 0; x[i ? 'lineTo' : 'moveTo'](w * (.1 + t * .8), h * (.72 + (dip + sag) * .17)); }
+  x.stroke();
+}
 const WORKS_WORDS = {
   name: 'Cyrill',
-  role: 'YOUR ROLE HERE',
+  role: 'ASPIRING SOFTWARE / AI ENGINEER',
   aboutTitle: 'About me',
-  about: 'Placeholder lines about what I make, how I work, and what I care about. Swap this for the real thing when you are ready.',
+  about: 'Aspiring software and AI engineer from San Miguel, Bulacan. I build AI agent tools, computer vision apps and hardware alerts. Open to work, and looking for companies to intern at.',
   aboutMore: 'More about me',
-  highlight: { make: 0, work: 1, care: 2 }, // words that sit on a coloured chip, by which colour
+  highlight: { tools: 0, vision: 1, hardware: 2 }, // words that sit on a coloured chip, by which colour
   portfolioLabel: 'PORTFOLIO',
   portfolioTitle: 'Works',
-  portfolio: 'My latest works. A placeholder line about where craft and curiosity meet.',
-  filters: ['All', 'Design', 'Development'],
-  ask: 'Have a world in mind?',
+  portfolio: 'Three solo projects, and my thesis.',
+  filters: ['All', 'Solo', 'Thesis'],
+  ask: 'Have a role or an internship in mind?',
   talk: "Let's talk",
-  email: 'your@email.here',
+  email: 'cyrillgerardc@gmail.com',
   items: [
-    { t: 'Project One', tags: ['Design', 'Development'], colors: ['#160c52', '#fff4e0', '#ff7a59', '#c62e6d'], layout: 0 },
-    { t: 'Project Two', tags: ['Design', 'Development'], colors: ['#f6efe0', '#1f3a4d', '#2f9d8f', '#f2b84b'], layout: 1 },
-    { t: 'Project Three', tags: ['Development'], colors: ['#14323a', '#eafff6', '#7fe0b0', '#2c6e6b'], layout: 2 },
-    { t: 'Project Four', tags: ['Design'], colors: ['#fff0f3', '#5a1f3d', '#e8527c', '#ffc1cf'], layout: 0 },
-    { t: 'Project Five', tags: ['Design', 'Development'], colors: ['#1c2a6b', '#f7f4ff', '#ffd25e', '#5668d8'], layout: 1 },
-    { t: 'Project Six', tags: ['Development'], colors: ['#f2e6d3', '#3b2a1e', '#c8622f', '#e3b98a'], layout: 2 },
+    { t: 'Ascend Hub', tags: ['Solo'], src: 'photos/ascend-hub.jpg', colors: ['#160c52', '#fff4e0', '#ff7a59', '#c62e6d'], layout: 0, links: [['View on GitHub', 'https://github.com/RIll-cmd/ascend-hub']], copy: 'A retro orchestrator for AI coding agents. Codex, Claude and Antigravity plan, build, review and merge as a team in the Agent Room, while you approve each step. CRT televisions show their status and your subscription limits, then play Spotify, the weather and YouTube between sessions. Solo project.' },
+    { t: 'Ascend Core', tags: ['Solo'], src: 'photos/ascend-core.jpg', colors: ['#f6efe0', '#1f3a4d', '#2f9d8f', '#f2b84b'], layout: 1, links: [['Live site', 'https://ascend-core.vercel.app/landing'], ['GitHub', 'https://github.com/RIll-cmd/ascend-core']], copy: 'A gamified self-mastery platform that turns workouts, habits, focus, sleep and real-world goals into RPG progression, powered by AI. Solo project.' },
+    { t: 'Ascend Vision', tags: ['Solo'], src: 'photos/ascend-vision.jpg', colors: ['#14323a', '#eafff6', '#7fe0b0', '#2c6e6b'], layout: 2, links: [['View on GitHub', 'https://github.com/RIll-cmd/ascend-vision']], copy: 'A desktop companion that uses your webcam to notice when you pick up your phone, and reacts through an animated eye. Talk to it by voice or text to set reminders, get coached on your habits and have documents read for you. Detection runs entirely on your computer. Solo project.' },
+    { t: 'Wake&Brake', tags: ['Thesis'], art: worksEyeArt, colors: ['#0e1d39', '#f4ecd8', '#3fc1b0', '#27527a'], layout: 0, links: [['View on GitHub', 'https://github.com/RIll-cmd/Wake-Brake']], copy: 'My thesis: a real-time driver fatigue detector on a Raspberry Pi, with an Arduino as the haptic actuator. It combines face detection, eye aspect ratio, blink rate, PERCLOS and head posture to catch micro-sleeps and drowsiness, then escalates alerts through sound, vibration, a buzzer and scent. My role: main debugger, researcher, hardware, and the alerts and alert algorithm code.' },
   ],
 };
 const WORKS_NAVY = '#14284b', WORKS_DUSK = '#27527a', WORKS_TEAL = '#3fc1b0', WORKS_CORAL = '#ff8a5c', WORKS_CREAM = '#f4ecd8', WORKS_BODY = 'Poppins, "Segoe UI", sans-serif', WORKS_LABEL = 'Righteous, "Segoe UI", sans-serif', WORKS_SCRIPT = '"Kaushan Script", Righteous, cursive';
@@ -29,6 +37,8 @@ const worksClamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 /* ---------- Placeholder screenshots: a made-up site, one per project. Swap draw() for a real image ---------- */
 function worksMock(x, w, h, it) {
+  if (it.pic && it.pic.naturalWidth) { const k = Math.max(w / it.pic.naturalWidth, h / it.pic.naturalHeight), dw = it.pic.naturalWidth * k, dh = it.pic.naturalHeight * k; x.drawImage(it.pic, (w - dw) / 2, (h - dh) / 2, dw, dh); return; }
+  if (it.art) { it.art(x, w, h); return; }
   const [bg, ink, accent, soft] = it.colors, u = w / 100, bar = (a, b, c, d, color, r = .8) => { x.fillStyle = color; x.beginPath(); x.roundRect(a * u, b * u, c * u, d * u, r * u); x.fill(); };
   x.fillStyle = bg; x.fillRect(0, 0, w, h);
   bar(5, 4, 12, 3, ink); for (const a of [52, 63, 74]) bar(a, 4.6, 8, 1.6, ink); bar(85, 3.4, 11, 4, accent, 2);
@@ -50,7 +60,10 @@ function worksMock(x, w, h, it) {
     else { bar(53, y, 42, 18, row % 4 ? accent : soft, 1.6); bar(5, y + 3, 38, 2, ink); bar(5, y + 8, 30, 2, ink); bar(5, y + 13, 14, 3, accent, 1.5); }
   }
 }
-for (const it of WORKS_WORDS.items) Object.assign(it, { c: it.tags.join(' and '), w: 340, h: 225, draw: (x, w, h) => worksMock(x, w, Math.max(h, w * 1.2), it), s: 1, y: 0 });
+for (const it of WORKS_WORDS.items) {
+  Object.assign(it, { c: it.tags.join(' and '), w: 340, h: 225, draw: (x, w, h) => worksMock(x, w, it.src || it.art ? h : Math.max(h, w * 1.2), it), s: 1, y: 0 });
+  if (it.src) { it.pic = new Image(); it.pic.onload = () => { it.bmp = it.heroBmp = it.detailBmp = null; dirty = true; }; it.pic.src = it.src; }
+}
 
 /* ---------- Painted parts ---------- */
 function worksPuffs(lit, dark, rim) {
@@ -225,7 +238,7 @@ function worksBakeTitle() { // the swirl, the crescents, the vines and the word'
   crescent(3.55, 5.75, size * .07); crescent(.4, 2.05, -size * .07);
   x.shadowBlur = 0;
   const roleSize = Math.max(13, Math.min(W * .022, H * .03));
-  worksArcText(x, WORKS_WORDS.role, cx, cy, ring * 1.04, ring * tilt * 1.08, tall ? 1.5708 : 1.3, roleSize, false);
+  worksArcText(x, WORKS_WORDS.role, cx, cy, ring * 1.14, ring * tilt * 1.42, 1.5708, roleSize, false);
   x.save(); x.translate(cx, cy); x.rotate(-.09); x.font = `400 ${size}px ${WORKS_LABEL}`; x.textAlign = 'center'; x.textBaseline = 'middle';
   x.shadowColor = 'rgba(255,138,92,.5)'; x.shadowBlur = size * .18 * pr; x.fillStyle = '#0b1730'; x.fillText(word, size * .022, size * .036); x.shadowBlur = 0;
   x.fillStyle = WORKS_CORAL; x.fillText(word, 0, 0); x.restore();
@@ -300,7 +313,7 @@ const WORKS_DRAW = {
     g.globalAlpha = k * rise; g.drawImage(works.titleBmp, 0, shift + (1 - rise) * 40, W, H);
     const tw = n => reduced ? 1 : .86 + .14 * Math.sin(t * 2 + n), glow = (x, y, r, n) => { const l = g.createRadialGradient(x, y, 0, x, y, r * 1.6); l.addColorStop(0, 'rgba(63,193,176,.4)'); l.addColorStop(1, 'rgba(63,193,176,0)'); g.fillStyle = l; g.fillRect(x - r * 1.6, y - r * 1.6, r * 3.2, r * 3.2); worksStar(x, y, r * tw(n), WORKS_TEAL, .1); };
     const big = works.tall ? .17 : .24;
-    glow(Math.max(24, W / 2 - half * 1.12), cy + size * (works.tall ? .62 : .1), size * big, 0); glow(Math.max(24, W / 2 - half * 1.02), cy + size * (works.tall ? .78 : .5), size * .1, 1); glow(Math.min(W - 24, W / 2 + half * 1.12), cy - size * (works.tall ? .58 : .12), size * big * .85, 2); glow(Math.min(W - 24, W / 2 + half * 1.06), cy + size * (works.tall ? .66 : .34), size * big, 3);
+    glow(Math.max(24, W / 2 - half * 1.12), cy - size * (works.tall ? .72 : -.1), size * big, 0); glow(Math.max(24, W / 2 - half * .9), cy - size * (works.tall ? 1 : -.5), size * .1, 1); glow(Math.min(W - 24, W / 2 + half * 1.12), cy - size * (works.tall ? .58 : .12), size * big * .85, 2); glow(Math.min(W - 24, W / 2 + half * .86), cy - size * (works.tall ? .95 : -.34), size * big * (works.tall ? .6 : 1), 3);
     g.globalAlpha = k;
     works.clouds.forEach((c, i) => g.drawImage(c, -W * .15, H * [.46, .58, .7][i] + sy * [.5, .85, 1.25][i], W * 1.3, H * .95));
     const hint = worksClamp(H * .022, 13, 18), bob = reduced ? 0 : Math.sin(t * 2.4) * 4; g.globalAlpha = k * k * worksClamp(t - 1, 0, 1);
@@ -343,8 +356,8 @@ const WORKS_DRAW = {
     const it = p.it, { cardW, cardH, x } = it, top = it.y + sy, hov = works.hover === it.t, lean = (it.side ? 1 : -1) * (1 - k) * .05;
     it.lift = (it.lift || 0) + ((hov ? 1 : 0) - (it.lift || 0)) * .14;
     if (!it.bmp) { // a tall sheet that drifts up and down inside the frame
-      const scale = Math.min(pr, 1.5), c = document.createElement('canvas'); c.width = Math.ceil(cardW * scale); c.height = Math.ceil(cardW * 1.75 * scale);
-      const x2 = c.getContext('2d'); x2.scale(scale, scale); worksMock(x2, cardW, cardW * 1.75, it); it.bmp = c; it.bmpH = cardW * 1.75;
+      const scale = Math.min(pr, 1.5), c = document.createElement('canvas'), full = it.art ? cardH : it.pic && it.pic.naturalWidth ? Math.max(cardH, cardW * it.pic.naturalHeight / it.pic.naturalWidth) : cardW * 1.75; c.width = Math.ceil(cardW * scale); c.height = Math.ceil(full * scale);
+      const x2 = c.getContext('2d'); x2.scale(scale, scale); worksMock(x2, cardW, full, it); it.bmp = c; it.bmpH = full;
     }
     g.save(); g.globalAlpha = k;
     g.translate(x + cardW / 2, top + cardH / 2 - it.lift * 6); g.rotate(lean); const grow = 1 + it.lift * .018; g.scale(grow, grow); g.translate(-cardW / 2, -cardH / 2);

@@ -71,6 +71,12 @@ body:not(.inside) #ui { display: none; }
   font: 400 22px/1 var(--mono); letter-spacing: .04em; cursor: pointer;
 }
 #back:hover { background: var(--paper); color: #000; }
+#links { position: absolute; left: calc(clamp(16px, 4vw, 64px) + env(safe-area-inset-left, 0px)); top: calc(clamp(16px, 4vw, 48px) + env(safe-area-inset-top, 0px)); display: flex; flex-wrap: wrap; gap: 8px; max-width: calc(100% - 220px); }
+#links[hidden] { display: none; }
+#links a { background: #000; color: var(--paper); border: 2px solid var(--paper); border-radius: 6px; padding: 11px 14px; min-height: 44px; box-sizing: border-box; font: 400 18px/1.2 var(--mono); white-space: nowrap; text-decoration: none; }
+#links a:hover { background: var(--paper); color: #000; }
+dialog .socials { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+dialog .socials a { color: var(--yellow); padding: 6px 0; }
 @media (max-width: 600px), (max-height: 480px) { #back { min-height: 44px; padding: 7px 11px; font-size: 18px; } } /* still a full finger target, but no bigger than the cards around it */
 @media (max-height: 480px) { #back { top: calc(10px + env(safe-area-inset-top, 0px)); } } /* clears the top card on a sideways phone */
 * { -webkit-tap-highlight-color: transparent; }
@@ -157,13 +163,14 @@ dialog button.ghost { background: none; color: var(--yellow); }
     </svg>
   </button>
   <button id="back" type="button">&#9167; Back to room</button>
+  <div id="links" hidden></div>
   <nav class="sr-only" aria-label="Projects" id="project-nav"></nav>
   <div class="sr-only" id="live" aria-live="polite"></div>
 </div>
 
 <dialog id="about" aria-labelledby="about-title">
-  <h2 id="about-title" class="tape">Cyrill Cajucom / Help</h2>
-  <p>This is placeholder text for your bio. Say what you make, who you make it for, and where you're based.</p>
+  <h2 id="about-title" class="tape">Cyrill Gerard P. Cajucom</h2>
+  <p>Aspiring software and AI engineer from San Miguel, Bulacan. I build my own tools solo, from orchestrating AI coding agents to computer vision on the desk. On my thesis, Wake&amp;Brake, I was the main debugger and researcher, and handled the hardware and the alert algorithms. I'm open to work and looking for companies to intern at.</p>
   <dl class="keys">
     <div><dt>Click</dt><dd>Look closer, click again to open</dd></div>
     <div><dt>Wheel</dt><dd>Zoom in on the screen nearest your mouse</dd></div>
@@ -180,8 +187,9 @@ dialog button.ghost { background: none; color: var(--yellow); }
 </dialog>
 <dialog id="contact" aria-labelledby="contact-title">
   <h2 id="contact-title" class="tape">Say hello</h2>
-  <p>Placeholder address. Replace it with the one you want clients to use.</p>
-  <p class="address" id="address">you@example.com</p>
+  <p>Open to work, and looking for companies to intern at.</p>
+  <p class="address" id="address">cyrillgerardc@gmail.com</p>
+  <p class="socials"><a href="https://www.linkedin.com/in/cyrill-gerard-cajucom-25553933a/" target="_blank" rel="noopener">LinkedIn</a><a href="https://github.com/RIll-cmd" target="_blank" rel="noopener">GitHub</a><a href="https://www.facebook.com/cyrillgerardcajucom10" target="_blank" rel="noopener">Facebook</a><a href="https://discord.com/users/700210477288128593" target="_blank" rel="noopener">Discord</a></p>
   <div class="row"><button type="button" id="copy">Copy address</button><button type="button" class="ghost" data-close>Close</button></div>
 </dialog>
 
@@ -196,7 +204,7 @@ const DIVE_MS = reduced ? 0 : 1800;
 const DISPLAY = 'Anton, Impact, sans-serif', LETTERING = '"Lilita One", Impact, sans-serif', BODY = '"Instrument Sans", "Segoe UI", sans-serif', MONO = 'VT323, Consolas, monospace';
 const COARSE = matchMedia('(pointer: coarse)').matches;
 const room = $('#room'), crt = $('#crt'), tip = $('#tip');
-const vol = $('#vol'), chan = $('#chan'), powerBtn = $('#power'), backBtn = $('#back'), live = $('#live');
+const vol = $('#vol'), chan = $('#chan'), powerBtn = $('#power'), backBtn = $('#back'), live = $('#live'), linksBox = $('#links');
 
 /* ---------- Placeholder project art. Swap each draw() for a real image later. ---------- */
 const text = (g, s, x, y, size, font = DISPLAY, color = '#fff', align = 'center') => {
@@ -259,43 +267,24 @@ const art = {
     g.save(); g.translate(w / 2, 0);
     outlined('HELLO', h * .12, w * .12, '#fff'); outlined('MY NAME IS', h * .22, w * .12, '#fff');
     g.save(); g.translate(0, h * .52); g.rotate(-.12); g.transform(1, 0, -.12, 1, 0, 0); outlined('CYRILL', 0, w * .27, '#ffe600'); g.restore();
-    outlined("AND I'M A", h * .74, w * .07, '#fff'); outlined('YOUR ROLE HERE', h * .85, w * .12, '#fff');
+    outlined("AND I'M AN ASPIRING", h * .74, w * .065, '#fff'); outlined('SOFTWARE / AI ENGINEER', h * .85, w * .082, '#fff');
     g.restore();
   },
 };
 const COPY = 'Placeholder case study. Replace this with the problem, what you did, and what changed because of it.';
-// Placeholder story pictures. Swap each draw() for a real photo later.
-const story = (name, sky, draw) => ({ name, draw(g, w, h) { const l = g.createLinearGradient(0, 0, 0, h); sky.forEach((c, i) => l.addColorStop(i / (sky.length - 1), c)); g.fillStyle = l; g.fillRect(0, 0, w, h); draw(g, w, h); } });
-const STORIES = [
-  story('Winter 24', ['#120b09', '#2c1610', '#3a1d14'], (g, w, h) => {
-    g.fillStyle = '#0b0705'; g.beginPath(); g.moveTo(0, h * .22); g.lineTo(w / 2, h * .03); g.lineTo(w, h * .22); g.lineTo(w, 0); g.lineTo(0, 0); g.fill();
-    const cx = w * .27, cy = h * .56, r = h * .22;
-    circle(g, cx, cy, r * 1.25, '#1b0f0a'); circle(g, cx, cy, r, '#f4f0e6');
-    g.strokeStyle = '#111'; g.lineWidth = r * .12; g.beginPath(); g.moveTo(cx - r * .75, cy); g.quadraticCurveTo(cx, cy - r * .6, cx + r * .75, cy + r * .2); g.moveTo(cx - r * .5, cy + r * .35); g.quadraticCurveTo(cx, cy, cx + r * .5, cy - r * .3); g.stroke();
-    g.fillStyle = '#4a2015'; g.fillRect(w * .52, h * .3, w * .38, h * .7);
-    g.fillStyle = '#9fb4b8'; g.fillRect(w * .56, h * .36, w * .3, h * .64); g.fillStyle = '#4a2015'; g.fillRect(w * .56, h * .62, w * .3, h * .015);
-    g.fillStyle = '#c47a4e'; g.beginPath(); g.moveTo(w * .56, h * .5); g.lineTo(w * .8, h * .4); g.lineTo(w * .56, h * .8); g.fill();
-  }),
-  story('Summer 25', ['#274a3a', '#2f6a51', '#7c5230'], (g, w, h) => {
-    g.fillStyle = '#6b3f20'; g.fillRect(0, h * .55, w, h * .45);
-    g.save(); g.translate(w * .32, h * .3); g.rotate(-.35); g.fillStyle = '#e6d9b8'; g.beginPath(); g.ellipse(0, 0, h * .3, h * .17, 0, 0, 7); g.fill(); g.fillStyle = '#1c1c1c'; g.fillRect(h * .2, -h * .025, h * .95, h * .05); g.restore();
-    g.save(); g.translate(w * .28, h * .76); g.rotate(-.12); g.fillStyle = '#bcbcbc'; g.fillRect(-w * .17, -h * .12, w * .34, h * .24); g.fillStyle = '#262626'; g.fillRect(-w * .14, -h * .09, w * .28, h * .18); g.restore();
-    box(g, w * .58, h * .78, w * .28, h * .1, 6, '#111'); circle(g, w * .72, h * .78, h * .07, '#2a2a2a');
-  }),
-  story('Night Shift', ['#0d0204', '#2a0508', '#100204'], (g, w, h) => {
-    circle(g, w * .64, h * .13, w * .3, '#d3561d');
-    g.fillStyle = '#3d090d'; g.fillRect(w * .08, h * .34, w * .84, h * .3);
-    [.2, .42, .64].forEach(x => { g.fillStyle = '#ff3b30'; g.fillRect(w * x, h * .42, w * .12, h * .1); });
-    g.fillStyle = '#060101'; g.fillRect(0, h * .72, w, h * .28);
-    g.strokeStyle = '#7d1218'; g.lineWidth = 3; [.3, .5, .7].forEach(x => { g.beginPath(); g.moveTo(w * x, h * .72); g.lineTo(w * (x + .08), h * .96); g.stroke(); });
-  }),
-  story('Dawn Run', ['#f4b37b', '#b96f88', '#22375e'], (g, w, h) => {
-    circle(g, w * .5, h * .44, w * .18, '#ffe2a8');
-    g.fillStyle = '#16243f'; g.fillRect(0, h * .55, w, h * .45);
-    g.fillStyle = '#ffd08a'; for (let i = 0; i < 9; i++) g.fillRect(w * (.34 + (i % 3) * .05), h * (.58 + i * .04), w * (.32 - i * .02), h * .008);
-    g.fillStyle = '#0a1224'; g.beginPath(); g.moveTo(0, h * .55); g.lineTo(w * .26, h * .47); g.lineTo(w * .42, h * .55); g.fill();
-  }),
-];
+// focus says where to look when a photo is cropped to fit: 0 is its top, 1 its bottom.
+const photoStory = (name, src, focus = .5) => {
+  const pic = new Image();
+  pic.onload = () => { stories.bmp = stories.bigBmp = null; STORIES.forEach(n => { n.bmp = null; }); dirty = true; };
+  pic.src = src;
+  return { name, draw(g, w, h) {
+    g.fillStyle = '#14284b'; g.fillRect(0, 0, w, h);
+    if (!pic.naturalWidth) return;
+    const k = Math.max(w / pic.naturalWidth, h / pic.naturalHeight), dw = pic.naturalWidth * k, dh = pic.naturalHeight * k;
+    g.drawImage(pic, (w - dw) / 2, (h - dh) * focus, dw, dh);
+  } };
+};
+const STORIES = [photoStory('Sunset', 'photos/sunset.jpg', .64), photoStory('La Union at night', 'photos/moon.jpg', .28), photoStory('Baguio', 'photos/garden.jpg', .55), photoStory('La Union', 'photos/hut.jpg', .55), photoStory('Shiro', 'photos/tabby-chin.jpg', .2), photoStory('Hoshi', 'photos/hoshi-sleep.jpg', .2)];
 // wide and tall place each card on the one page as [x, y, scale], for landscape and portrait screens.
 const hero = { hero: true, t: 'Cyrill', c: 'Hello', w: 430, h: 500, depth: 1, wide: [0, -10, 1.25], tall: [0, -340, 1.15], draw: art.hero };
 const stories = { stories: true, t: 'Stories', c: 'Stories', w: 340, h: 225, depth: .9, wide: [520, 152, 1.335], tall: [197, 362, 1.1], draw: STORIES[0].draw };
@@ -305,7 +294,7 @@ const projects = [
   { t: 'Soft Club', c: 'Illustration', w: 340, h: 225, depth: .9, wide: [-520, 152, 1.335], tall: [-197, 362, 1.1], draw: art.soft },
 ];
 const items = [hero, stories, ...projects];
-const TICKER = 'THIS IS YOUR NEWS TICKER. SAY WHAT YOU ARE UP TO, OR WHAT YOU WON.     ';
+const TICKER = 'OPEN TO WORK. FINDING COMPANIES TO INTERN AT.     ';
 const PAGE = { wide: { w: 1640, h: 1040 }, tall: { w: 830, h: 1700 } }; // world size that must fit the screen, with room for the tube's curved edge
 
 /* ---------- Scene state ---------- */
@@ -661,7 +650,7 @@ function drawProject() {
   text(g, c.t.toUpperCase(), W / 2, y, titleSize, DISPLAY, '#ffe600'); y += titleSize * .85;
   const bodySize = Math.max(17, Math.min(21, cw * .03));
   g.font = `${bodySize}px ${BODY}`;
-  for (const line of wrapLines(COPY, Math.min(cw, 620))) { text(g, line, W / 2, y, bodySize, BODY, '#d8d6cf'); y += bodySize * 1.5; }
+  for (const line of wrapLines(c.copy || COPY, Math.min(cw, 620))) { text(g, line, W / 2, y, bodySize, BODY, '#d8d6cf'); y += bodySize * 1.5; }
   y += 30;
   g.drawImage(c.detailBmp, x, y, cw, detailH); y += detailH + 44;
   text(g, 'End of case study', W / 2, y, 22, MONO, '#8b8a85'); y += 80;
@@ -1205,13 +1194,15 @@ function openProject(c, viaKeyboard = false, passedGate = false) {
   view = { c, p: 0, scroll: 0, target: 0, max: 0, viaKeyboard };
   hover = null; focusCard = null; glitch = reduced ? 0 : 1; dirty = true;
   syncBack();
-  live.textContent = `${c.t}, ${c.c}. ${COPY}`;
+  live.textContent = `${c.t}, ${c.c}. ${c.copy || COPY}`;
+  linksBox.replaceChildren(...(c.links || []).map(([label, href]) => { const a = document.createElement('a'); a.href = href; a.target = '_blank'; a.rel = 'noopener'; a.textContent = label; return a; }));
+  linksBox.hidden = !c.links;
   crt.style.cursor = 'grab';
   keyboardFocus(backBtn);
 }
 function closeProject() {
   const c = view.c, viaKeyboard = view.viaKeyboard;
-  view = null; glitch = reduced ? 0 : 1; dirty = true;
+  view = null; glitch = reduced ? 0 : 1; dirty = true; linksBox.hidden = true;
   syncBack(); live.textContent = ''; backBtn.hidden = noRoom;
   if (viaKeyboard) navButtons.get(c).focus();
 }

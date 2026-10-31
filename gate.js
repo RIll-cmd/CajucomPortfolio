@@ -614,7 +614,15 @@ const gateShown = p => (p < .3 ? p * 1.6 : p < .55 ? .48 + (p - .3) * .3 : p < .
 function drawGate(now) {
   let t = now - gate.at;
   if (gate.phase === 'build') {
-    if (gateBuilder) { const r = gateBuilder.next(); if (r.done) gateBuilder = null; }
+    if (gateBuilder) {
+      let r;
+      try { r = gateBuilder.next(); }
+      catch (e) { // out of memory, most likely. The page behind the door works without the world, so don't leave them on the loader
+        console.error(e); gateBuilder = null;
+        const { c, viaKeyboard } = gate; closeGate(); openWorks(c, viaKeyboard); drawWorks(now); return;
+      }
+      if (r.done) gateBuilder = null;
+    }
     g.fillStyle = '#f4f4f1'; g.fillRect(0, 0, W, H);
     drawGateLoader(gateBuilt * gate.buildSpan, gateSmooth(t / 300), true);
     if (gateWorld && !gateBuilder) { gate.phase = 'load'; gate.at = now; }
