@@ -262,11 +262,11 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     assert.ok(pill, 'the Solo filter can be clicked');
     await page.mouse.click(...pill);
     assert.ok(await onCount() < allCount, 'Solo hides the thesis');
-    assert.ok(await page.evaluate(() => WORKS_WORDS.items.filter(i => i.src).every(i => i.pic.naturalWidth > 0)), 'the project screenshots load');
     await settle();
     await page.screenshot({ path: `${name}-k-filter.png` });
     await page.keyboard.press('ArrowLeft');
     assert.strictEqual(await onCount(), allCount, 'left goes back to All');
+    assert.ok(await page.evaluate(() => WORKS_WORDS.items.every(i => i.topics.length && i.c === i.topics.join(' · '))), 'every project lists its topics');
     assert.strictEqual(await page.evaluate(() => works.pages.length), allCount + 4, 'one screen for each project, plus four');
     // A project opens from its frame, and back returns to the page, not the board.
     await page.evaluate(i => worksJump(i), await pageOf('work')); await settle();
@@ -277,8 +277,14 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     await page.mouse.click(...frame);
     assert.strictEqual(await page.evaluate(() => view && view.c.t), first, 'a project opens');
     assert.ok(await page.evaluate(() => !linksBox.hidden && linksBox.querySelector('a').href.includes('github.com/RIll-cmd/')), 'the project links to its repo');
+    await page.waitForFunction(() => view.c.shots.every(shot => shot.pics.length && shot.pics.every(pic => pic.naturalWidth > 0)), null, { timeout: 60000 });
     await page.waitForTimeout(800);
     await page.screenshot({ path: `${name}-p-case.png` });
+    assert.ok(await page.evaluate(() => view.max > H), 'the gallery and features make the page scroll');
+    await page.evaluate(() => { view.scroll = view.target = view.max * .3; });
+    await page.waitForTimeout(800);
+    await page.screenshot({ path: `${name}-q-features.png` });
+    await page.evaluate(() => { view.scroll = view.target = 0; });
     await page.click('#back');
     assert.strictEqual(await page.evaluate(() => [!!works, view].join()), 'true,', 'back returns to the works page');
     assert.strictEqual(await page.evaluate(() => linksBox.hidden), true, 'the links leave with the project');
@@ -377,6 +383,14 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
       await page.screenshot({ path: `${name}-5-inside.png` });
     }
 
+    // The dialogs fit their width, whatever the screen, and More about me leaves out the controls.
+    for (const id of ['about', 'contact']) {
+      assert.deepStrictEqual(await page.evaluate(i => { const d = $('#' + i); d.showModal(); const r = [d.scrollWidth > d.clientWidth, d.getBoundingClientRect().right > innerWidth]; return r; }, id), [false, false], `#${id} has no sideways scroll`);
+      await page.screenshot({ path: `${name}-r-${id}.png` });
+      await page.evaluate(i => $('#' + i).close(), id);
+    }
+    assert.strictEqual(await page.evaluate(() => { worksAbout(); const hidden = getComputedStyle($('.keys')).display; $('#about').close(); return hidden; }), 'none', 'More about me hides the controls');
+    await page.waitForFunction(() => !$('#about').classList.contains('no-keys'), null, { timeout: 5000 }); // the close event fires a moment later
     // Stickers open dialogs, and Escape closes the dialog only.
     await page.click('#btn-talk');
     await page.waitForTimeout(150);

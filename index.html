@@ -75,8 +75,8 @@ body:not(.inside) #ui { display: none; }
 #links[hidden] { display: none; }
 #links a { background: #000; color: var(--paper); border: 2px solid var(--paper); border-radius: 6px; padding: 11px 14px; min-height: 44px; box-sizing: border-box; font: 400 18px/1.2 var(--mono); white-space: nowrap; text-decoration: none; }
 #links a:hover { background: var(--paper); color: #000; }
-dialog .socials { display: flex; flex-wrap: wrap; gap: 8px 18px; }
-dialog .socials a { color: var(--yellow); padding: 6px 0; }
+@media (max-width: 600px) { #links { max-width: calc(100% - 186px); gap: 6px; } #links a { padding: 11px 9px; font-size: 16px; } }
+dialog .socials { display: flex; flex-wrap: wrap; gap: 8px; max-width: none; }
 @media (max-width: 600px), (max-height: 480px) { #back { min-height: 44px; padding: 7px 11px; font-size: 18px; } } /* still a full finger target, but no bigger than the cards around it */
 @media (max-height: 480px) { #back { top: calc(10px + env(safe-area-inset-top, 0px)); } } /* clears the top card on a sideways phone */
 * { -webkit-tap-highlight-color: transparent; }
@@ -84,20 +84,27 @@ canvas { -webkit-touch-callout: none; -webkit-user-select: none; user-select: no
 .sticker, #back, #room3d { touch-action: manipulation; }
 
 dialog {
-  width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); box-sizing: border-box; padding: 0 clamp(18px, 4vw, 34px) 26px; border: 0; border-radius: 14px; overflow: auto;
-  background: #0b0b0b; color: var(--paper);
+  width: min(600px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); box-sizing: border-box; padding: clamp(20px, 4vw, 32px); overflow: hidden auto;
+  background: #14284b radial-gradient(circle at 85% 8%, #27527a, transparent 62%); color: #f4ecd8;
+  border: 2px solid #f4ecd8; border-radius: 18px; box-shadow: 0 0 0 5px #14284b, 0 0 0 6px rgba(244,236,216,.55), 0 18px 60px rgba(5,12,30,.7);
 }
-dialog::backdrop { background: rgba(0,0,0,.82); }
-.tape { margin: 18px -40px 22px; padding: 7px 40px; transform: rotate(-1.2deg); background: var(--yellow); color: #000; font: 400 clamp(20px, 4vw, 28px)/1 var(--display); text-transform: uppercase; letter-spacing: .03em; }
-dialog p { margin: 0 0 14px; max-width: 58ch; font-size: 16px; line-height: 1.5; color: #d8d6cf; }
-dialog .address { font: 400 28px/1.1 var(--mono); user-select: all; overflow-wrap: anywhere; color: var(--yellow); }
+dialog::backdrop { background: rgba(6,12,28,.8); }
+dialog .tape { margin: 0 0 16px; font: 400 clamp(38px, 7vw, 56px)/1.1 "Kaushan Script", Righteous, cursive; color: #ff8a5c; text-shadow: 2px 3px 0 #0b1730; transform: rotate(-1.5deg); transform-origin: left center; overflow-wrap: anywhere; }
+dialog p { margin: 0 0 14px; max-width: 58ch; font: 600 15px/1.6 Poppins, "Segoe UI", sans-serif; color: #f4ecd8; }
+dialog .address { font: 400 clamp(19px, 4.6vw, 26px)/1.2 Righteous, "Segoe UI", sans-serif; user-select: all; overflow-wrap: anywhere; color: #3fc1b0; }
+dialog .topics { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 6px; padding: 0; list-style: none; }
+dialog .topics li { padding: 5px 13px; border-radius: 99px; background: #3fc1b0; color: #0b2e2a; font: 400 14px/1.2 Righteous, "Segoe UI", sans-serif; }
 .keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px 22px; margin: 20px 0 0; }
+.no-keys .keys { display: none; }
 .keys div { min-width: 0; }
-.keys dt { font: 400 20px/1.1 var(--display); color: var(--yellow); text-transform: uppercase; letter-spacing: .03em; }
-.keys dd { margin: 3px 0 0; font-size: 14px; line-height: 1.35; color: #d8d6cf; }
+.keys dt { font: 400 17px/1.15 Righteous, "Segoe UI", sans-serif; color: #3fc1b0; }
+.keys dd { margin: 3px 0 0; font: 600 13px/1.4 Poppins, "Segoe UI", sans-serif; color: #f4ecd8; }
 dialog .row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
-dialog button { font: 600 15px/1 var(--body); padding: 11px 16px; border: 2px solid var(--yellow); border-radius: 8px; background: var(--yellow); color: #000; cursor: pointer; }
-dialog button.ghost { background: none; color: var(--yellow); }
+dialog button, dialog .socials a { display: inline-flex; align-items: center; min-height: 44px; box-sizing: border-box; padding: 9px 18px; border: 1.5px solid #f4ecd8; border-radius: 99px; background: #1b3c63; color: #f4ecd8; font: 400 15px/1 Righteous, "Segoe UI", sans-serif; text-decoration: none; cursor: pointer; }
+dialog button:hover, dialog .socials a:hover { background: #27527a; }
+dialog button:not(.ghost) { background: #3fc1b0; color: #14284b; }
+dialog button:not(.ghost):hover { background: #62d8c8; }
+dialog :focus-visible { outline-color: #ff8a5c; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -171,6 +178,7 @@ dialog button.ghost { background: none; color: var(--yellow); }
 <dialog id="about" aria-labelledby="about-title">
   <h2 id="about-title" class="tape">Cyrill Gerard P. Cajucom</h2>
   <p>Aspiring software and AI engineer from San Miguel, Bulacan. I build my own tools solo, from orchestrating AI coding agents to computer vision on the desk. On my thesis, Wake&amp;Brake, I was the main debugger and researcher, and handled the hardware and the alert algorithms. I'm open to work and looking for companies to intern at.</p>
+  <ul class="topics" aria-label="What I work with"><li>AI</li><li>Orchestration</li><li>Computer Vision</li><li>Full-stack</li><li>Hardware</li></ul>
   <dl class="keys">
     <div><dt>Click</dt><dd>Look closer, click again to open</dd></div>
     <div><dt>Wheel</dt><dd>Zoom in on the screen nearest your mouse</dd></div>
@@ -639,20 +647,39 @@ function wrapLines(s, maxW) {
 function drawProject() {
   const { c, p } = view, cw = Math.min(W - 64, Math.max(560, W * .5)), x = (W - cw) / 2, heroH = Math.round(cw * .62), detailH = Math.round(cw * .46);
   const ease = 1 - (1 - p) ** 3;
-  c.heroBmp = c.heroBmp || bitmap(c, cw, heroH);
-  c.detailBmp = c.detailBmp || bitmap(c, cw, detailH, 1.7);
+  if (!c.shots) { c.heroBmp = c.heroBmp || bitmap(c, cw, heroH); c.detailBmp = c.detailBmp || bitmap(c, cw, detailH, 1.7); }
   g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
   g.globalAlpha = ease;
   let y = Math.max(72, H * .1) - view.scroll + (1 - ease) * 50;
   text(g, c.c, W / 2, y, Math.max(20, 24 * sc), BODY, '#f4f1e8'); y += 44;
   const titleSize = Math.min(cw * .13, 88);
-  g.drawImage(c.heroBmp, x, y, cw, heroH); y += heroH + 30 + titleSize / 2;
+  if (c.shots) { g.save(); g.beginPath(); g.roundRect(x, y, cw, heroH, 16); g.clip(); worksReel(g, c, x, y, cw, heroH, performance.now()); g.restore(); }
+  else g.drawImage(c.heroBmp, x, y, cw, heroH);
+  y += heroH + 30 + titleSize / 2;
   text(g, c.t.toUpperCase(), W / 2, y, titleSize, DISPLAY, '#ffe600'); y += titleSize * .85;
   const bodySize = Math.max(17, Math.min(21, cw * .03));
   g.font = `${bodySize}px ${BODY}`;
   for (const line of wrapLines(c.copy || COPY, Math.min(cw, 620))) { text(g, line, W / 2, y, bodySize, BODY, '#d8d6cf'); y += bodySize * 1.5; }
   y += 30;
-  g.drawImage(c.detailBmp, x, y, cw, detailH); y += detailH + 44;
+  if (c.features) {
+    const width = Math.min(cw, 620), left = (W - width) / 2, indent = bodySize * 1.2;
+    g.font = `${bodySize}px ${BODY}`;
+    for (const feature of c.features) {
+      g.fillStyle = '#ffe600'; g.fillRect(left, y - bodySize * .2, bodySize * .4, bodySize * .4);
+      for (const line of wrapLines(feature, width - indent)) { text(g, line, left + indent, y, bodySize, BODY, '#f4f1e8', 'left'); y += bodySize * 1.42; }
+      y += bodySize * .5;
+    }
+    y += 30;
+  }
+  if (c.shots) { // every screenshot, with what it shows
+    const caption = Math.max(15, bodySize * .85);
+    for (const shot of c.shots) {
+      const pic = shot.pics[0]; if (!pic || !pic.naturalWidth) continue;
+      const tall = cw * pic.naturalHeight / pic.naturalWidth;
+      if (y + tall > 0 && y < H) { g.save(); g.beginPath(); g.roundRect(x, y, cw, tall, 12); g.clip(); g.drawImage(pic, x, y, cw, tall); g.restore(); }
+      y += tall + caption * 1.2; text(g, shot.cap, W / 2, y, caption, BODY, '#d8d6cf'); y += caption * 2.6;
+    }
+  } else { g.drawImage(c.detailBmp, x, y, cw, detailH); y += detailH + 44; }
   text(g, 'End of case study', W / 2, y, 22, MONO, '#8b8a85'); y += 80;
   g.globalAlpha = 1;
   view.max = Math.max(0, y + view.scroll - H);
@@ -1072,6 +1099,7 @@ function step(dt) {
   }
   if (view) {
     if (view.p < 1) { view.p = reduced ? 1 : Math.min(1, view.p + .05); dirty = true; }
+    if (view.c.shots && !reduced) dirty = true; // the reel keeps playing
     const d = view.target - view.scroll;
     if (Math.abs(d) > .3) { view.scroll += d * .18; dirty = true; }
   }
@@ -1194,7 +1222,7 @@ function openProject(c, viaKeyboard = false, passedGate = false) {
   view = { c, p: 0, scroll: 0, target: 0, max: 0, viaKeyboard };
   hover = null; focusCard = null; glitch = reduced ? 0 : 1; dirty = true;
   syncBack();
-  live.textContent = `${c.t}, ${c.c}. ${c.copy || COPY}`;
+  live.textContent = `${c.t}, ${c.c}. ${c.copy || COPY} ${(c.features || []).join('. ')}`;
   linksBox.replaceChildren(...(c.links || []).map(([label, href]) => { const a = document.createElement('a'); a.href = href; a.target = '_blank'; a.rel = 'noopener'; a.textContent = label; return a; }));
   linksBox.hidden = !c.links;
   crt.style.cursor = 'grab';
