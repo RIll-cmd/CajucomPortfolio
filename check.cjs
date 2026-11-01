@@ -37,7 +37,7 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     return;
   }
 
-  const PHONE = { deviceScaleFactor: 3, hasTouch: true, isMobile: true };
+  const PHONE = { deviceScaleFactor: 3, hasTouch: true, isMobile: true }, TOMES = 8;
   for (const [name, viewport, device] of [['desktop', { width: 1440, height: 860 }], ['phone', { width: 390, height: 844 }, PHONE], ['small', { width: 360, height: 640 }, PHONE], ['landscape', { width: 844, height: 390 }, PHONE]]) {
     const context = await browser.newContext({ viewport, ...device });
     const page = await context.newPage();
@@ -130,7 +130,7 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
 
     // First click selects a card, the second opens it.
     const spot = await page.evaluate(() => {
-      for (let y = 40; y < H - 40; y += 20) for (let x = 40; x < W - 40; x += 20) { const c = hit(x, y); if (c && !c.hero && !c.stories && !c.portal && !c.notebook && document.elementFromPoint(x, y) === crt) return { x, y, t: c.t }; }
+      for (let y = 40; y < H - 40; y += 20) for (let x = 40; x < W - 40; x += 20) { const c = hit(x, y); if (c && c.tome && document.elementFromPoint(x, y) === crt) return { x, y, t: c.t }; }
     });
     assert.ok(spot, 'a project is on screen');
     await page.mouse.click(spot.x, spot.y);
@@ -139,7 +139,10 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     const centre = await page.evaluate(() => [...place(focus)]);
     await page.mouse.click(centre[0], centre[1]);
     await page.waitForTimeout(900);
-    assert.strictEqual(await page.evaluate(() => view && view.c.t), spot.t, 'second click opens');
+    assert.ok(await page.evaluate(() => !!tome), 'second click opens');
+    await page.evaluate(() => { closeTome(); openProject(projects[2], false, true); });
+    await page.waitForTimeout(600);
+    assert.strictEqual(await page.evaluate(() => view && view.c.t), spot.t, 'the plain page still opens where the book cannot be drawn');
     await page.screenshot({ path: `${name}-7-project.png` });
     await page.mouse.move(cx, cy); await page.mouse.wheel(0, 500);
     await page.waitForTimeout(500);
@@ -344,6 +347,33 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     assert.strictEqual(await page.evaluate(() => book.say && book.say.prop && book.say.prop.name), 'about', 'clicking a drawing makes it speak');
     await page.click('#back');
     assert.strictEqual(await page.evaluate(() => [book, gate, view, focus && focus.t].join()), ',,,Field Notes', 'back leaves the notebook for the selected card');
+
+    // Box 3: the book on the table. Every turn of the page is a chapter.
+    await page.evaluate(() => { clearFocus(); openTome(projects[2], false); });
+    await page.waitForFunction(() => tome && tome.phase === 'read' && !tome.from && !tome.turn, null, { timeout: 180000 });
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: `${name}-s-tome.png` });
+    const settled = n => page.waitForFunction(k => tome.at === k && !tome.turn, n, { timeout: 60000 });
+    await page.mouse.move(cx, cy); await page.mouse.wheel(0, 600); // the emulated phones divide this by their pixel ratio
+    await settled(1);
+    await page.keyboard.press('ArrowRight'); await settled(2);
+    await page.keyboard.press('ArrowLeft'); await settled(1);
+    await page.mouse.move(cx, cy); await page.mouse.down(); await page.mouse.move(cx - 120, cy, { steps: 3 }); await page.mouse.up();
+    await settled(2);
+    const nextButton = await page.evaluate(() => { for (let y = 10; y < H; y += 6) for (let x = 10; x < W; x += 6) { const h = tomeSpotAt(x, y); if (h && h.go === 3 && h.x !== undefined && document.elementFromPoint(x, y) === crt) return [x, y]; } return null; }); // through the tube's curve, as a real click goes
+    assert.ok(nextButton, 'the chapter button can be clicked');
+    await page.mouse.click(...nextButton); await settled(3);
+    await page.screenshot({ path: `${name}-t-tome-chapter.png` });
+    await page.keyboard.press('ArrowRight'); await settled(4);
+    assert.strictEqual(await page.evaluate(() => { const c = tomeWorld.chapters[3]; return [TOME_PAGES[4].ci, c.root.visible, c.foldAt].join(); }), '3,true,0', 'a page within a chapter stays in its world');
+    await page.keyboard.press('End'); await settled(TOMES - 1);
+    await page.keyboard.press('ArrowRight');
+    assert.strictEqual(await page.evaluate(() => [tome.at, !!tome.turn].join()), `${TOMES - 1},false`, 'the last page stays the last page');
+    assert.ok(await page.evaluate(() => { const l = tome.layout; return l.cardX >= 0 && l.cardX + l.cardW <= W && l.free.h > 60 && l.navY + l.navH <= H && l.cardY >= 0 && (l.short ? l.cardY + l.cardH <= H : l.cardY + l.cardH <= l.navY); }), 'the card, book and buttons fit the screen');
+    assert.ok(await page.evaluate(() => { const l = tome.layout; if (!l.short) return true; const a = l.navCx - l.navW / 2; return a >= l.cardX + l.cardW - 1; }), 'on a short screen the buttons sit beside the card');
+    assert.ok((await page.evaluate(() => live.textContent)).includes('Skills'), 'the chapter is read out');
+    await page.keyboard.press('Escape');
+    assert.strictEqual(await page.evaluate(() => [!!tome, view].join()), 'false,', 'Escape closes the book');
     assert.strictEqual(await page.evaluate(() => $('#btn-talk').hidden), false, 'stickers come back');
     await page.evaluate(() => clearFocus());
     await page.waitForFunction(() => !focus, null, { timeout: 60000 });

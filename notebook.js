@@ -4,9 +4,9 @@ const BOOK_WORDS = {
   worlds: ['Home', 'Food', 'Up late', 'Places', 'My people'],
   hello: ['i am Hoshi. this is the notebook. no projects allowed.', 'is it dinner yet?', 'one more episode. then bed.', 'i do not like water. we go anyway.', 'everyone here is nicer than me.'],
   welcome: ["Hi, it's me!", "Cyrill's notebook", 'p.s. Hoshi the cat is in charge'],
-  about: ['About me', 'From San Miguel, Bulacan. Aspiring software and AI engineer.', 'No projects past this page.'],
-  food: ['Things I eat', "Forever meal: Yabu's Tornado Omelette Curry", 'Comfort food: McDo fries', 'Will never eat: Ginisang Ampalaya'],
-  late: ['Up too late', 'On repeat: Mr. Incorrect', 'Now playing: ZZZ', 'Still watching: Loki'],
+  about: ['About me', 'From San Miguel, Bulacan, now in Manila. Aspiring software and AI engineer.', 'No projects past this page.'],
+  food: ['Things I eat', 'Forever meal: Katsu', 'Comfort food: French fries', 'Will never eat: Ginisang Ampalaya'],
+  late: ['Up too late', 'On repeat: Mr. Incorrect', 'Favorite game: Black Myth: Wukong', 'Favorite show: Loki'],
   places: ['Places', 'Been to: Hong Kong, Baguio, La Union', 'Going next: Japan', 'Took my breath away: La Union', 'Most memories: Baguio'],
   people: ['My people', 'My family, and the two cats who run the house.'],
   hi: ['Say hi!', 'cyrillgerardc@gmail.com', 'I reply faster than this cat.'],
@@ -395,9 +395,9 @@ function* buildBook() {
   for (const [u, z, n] of [[5.5, 5.6, 'grass'], [11.5, 3.6, 'flower'], [13, 5.8, 'grass'], [21, 5.7, 'flower'], [22.5, 5.9, 'grass'], [30, 5.2, 'grass'], [33, 3.5, 'flower']]) put(n, at(0, u), z, { shadow: n === 'grass' ? false : undefined });
   // Food
   put('lights', at(1, 7), 1.2, { hang: true, y: 10.5, sway: .015 }); put('lights', at(1, 22), 1.2, { hang: true, y: 10.1, sway: .015 });
-  put('food', at(1, 7.6), .1, { y: 3.9, flat: true, tilt: .025, say: 'curry first. questions later.' });
+  put('food', at(1, 7.6), .1, { y: 3.9, flat: true, tilt: .025, say: 'katsu first. questions later.' });
   put('egg', at(1, 1.8), .9, { hang: true, y: 9.8, say: 'i am the sun of this page.' });
-  put('stall', at(1, 16), 1.4, { say: 'Yabu, if you are asking.' }); put('bowl', at(1, 26), 2.8, { say: 'Tornado Omelette Curry. hot. wait.' });
+  put('stall', at(1, 16), 1.4, { say: 'my usual spot.' }); put('bowl', at(1, 26), 2.8, { say: 'hot. wait.' });
   put('boba', at(1, 12.6), 4.4, { say: 'half sugar. no regrets.' }); put('dumplings', at(1, 4), 4.4, { say: 'there were six.' }); put('icecream', at(1, 31.5), 4, { say: 'mine.' }); put('photo-food', at(1, 32), .1, { y: 4.6, flat: true, tilt: -.05, say: 'coffee, by the sea.' });
   // Up late
   put('night', at(2, 18), .05, { noPop: true, shadow: false, order: -2, y: -.2 });
@@ -405,7 +405,7 @@ function* buildBook() {
   for (const [u, y] of [[1.5, 10.4], [11.5, 11.4], [20.5, 11], [28, 10.4], [33.5, 11.6]]) put('star', at(2, u), 1, { hang: true, y, sway: .08 });
   put('late', at(2, 10.2), .1, { y: 3.9, flat: true, tilt: -.025, say: 'what keeps me up.' });
   put('desk', at(2, 21), 1.6, { say: 'This is where the hours go.' }); put('guitar', at(2, 3), 2.6, { say: 'mostly for decoration.' }); put('record', at(2, 15.6), .1, { y: 4.4, flat: true, tilt: .08, say: 'Mr. Incorrect. on repeat.' }); put('cassette', at(2, 28.5), .1, { y: 5.4, flat: true, tilt: -.06, say: 'still Mr. Incorrect.' });
-  put('controller', at(2, 30), 3.6, { y: 1.8, stick: true, say: 'ZZZ. one more run.', bob: .06 }); put('photo-late', at(2, 33.5), .1, { y: 3.2, flat: true, tilt: .05, say: 'a late night worth keeping.' });
+  put('controller', at(2, 30), 3.6, { y: 1.8, stick: true, say: 'Wukong. one more try.', bob: .06 }); put('photo-late', at(2, 33.5), .1, { y: 3.2, flat: true, tilt: .05, say: 'a late night worth keeping.' });
   // Places
   put('sun', at(3, 23), .9, { hang: true, y: 11.3, say: 'too cool to set.' }); put('cloud', at(3, 7), .8, { hang: true, y: 10.8 }); put('gull', at(3, 12), 1.5, { hang: true, y: 8.9, sway: .1, say: 'mine? mine? mine?' }); put('gull', at(3, 16), 1.2, { hang: true, y: 10, sway: .1 });
   put('places', at(3, 8.5), .1, { y: 3.9, flat: true, tilt: .03, say: 'where I have been.' });

@@ -4,7 +4,7 @@ const WORKS_WORDS = {
   name: 'Cyrill',
   role: 'ASPIRING SOFTWARE / AI ENGINEER',
   aboutTitle: 'About me',
-  about: 'Aspiring software and AI engineer from San Miguel, Bulacan. I build AI agent tools, computer vision apps and hardware alerts. Open to work, and looking for companies to intern at.',
+  about: 'Aspiring software and AI engineer from San Miguel, Bulacan, now based in Manila. I build AI agent tools, computer vision apps and hardware alerts. Open to work, and looking for companies to intern at.',
   aboutMore: 'More about me',
   highlight: { tools: 0, vision: 1, hardware: 2 }, // words that sit on a coloured chip, by which colour
   portfolioLabel: 'PORTFOLIO',
