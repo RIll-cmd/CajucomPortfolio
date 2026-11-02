@@ -4,7 +4,7 @@
 const TOME_WORDS = {
   cover: 'Chronicle',
   chapters: [
-    { name: 'Summary', lead: 'Cyrill Gerard P. Cajucom. Backend AI engineering intern at FlyRank AI and BS Computer Science student at FEU Institute of Technology, specializing in software engineering.', pills: ['Open to work', 'Based in Manila', 'From San Miguel, Bulacan'] },
+    { name: 'Summary', lead: "Backend AI engineering intern at FlyRank AI, building AI capstones, automations and agent skills. BS Computer Science at FEU Institute of Technology, Dean's Lister. 16 certifications, from SAP and PMI to seven Claude Academy courses.", pills: ['1 internship', '16 certifications', "Dean's Lister", 'Open to work'] },
     { name: 'Experience', entries: [{ h: 'Backend AI Engineering Intern', m: 'FlyRank AI, Sep 2026 to present. Manila, remote', d: 'AI capstones, automation and data-heavy apps, agent skills with documentation, and token and cost analysis.' }] },
     { name: 'Education', entries: [
       { h: 'BS Computer Science, Software Engineering', m: 'FEU Institute of Technology, 2023 to 2027', d: "Dean's Lister, 3rd Term, S.Y. 2024-2025" },
@@ -14,22 +14,22 @@ const TOME_WORDS = {
     ] },
     { name: 'Certifications', parts: [
       { label: 'Professional', entries: [
-        { h: 'SAP Certified: Positioning the Autonomous Enterprise', m: 'SAP, Jul 2026' },
-        { h: 'PMI Project Management Ready', m: 'Project Management Institute, Mar 2026' },
-        { h: 'IT Specialist: Python', m: 'Pearson, Jul 2025' },
+        { h: 'SAP Certified: Positioning the Autonomous Enterprise', m: 'SAP, Jul 2026', img: 'sap-autonomous-enterprise', big: true, verify: ['Verify', 'https://www.credly.com/badges/a696c2ef-883c-4170-b81c-14a42787a711'] },
+        { h: 'PMI Project Management Ready', m: 'Project Management Institute, Mar 2026', img: 'pmi-project-management-ready', big: true, d: 'Certiport code wYUQy-2FaU', verify: ['Verify', 'https://verify.certiport.com'] },
+        { h: 'IT Specialist: Python', m: 'Pearson, Jul 2025', img: 'it-specialist-python', big: true, d: 'Certiport code bhzD-s4NA', verify: ['Verify', 'https://verify.certiport.com'] },
       ] },
-      { label: 'Claude Academy', lead: 'Seven courses from Anthropic, September 2026.', pills: ['Building effective human-agent teams', 'Claude Platform 101', 'Claude Code 101', 'Claude Code in action', 'AI capabilities and limitations', 'Introduction to Model Context Protocol', 'Model Context Protocol: Advanced topics'] },
+      { label: 'Claude Academy', lead: 'Seven courses from Anthropic, September 2026.', badges: [['Building effective human-agent teams', 'claude-human-agent-teams'], ['Claude Platform 101', 'claude-platform-101'], ['Claude Code 101', 'claude-code-101'], ['Claude Code in action', 'claude-code-in-action'], ['AI capabilities and limitations', 'claude-ai-capabilities', true, 'https://academy.claude.com/verify/00df819cd8f793402ac8a521e5a422d3'], ['Introduction to Model Context Protocol', 'claude-mcp-intro'], ['Model Context Protocol: Advanced topics', 'claude-mcp-advanced']] },
       { label: 'Courses', dense: true, entries: [
-        { h: 'AI Agent Fundamentals', m: 'Databricks, Sep 2026' },
-        { h: 'Intro to Deep Learning', m: 'Kaggle, Sep 2026' },
-        { h: 'MATLAB Onramp', m: 'MathWorks, Nov 2025' },
+        { h: 'AI Agent Fundamentals', m: 'Databricks, Sep 2026', img: 'databricks-ai-agents', big: true },
+        { h: 'Intro to Deep Learning', m: 'Kaggle, Sep 2026', img: 'kaggle-deep-learning', big: false },
+        { h: 'MATLAB Onramp', m: 'MathWorks, Nov 2025', img: 'matlab-onramp', big: true },
         { h: 'CCNA: Introduction to Networks', m: 'Cisco, Sep 2025' },
-        { h: 'Android Development with Kotlin', m: 'LinkedIn Learning, Nov 2025' },
-        { h: 'Agile Software Development', m: 'LinkedIn Learning, Nov 2025' },
+        { h: 'Android Development with Kotlin', m: 'LinkedIn Learning, Nov 2025', img: 'linkedin-kotlin', big: false },
+        { h: 'Agile Software Development', m: 'LinkedIn Learning, Nov 2025', img: 'linkedin-agile', big: false },
       ] },
     ] },
     { name: 'Awards', entries: [
-      { h: "Dean's Bronze Certificate", m: 'FEU Institute of Technology, Jul 2025', d: '3rd Term, S.Y. 2024-2025' },
+      { h: "Dean's Bronze Certificate", m: 'FEU Institute of Technology, Jul 2025', d: '3rd Term, S.Y. 2024-2025', img: 'feu-deans-bronze' },
       { h: 'Academic Excellence Award', m: 'San Miguel National High School, Jun 2022', d: 'With High Honors, Grade 11 STEM' },
     ] },
     { name: 'Skills', entries: [
@@ -39,8 +39,18 @@ const TOME_WORDS = {
     ] },
   ],
 };
+// Which projects show each skill (from what each project's page says it uses); a skill with none isn't a link.
+const TOME_SKILL_PROJECTS = { Python: ['Ascend Core', 'Ascend Vision', 'Wake&Brake'], JavaScript: ['Ascend Hub', 'Ascend Core'], 'C++': ['Wake&Brake'], 'AI Agents': ['Ascend Hub', 'Ascend Vision'], Orchestration: ['Ascend Hub'], LLMs: ['Ascend Hub', 'Ascend Core', 'Ascend Vision'], 'Prompt Engineering': ['Ascend Vision'], 'Computer Vision': ['Ascend Vision', 'Wake&Brake'], React: ['Ascend Hub', 'Ascend Core'], 'Full-stack': ['Ascend Core'], APIs: ['Ascend Core', 'Wake&Brake'] };
+const TOME_CERTS = {}; // the certificate pictures, loaded when the book first opens
+function tomeCertsLoad() {
+  for (const c of TOME_WORDS.chapters) for (const part of c.parts || [c]) for (const name of [...(part.entries || []).map(e => e.img), ...(part.badges || []).map(b => b[1])]) {
+    if (!name || TOME_CERTS[name]) continue;
+    const im = TOME_CERTS[name] = new Image(); im.onload = () => { if (tome && tome.layout) { tome.layout.cards = []; dirty = true; } }; im.src = `photos/certs/${name}.jpg`;
+  }
+}
 const TOME_PAGES = TOME_WORDS.chapters.flatMap((c, ci) => (c.parts || [c]).map(p => ({ ...p, name: c.name, ci })));
 const TOME_NUM = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+const TOME_FIT_H = 17, TOME_FIT_TALL = 17.5, TOME_LIFT = 2.2; // how much height the camera keeps for the book and its pop-ups, and how far above the pages it aims
 const TOME_PW = 10, TOME_PD = 13, TOME_TOP = 1.5, TOME_GUT = .42; // page width, page depth, height of the page block, how far the pages dip at the spine
 const TOME_TURN_MS = reduced ? 1 : 1150, TOME_OPEN_MS = reduced ? 1 : 1900, TOME_FOLD_MS = 320, TOME_POP_MS = 640, TOME_TILT = new THREE.Vector3(0, .64, .77).normalize(), TOME_AIM = new THREE.Vector3(0, 2.6, 1.3);
 const TOME_INK = '#3b2a1c', TOME_GOLD = '#c9a24a', TOME_SERIF = 'Cinzel, Georgia, serif', TOME_SANS = 'Poppins, "Segoe UI", sans-serif';
@@ -389,6 +399,7 @@ function tomeSnapshot() { const s = document.createElement('canvas'); s.width = 
 function openTome(c, viaKeyboard) {
   if (!renderer || !renderer.capabilities.isWebGL2) { openProject(c, viaKeyboard, true); return; } // can't draw the book here, so show the plain page
   if (!tomeWorld && !tomeBuilder) tomeBuilder = buildTome();
+  tomeCertsLoad();
   const now = performance.now();
   tome = { c, viaKeyboard, phase: tomeWorld ? 'open' : 'build', at: 0, shown: 0, turn: null, queue: null, openAt: now, from: tomeSnapshot(), fadeAt: now, hot: [], rect: null, hover: null, wheel: 0, wheelAt: 0, dragX: 0, moved: false, cardK: 0, cardOutAt: 0, layout: null, shadow: true };
   if (tomeWorld) tomeReset();
@@ -410,7 +421,7 @@ function closeTome() {
   $('#btn-about').hidden = $('#btn-talk').hidden = false;
   live.textContent = ''; crt.style.cursor = 'grab';
 }
-function tomeSay(i) { const c = TOME_PAGES[i]; live.textContent = [`Chapter ${c.ci + 1}, ${c.name}${c.label ? `, ${c.label}` : ''}.`, c.lead, ...(c.pills || []), ...(c.entries || []).map(e => [e.h, e.m, e.d, ...(e.pills || [])].filter(Boolean).join(', '))].filter(Boolean).join(' '); }
+function tomeSay(i) { const c = TOME_PAGES[i]; live.textContent = [`Chapter ${c.ci + 1}, ${c.name}${c.label ? `, ${c.label}` : ''}.`, c.lead, ...(c.pills || []), ...(c.badges || []).map(b => b[0]), ...(c.entries || []).map(e => [e.h, e.m, e.d, ...(e.pills || [])].filter(Boolean).join(', '))].filter(Boolean).join(' '); }
 function tomeGo(i) {
   if (!tome || tome.phase !== 'read') { if (tome && tome.phase === 'open') tome.openAt = -1e9; return; }
   if (i < 0 || i >= TOME_PAGES.length) return;
@@ -449,8 +460,13 @@ function tomeSpotAt(clientX, clientY) {
   const r = tome.rect; if (r && x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h && !(tome.cardBox && x > tome.cardBox.x && x < tome.cardBox.x + tome.cardBox.w && y > tome.cardBox.y && y < tome.cardBox.y + tome.cardBox.h)) { const go = tome.at + (x > r.spine ? 1 : -1); if (go >= 0 && go < TOME_PAGES.length) return { go }; }
   return null;
 }
-const tomeClick = (x, y) => { if (tome.phase === 'open') { tome.openAt = -1e9; return; } const h = tomeSpotAt(x, y); if (h) tomeGo(h.go); };
-function tomeHover(x, y) { const h = tomeSpotAt(x, y); tome.hover = h; crt.style.cursor = h ? 'pointer' : 'grab'; }
+function tomeCardSpot(clientX, clientY) { // a button, picture or skill on the card under the pointer
+  const b = tome.cardBox, l = tome.layout; if (!b || !l || tome.phase !== 'read' || tome.turn) return null;
+  const [sx, sy] = toScene(clientX, clientY), cx = sx - b.x, cy = sy - b.y;
+  return (l.hot[tome.shown] || []).find(h => cx > h.x && cx < h.x + h.w && cy > h.y && cy < h.y + h.h) || null;
+}
+const tomeClick = (x, y) => { if (tome.phase === 'open') { tome.openAt = -1e9; return; } const c = tomeCardSpot(x, y); if (c) { c.act(x, y); return; } const h = tomeSpotAt(x, y); if (h) tomeGo(h.go); };
+function tomeHover(x, y) { const c = tomeCardSpot(x, y), h = c ? null : tomeSpotAt(x, y); tome.hover = h; crt.style.cursor = c || h ? 'pointer' : 'grab'; }
 function tomeKey(e) {
   const go = { ArrowRight: tome.at + 1, ArrowDown: tome.at + 1, PageDown: tome.at + 1, ArrowLeft: tome.at - 1, ArrowUp: tome.at - 1, PageUp: tome.at - 1, Home: 0, End: TOME_PAGES.length - 1 }[e.key];
   if (go !== undefined) { e.preventDefault(); tomeGo(go); }
@@ -458,14 +474,37 @@ function tomeKey(e) {
 
 /* ---------- The parchment card ---------- */
 function tomeWrap(x, text, maxW) { const lines = []; let line = ''; for (const w of text.split(' ')) { const n = line ? `${line} ${w}` : w; if (x.measureText(n).width > maxW && line) { lines.push(line); line = w; } else line = n; } lines.push(line); return lines; }
-function tomePills(x, pills, cx, y, maxW, size, align) { // returns the bottom edge
+function tomePills(x, pills, cx, y, maxW, size, align, { hot, link } = {}) { // returns the bottom edge. link(p) gives a pill's click, which draws it as a button
   x.font = `600 ${size}px ${TOME_SANS}`; const gap = size * .5, h = size * 1.9, rows = [[]]; let used = 0;
-  for (const p of pills) { const w = x.measureText(p).width + size * 1.5; if (used + w > maxW && rows[rows.length - 1].length) { rows.push([]); used = 0; } rows[rows.length - 1].push([p, w]); used += w + gap; }
-  rows.forEach((row, r) => { const total = row.reduce((s, [, w]) => s + w + gap, -gap); let px = align === 'center' ? cx - total / 2 : cx; for (const [p, w] of row) { x.fillStyle = '#4a2f1b'; x.beginPath(); x.roundRect(px, y + r * (h + gap), w, h, h / 2); x.fill(); x.fillStyle = '#f3e4bf'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(p, px + w / 2, y + r * (h + gap) + h / 2 + 1); px += w + gap; } });
+  const label = p => link && link(p) ? `${p}  ↗` : p;
+  for (const p of pills) { const w = x.measureText(label(p)).width + size * 1.5; if (used + w > maxW && rows[rows.length - 1].length) { rows.push([]); used = 0; } rows[rows.length - 1].push([p, w]); used += w + gap; }
+  rows.forEach((row, r) => { const total = row.reduce((s, [, w]) => s + w + gap, -gap); let px = align === 'center' ? cx - total / 2 : cx; for (const [p, w] of row) {
+    const act = link && link(p), on = act && tome && tome.skill === p, py = y + r * (h + gap);
+    x.fillStyle = on ? TOME_GOLD : '#4a2f1b'; x.beginPath(); x.roundRect(px, py, w, h, h / 2); x.fill();
+    if (act && !on) { x.strokeStyle = TOME_GOLD; x.lineWidth = 2; x.stroke(); }
+    x.fillStyle = on ? '#2a1a0e' : '#f3e4bf'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(label(p), px + w / 2, py + h / 2 + 1);
+    if (act && hot) hot.push({ x: px, y: py, w, h, act, label: p }); px += w + gap; } });
   return y + rows.length * (h + gap) - gap;
 }
+function tomeThumb(x, name, bx, by, bw, bh) { // a certificate's picture, framed in gold, cropped to fill
+  x.save(); x.fillStyle = 'rgba(60,35,15,.25)'; x.fillRect(bx + 2, by + 3, bw, bh); x.fillStyle = '#fbf3dc'; x.fillRect(bx, by, bw, bh);
+  const im = TOME_CERTS[name]; if (im && im.naturalWidth) { const k = Math.max(bw / im.naturalWidth, bh / im.naturalHeight); x.beginPath(); x.rect(bx + 2, by + 2, bw - 4, bh - 4); x.clip(); x.drawImage(im, bx + (bw - im.naturalWidth * k) / 2, by + (bh - im.naturalHeight * k) / 2, im.naturalWidth * k, im.naturalHeight * k); }
+  x.restore(); x.strokeStyle = TOME_GOLD; x.lineWidth = 1.5; x.strokeRect(bx + .5, by + .5, bw - 1, bh - 1);
+}
+function tomeButton(x, text, bx, by, size, hot, act) { // a small outlined button on the card
+  x.font = `700 ${size}px ${TOME_SANS}`; const w = x.measureText(text).width + size * 1.6, h = size * 1.9;
+  x.fillStyle = '#fbf3dc'; x.beginPath(); x.roundRect(bx, by, w, h, h / 2); x.fill(); x.strokeStyle = '#7a5a2e'; x.lineWidth = 1.5; x.stroke();
+  x.fillStyle = '#4a2f1b'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(text, bx + w / 2, by + h / 2 + 1);
+  if (hot) hot.push({ x: bx, y: by, w, h, act, label: text }); return by + h;
+}
+const tomeOpen = url => window.open(url, '_blank', 'noopener');
+function tomeJump(title) { // from a skill to its project's page, in the Projects box
+  const it = WORKS_WORDS.items.find(t => t.t === title); if (!it) return;
+  closeTome(); openWorks(projects[0]); worksOpenItem(it);
+}
 function tomeInk(x, i, w, l) { // draws chapter i's words. Returns the height they took, so the same code measures and paints
-  const c = TOME_PAGES[i], s = l.size, pad = s * 1.35; let y = pad * 1.05;
+  const c = TOME_PAGES[i], s = l.size, pad = s * 1.35, hot = x === l.measure ? null : (l.hot[i] = []); let y = pad * 1.05;
+  const zoom = (name, cap) => (cx, cy) => zoomPicture(`photos/certs/${name}.jpg`, cap, cx, cy);
   x.textAlign = 'center'; x.textBaseline = 'middle';
   x.fillStyle = '#8b6c3c'; x.font = `600 ${s * .86}px ${TOME_SERIF}`; x.fillText(`CHAPTER ${TOME_NUM[c.ci]}${c.label ? `  ·  ${c.label.toUpperCase()}` : ''}`, w / 2, y); y += s * 1.5;
   x.fillStyle = TOME_INK; x.font = `700 ${s * 2.05}px ${TOME_SERIF}`; x.fillText(c.name, w / 2, y); y += s * 1.5;
@@ -473,19 +512,42 @@ function tomeInk(x, i, w, l) { // draws chapter i's words. Returns the height th
   x.fillStyle = TOME_GOLD; x.beginPath(); x.moveTo(w / 2, y - s * .34); x.lineTo(w / 2 + s * .34, y); x.lineTo(w / 2, y + s * .34); x.lineTo(w / 2 - s * .34, y); x.fill(); y += s * 1.1;
   if (c.lead) { x.fillStyle = TOME_INK; x.font = `600 ${s}px ${TOME_SANS}`; x.textAlign = 'center'; for (const line of tomeWrap(x, c.lead, Math.min(w - pad * 2, s * 40))) { x.fillText(line, w / 2, y + s * .6); y += s * 1.45; } y += s * .55; }
   if (c.pills) y = tomePills(x, c.pills, w / 2, y, w - pad * 2, s * .88, 'center') + s * .3;
+  if (c.badges) { // each badge's picture with its name under it; the ones big enough open large, and one can be verified
+    const fit = Math.max(2, Math.min(c.badges.length, Math.floor((w - pad * 2 + s) / (s * 7.2)))), per = Math.ceil(c.badges.length / Math.ceil(c.badges.length / fit)), gap = s * .8, bw = (w - pad * 2 - gap * (per - 1)) / per, bh = bw / 1.45;
+    let rowTop = y, bottom = y;
+    c.badges.forEach(([name, img, big, url], n) => {
+      const col = n % per; if (n && !col) rowTop = bottom + s * .7; const inRow = Math.min(per, c.badges.length - (n - col)), bx = (w - (inRow * bw + (inRow - 1) * gap)) / 2 + col * (bw + gap); let by = rowTop; // each row centred
+      tomeThumb(x, img, bx, by, bw, bh); if (big && hot) hot.push({ x: bx, y: by, w: bw, h: bh, act: zoom(img, name), label: name }); by += bh + s * .55;
+      x.fillStyle = TOME_INK; x.font = `600 ${s * .74}px ${TOME_SANS}`; x.textAlign = 'center'; x.textBaseline = 'middle'; for (const line of tomeWrap(x, name, bw)) { x.fillText(line, bx + bw / 2, by + s * .4); by += s * 1.02; }
+      if (url) by = tomeButton(x, 'Verify ↗', bx + bw / 2 - s * 3, by + s * .2, s * .7, hot, () => tomeOpen(url));
+      bottom = Math.max(bottom, by);
+    });
+    y = bottom + s * .3;
+  }
   if (c.entries) {
     const cols = Math.min(l.cols === 1 ? (c.dense ? 2 : 1) : c.entries.length === 4 ? 2 : l.cols, c.entries.length), gap = s * 1.6, colW = (w - pad * 2 - gap * (cols - 1)) / cols; let rowTop = y, bottom = y;
     c.entries.forEach((e, n) => {
-      const col = n % cols, cx = pad + col * (colW + gap); if (n && !col) rowTop = bottom + s * .75; let ey = rowTop;
+      const col = n % cols; if (n && !col) rowTop = bottom + s * .75; let ey = rowTop;
+      // a certificate's picture sits to the left of its words
+      const tw = e.img ? Math.min(colW * .34, s * 5.4) : 0, th = tw / 1.42, cx = pad + col * (colW + gap) + (tw ? tw + s * .7 : 0), tx = colW - (tw ? tw + s * .7 : 0);
+      if (e.img) { const bx = pad + col * (colW + gap); tomeThumb(x, e.img, bx, rowTop + s * .2, tw, th); if (e.big && hot) hot.push({ x: bx, y: rowTop + s * .2, w: tw, h: th, act: zoom(e.img, `${e.h}. ${e.m || ''}`), label: e.h }); }
       x.textAlign = 'left'; x.textBaseline = 'middle';
-      x.fillStyle = TOME_INK; x.font = `700 ${s * 1.1}px ${TOME_SERIF}`; for (const line of tomeWrap(x, e.h, colW)) { x.fillText(line, cx, ey + s * .68); ey += s * 1.38; }
-      if (e.m) { x.fillStyle = '#7a5a2e'; x.font = `600 ${s * .86}px ${TOME_SANS}`; for (const line of tomeWrap(x, e.m, colW)) { x.fillText(line, cx, ey + s * .6); ey += s * 1.26; } }
-      if (e.d) { x.fillStyle = TOME_INK; x.font = `600 ${s * .86}px ${TOME_SANS}`; for (const line of tomeWrap(x, e.d, colW)) { x.fillText(line, cx, ey + s * .6); ey += s * 1.26; } }
-      if (e.pills) ey = tomePills(x, e.pills, cx, ey + s * .3, colW, s * .8, 'left');
-      bottom = Math.max(bottom, ey);
+      x.fillStyle = TOME_INK; x.font = `700 ${s * 1.1}px ${TOME_SERIF}`; for (const line of tomeWrap(x, e.h, tx)) { x.fillText(line, cx, ey + s * .68); ey += s * 1.38; }
+      if (e.m) { x.fillStyle = '#7a5a2e'; x.font = `600 ${s * .86}px ${TOME_SANS}`; for (const line of tomeWrap(x, e.m, tx)) { x.fillText(line, cx, ey + s * .6); ey += s * 1.26; } }
+      if (e.d) { x.fillStyle = TOME_INK; x.font = `600 ${s * .86}px ${TOME_SANS}`; for (const line of tomeWrap(x, e.d, tx)) { x.fillText(line, cx, ey + s * .6); ey += s * 1.26; } }
+      if (e.verify) ey = tomeButton(x, `${e.verify[0]}  ↗`, cx, ey + s * .35, s * .72, hot, () => tomeOpen(e.verify[1]));
+      const skill = c.name === 'Skills' ? p => TOME_SKILL_PROJECTS[p] && (() => { tome.skill = tome.skill === p ? null : p; if (tome.layout) tome.layout.cards[i] = null; dirty = true; }) : null;
+      if (e.pills) ey = tomePills(x, e.pills, cx, ey + s * .3, tx, s * .8, 'left', { hot, link: skill });
+      bottom = Math.max(bottom, ey, e.img ? rowTop + s * .2 + th : 0);
     });
     y = bottom;
   }
+  // A skill picked: the projects that show it, each one a way there.
+  if (c.name === 'Skills' && x !== l.measure && tome && tome.skill && TOME_SKILL_PROJECTS[tome.skill]) {
+    y += s * .9; x.fillStyle = '#7a5a2e'; x.font = `600 ${s * .86}px ${TOME_SANS}`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(`${tome.skill} shows up in:`, w / 2, y); y += s * .9;
+    y = tomePills(x, TOME_SKILL_PROJECTS[tome.skill], w / 2, y, w - pad * 2, s * .86, 'center', { hot, link: t => () => tomeJump(t) });
+  } else if (c.name === 'Skills') y += s * .9 + s * 1.9 * 1.5; // room kept for that line, so the card doesn't jump
+  if (c.name === 'Skills' && x !== l.measure && !(tome && tome.skill)) { x.fillStyle = '#7a5a2e'; x.font = `italic 600 ${s * .78}px ${TOME_SANS}`; x.textAlign = 'center'; x.fillText('Click a skill with ↗ to see the projects that use it.', w / 2, y - s * 1.9); }
   return y + pad * .8;
 }
 function tomeCard(i, l) {
@@ -502,13 +564,13 @@ function tomeLayout() {
   if (tome.layout && tome.layout.W === W && tome.layout.H === H && tome.layout.pr === pr) return tome.layout;
   const tall = W / H < 1, short = !tall && H < 520, compact = tall || W < 860, measure = document.createElement('canvas').getContext('2d');
   const cardW = tall ? W * .88 : short ? W * .4 : Math.min(W * .56, 800), cols = tall || short ? 1 : 3;
-  const l = { W, H, pr, tall, short, compact, measure, cardW, cols, cards: [], size: Math.max(11.5, Math.min(15.5, tall ? W / 27 : short ? H / 27 : Math.min(W / 72, H / 46))) };
+  const l = { W, H, pr, tall, short, compact, measure, cardW, cols, cards: [], hot: [], size: Math.max(11.5, Math.min(15.5, tall ? W / 27 : short ? H / 27 : Math.min(W / 72, H / 46))) };
   const room = H * (tall ? .5 : short ? .84 : .46); // the fullest page sets the size, so the book stays put between pages
   for (;;) { l.cardH = Math.max(...TOME_PAGES.map((c, i) => tomeInk(measure, i, cardW, l))); if (l.cardH <= room || l.size <= 9.5) break; l.size -= .5; }
   l.navH = compact ? 44 : 40; l.navY = short ? H * .955 - l.navH : H * (tall ? .945 : .95) - l.navH;
   l.navCx = W / 2; l.navW = Math.min(W * .86, 340);
   if (short) { l.cardX = W * .055; l.cardY = (H - l.cardH) / 2; l.free = { x: W * .46, y: H * .1, w: W * .5, h: l.navY - H * .1 }; l.navCx = l.free.x + l.free.w / 2; l.navW = Math.min(l.free.w, 300); }
-  else { l.cardX = (W - cardW) / 2; l.cardY = H * (tall ? .085 : .075); const top = l.cardY + l.cardH - (tall ? 0 : H * .05); l.free = { x: W * .04, y: top, w: W * .92, h: l.navY - top }; }
+  else { l.cardX = (W - cardW) / 2; l.cardY = H * (tall ? .085 : .075); const top = l.cardY + l.cardH + H * .015; l.free = { x: W * .04, y: top, w: W * .92, h: l.navY - top }; } // starts below the card, so nothing of the scene hides under it
   return tome.layout = l;
 }
 function tomeNav(l, now) {
@@ -595,12 +657,19 @@ function drawTome(now) {
     w.moving.motes.rotation.y = time * .012; w.moving.motes.position.y = Math.sin(time * .2) * .8;
     w.moving.ring.material.opacity = .28 + Math.sin(time * .8) * .07;
   }
-  // Camera: fit the book into what the card and the chapter buttons leave free.
-  const tan = Math.tan(w.cam.fov / 2 * Math.PI / 180), f = l.free, fw = f.w / W, fh = f.h / H, aspect = W / H;
-  const fit = Math.max(l.tall ? 25 / (2 * tan * aspect * fw) : 26.5 / (2 * tan * aspect * fw), (l.tall ? 13.5 : 12.7) / (2 * tan * fh));
+  // Camera: fit the book into what this page's card and the chapter buttons leave free. A short card leaves more room, so the
+  // camera comes in and the book grows into it; a long one pushes the book back. The space eases between pages, so the camera glides.
+  let f = l.free;
+  if (!l.short) {
+    const card = tomeCard(tome.phase === 'read' ? tome.shown : 0, l).height / pr, goal = l.cardY + card + H * .02, dt = Math.min(.1, (now - (tome.fitAt || now)) / 1000); tome.fitAt = now;
+    tome.fitTop = tome.fitTop == null || reduced ? goal : tome.fitTop + (goal - tome.fitTop) * (1 - Math.exp(-dt * 2.6));
+    f = { x: l.free.x, y: tome.fitTop, w: l.free.w, h: l.navY - tome.fitTop };
+  }
+  const tan = Math.tan(w.cam.fov / 2 * Math.PI / 180), fw = f.w / W, fh = f.h / H, aspect = W / H;
+  const fit = Math.max(l.tall ? 21.5 / (2 * tan * aspect * fw) : 23.5 / (2 * tan * aspect * fw), (l.tall ? TOME_FIT_TALL : TOME_FIT_H) / (2 * tan * fh)); // the width counts the book and its nearest candles; the height counts the pop-ups standing up off the far pages
   const dist = fit * (1 - (1 - opened) * .2);
   w.scene.fog.near = dist * 1.05; w.scene.fog.far = dist * 2.6;
-  const aim = TOME_AIM.clone(); aim.x += (1 - opened) * TOME_PW / 2;
+  const aim = TOME_AIM.clone(); aim.x += (1 - opened) * TOME_PW / 2; aim.y += opened * TOME_LIFT; // aimed a little above the pages, at the middle of the pop-ups as well as the book
   w.cam.position.copy(aim).addScaledVector(TOME_TILT, dist); w.cam.position.x += look.x * dist * .00022; w.cam.position.y -= look.y * dist * .00016;
   w.cam.up.set(0, 1, 0); w.cam.lookAt(aim); w.cam.aspect = aspect;
   const keep = 1 - opened; w.cam.setViewOffset(W, H, -((f.x + f.w / 2) / W - .5) * W * (1 - keep), -((f.y + f.h / 2) / H - .5) * H * (1 - keep), W, H); w.cam.updateMatrixWorld();

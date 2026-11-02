@@ -1,7 +1,7 @@
 <title>Cyrill Cajucom Portfolio</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@600;700&family=Kaushan+Script&family=Poppins:wght@600&family=Righteous&family=Gaegu:wght@400;700&family=Instrument+Sans:wght@400;600&family=Lilita+One&family=VT323&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@600;700&family=Kaushan+Script&family=Playfair+Display:ital,wght@0,400;0,500;1,500&family=JetBrains+Mono:wght@500;600&family=Poppins:wght@600;700&family=Righteous&family=Gaegu:wght@400;700&family=Instrument+Sans:wght@400;600&family=Lilita+One&family=VT323&display=swap">
 <style>
 /* Layout: a real-time 3D room you fly out of, then a full-screen CRT you pan around in. */
 :root {
@@ -54,7 +54,7 @@ body { background: #050404; color: var(--paper); font-family: var(--body); }
 @keyframes fade-in { from { opacity: 0; } }
 #ui { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
 body:not(.inside) #ui { display: none; }
-#ui button { pointer-events: auto; }
+#ui button, #ui a { pointer-events: auto; } /* the project links too, not just buttons */
 .sticker { position: absolute; padding: 0; background: none; border: 0; cursor: pointer; filter: drop-shadow(0 6px 8px rgba(0,0,0,.6)); transition: transform .18s; }
 .sticker svg { display: block; width: 100%; height: auto; }
 #btn-about:hover { animation: wobble .5s ease-in-out; }
@@ -73,8 +73,8 @@ body:not(.inside) #ui { display: none; }
 #back:hover { background: var(--paper); color: #000; }
 #links { position: absolute; left: calc(clamp(16px, 4vw, 64px) + env(safe-area-inset-left, 0px)); top: calc(clamp(16px, 4vw, 48px) + env(safe-area-inset-top, 0px)); display: flex; flex-wrap: wrap; gap: 8px; max-width: calc(100% - 220px); }
 #links[hidden] { display: none; }
-#links a { background: #000; color: var(--paper); border: 2px solid var(--paper); border-radius: 6px; padding: 11px 14px; min-height: 44px; box-sizing: border-box; font: 400 18px/1.2 var(--mono); white-space: nowrap; text-decoration: none; }
-#links a:hover { background: var(--paper); color: #000; }
+#links a { background: rgba(27,60,99,.85); color: #f4ecd8; border: 1.5px solid #f4ecd8; border-radius: 99px; padding: 11px 18px; min-height: 44px; box-sizing: border-box; font: 400 16px/1.2 Righteous, "Segoe UI", sans-serif; white-space: nowrap; text-decoration: none; box-shadow: 0 0 18px rgba(63,193,176,.35); } /* in the Projects box's colours */
+#links a:hover { background: #3fc1b0; color: #14284b; }
 @media (max-width: 600px) { #links { max-width: calc(100% - 186px); gap: 6px; } #links a { padding: 11px 9px; font-size: 16px; } }
 dialog .socials { display: flex; flex-wrap: wrap; gap: 8px; max-width: none; }
 @media (max-width: 600px), (max-height: 480px) { #back { min-height: 44px; padding: 7px 11px; font-size: 18px; } } /* still a full finger target, but no bigger than the cards around it */
@@ -89,6 +89,13 @@ dialog {
   border: 2px solid #f4ecd8; border-radius: 18px; box-shadow: 0 0 0 5px #14284b, 0 0 0 6px rgba(244,236,216,.55), 0 18px 60px rgba(5,12,30,.7);
 }
 dialog::backdrop { background: rgba(6,12,28,.8); }
+#zoom { position: fixed; inset: 0; margin: auto; width: fit-content; height: fit-content; max-width: none; max-height: none; padding: 0; overflow: visible; background: none; border: 0; box-shadow: none; text-align: center; cursor: zoom-out; outline: none; } /* centred on the screen */
+#zoom:focus, #zoom:focus-visible { outline: none; }
+#zoom::backdrop { background: rgba(6,10,24,.86); backdrop-filter: blur(6px); }
+#zoom img { display: block; max-width: min(92vw, 1400px); max-height: 82vh; border-radius: 14px; border: 3px solid #f4ecd8; box-shadow: 0 0 0 6px rgba(20,40,75,.6), 0 24px 70px rgba(0,0,0,.7); animation: zoom-in .38s cubic-bezier(.2,.9,.25,1.15) both; transform-origin: var(--from, 50% 50%); }
+#zoom p { margin: 14px 0 0; font: 400 18px/1.3 Righteous, "Segoe UI", sans-serif; color: #f4ecd8; }
+#zoom p:empty { display: none; }
+@keyframes zoom-in { from { transform: scale(.25); opacity: 0; } }
 dialog .tape { margin: 0 0 16px; font: 400 clamp(38px, 7vw, 56px)/1.1 "Kaushan Script", Righteous, cursive; color: #ff8a5c; text-shadow: 2px 3px 0 #0b1730; transform: rotate(-1.5deg); transform-origin: left center; overflow-wrap: anywhere; }
 dialog p { margin: 0 0 14px; max-width: 58ch; font: 600 15px/1.6 Poppins, "Segoe UI", sans-serif; color: #f4ecd8; }
 dialog .address { font: 400 clamp(19px, 4.6vw, 26px)/1.2 Righteous, "Segoe UI", sans-serif; user-select: all; overflow-wrap: anywhere; color: #3fc1b0; }
@@ -175,6 +182,7 @@ dialog :focus-visible { outline-color: #ff8a5c; }
   <div class="sr-only" id="live" aria-live="polite"></div>
 </div>
 
+<dialog id="zoom" aria-label="Picture"><img alt=""><p></p></dialog>
 <dialog id="about" aria-labelledby="about-title">
   <h2 id="about-title" class="tape">Cyrill Gerard P. Cajucom</h2>
   <p>Aspiring software and AI engineer from San Miguel, Bulacan, now based in Manila. I build my own tools solo, from orchestrating AI coding agents to computer vision on the desk. On my thesis, Wake&amp;Brake, I was the main debugger and researcher, and handled the hardware and the alert algorithms. I'm open to work and looking for companies to intern at.</p>
@@ -197,7 +205,7 @@ dialog :focus-visible { outline-color: #ff8a5c; }
   <h2 id="contact-title" class="tape">Say hello</h2>
   <p>Open to work, and looking for companies to intern at.</p>
   <p class="address" id="address">cyrillgerardc@gmail.com</p>
-  <p class="socials"><a href="https://www.linkedin.com/in/cyrill-gerard-cajucom-25553933a/" target="_blank" rel="noopener">LinkedIn</a><a href="https://github.com/RIll-cmd" target="_blank" rel="noopener">GitHub</a><a href="https://www.facebook.com/cyrillgerardcajucom10" target="_blank" rel="noopener">Facebook</a><a href="https://discord.com/users/700210477288128593" target="_blank" rel="noopener">Discord</a></p>
+  <p class="socials"><a href="https://www.linkedin.com/in/cyrill-gerard-cajucom-25553933a/" target="_blank" rel="noopener">LinkedIn</a><a href="https://github.com/RIll-cmd" target="_blank" rel="noopener">GitHub</a><a href="https://www.facebook.com/cyrillgerardcajucom10" target="_blank" rel="noopener">Facebook</a><a href="https://discord.com/users/700210477288128593" target="_blank" rel="noopener">Discord</a><a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=cyrillgerardc@gmail.com" target="_blank" rel="noopener">Gmail</a></p>
   <div class="row"><button type="button" id="copy">Copy address</button><button type="button" class="ghost" data-close>Close</button></div>
 </dialog>
 
@@ -225,58 +233,155 @@ function phone(g, x, y, w, h, bg, fg) {
   box(g, x + w * .12, y + h * .08, w * .4, h * .04, 3, fg);
   for (let i = 0; i < 5; i++) { box(g, x + w * .12, y + h * (.2 + i * .15), w * .76, h * .1, 4, fg); }
 }
-const art = {
-  orbit(g, w, h) {
-    const l = g.createLinearGradient(0, 0, 0, h); l.addColorStop(0, '#160c52'); l.addColorStop(.6, '#c62e6d'); l.addColorStop(1, '#ffb347');
-    g.fillStyle = l; g.fillRect(0, 0, w, h);
-    circle(g, w * .72, h * .36, h * .24, '#ffd9a0');
-    g.strokeStyle = '#fff'; g.lineWidth = 3; g.beginPath(); g.ellipse(w * .72, h * .36, h * .42, h * .08, -.35, 0, 7); g.stroke();
-    text(g, 'WORKS', w / 2, h * .72, h * .3);
-  },
-  field(g, w, h) { // a page from the notebook, with the cat who runs it
-    g.fillStyle = '#f5f2e8'; g.fillRect(0, 0, w, h);
-    g.strokeStyle = 'rgba(96,136,196,.55)'; g.lineWidth = Math.max(1, h * .006); for (let y = h * .09; y < h; y += h * .1) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
-    g.strokeStyle = 'rgba(226,84,92,.75)'; g.beginPath(); g.moveTo(w * .14, 0); g.lineTo(w * .14, h); g.stroke();
-    const cx = w * .55, cy = h * .55, r = h * .32;
-    g.lineWidth = h * .018; g.strokeStyle = '#26252b'; g.lineJoin = 'round';
-    for (const k of [-1, 1]) { g.fillStyle = '#f6c531'; g.beginPath(); g.moveTo(cx + k * r * .5, cy - r * .78); g.lineTo(cx + k * r * .8, cy - r * 1.24); g.lineTo(cx + k * r * 1.06, cy - r * .42); g.fill(); g.stroke(); }
-    g.fillStyle = '#f6c531'; g.beginPath(); g.ellipse(cx, cy, r * 1.17, r * 1.02, 0, 0, 7); g.fill(); g.stroke();
-    g.fillStyle = '#fff1c7'; g.beginPath(); g.ellipse(cx, cy + r * .46, r * .64, r * .42, 0, 0, 7); g.fill();
-    for (const k of [-1, 1]) {
-      const ex = cx + k * r * .47, ey = cy - r * .06;
-      g.fillStyle = '#e4851b'; g.beginPath(); g.arc(ex, ey, r * .335, 0, 7); g.fill(); g.stroke(); circle(g, ex, ey, r * .21, '#1c1720'); circle(g, ex - r * .08, ey - r * .1, r * .07, '#fff');
-      g.beginPath(); g.moveTo(ex - r * .36, ey - r * .27); g.lineTo(ex + r * .36, ey - r * .27); g.stroke();
+/* ---------- Pixel-art cards: each one is painted on a tiny grid, then blown up with hard edges ---------- */
+const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5]; // 4x4 ordered dither, for gradients made of whole pixels
+function pixelPainter(x) {
+  const p = {
+    px(a, b, c) { x.fillStyle = c; x.fillRect(a, b, 1, 1); },
+    rect(a, b, w, h, c) { x.fillStyle = c; x.fillRect(a, b, w, h); },
+    fill(test, c, x0 = 0, y0 = 0, x1 = x.canvas.width, y1 = x.canvas.height) { x.fillStyle = c; for (let b = Math.max(0, y0); b < y1; b++) for (let a = Math.max(0, x0); a < x1; a++) if (test(a + .5, b + .5)) x.fillRect(a, b, 1, 1); },
+    disc(cx, cy, r, c) { p.fill((a, b) => (a - cx) ** 2 + (b - cy) ** 2 <= r * r, c, Math.floor(cx - r), Math.floor(cy - r), Math.ceil(cx + r), Math.ceil(cy + r)); },
+    oval(cx, cy, rx, ry, c) { p.fill((a, b) => ((a - cx) / rx) ** 2 + ((b - cy) / ry) ** 2 <= 1, c, Math.floor(cx - rx), Math.floor(cy - ry), Math.ceil(cx + rx), Math.ceil(cy + ry)); },
+    line(a0, b0, a1, b1, c, t = 1) { const n = Math.max(Math.abs(a1 - a0), Math.abs(b1 - b0)) * 2 || 1; for (let i = 0; i <= n; i++) p.rect(Math.round(a0 + (a1 - a0) * i / n - (t - 1) / 2), Math.round(b0 + (b1 - b0) * i / n - (t - 1) / 2), t, t, c); },
+    bands(colors, y0, y1, x0 = 0, x1 = x.canvas.width) { // top-to-bottom gradient through colors, dithered
+      for (let b = y0; b < y1; b++) {
+        const t = (b - y0) / Math.max(1, y1 - y0 - 1) * (colors.length - 1), i = Math.min(colors.length - 2, Math.floor(t)), f = t - i;
+        for (let a = x0; a < x1; a++) p.px(a, b, BAYER[(b % 4) * 4 + a % 4] / 16 < f ? colors[i + 1] : colors[i]);
+      }
+    },
+    glow(cx, cy, r, c, strength = .6) { p.fill((a, b) => { const d = Math.hypot(a - cx, b - cy) / r; return d < 1 && BAYER[(Math.floor(b) % 4) * 4 + Math.floor(a) % 4] / 16 < (1 - d) * strength; }, c, Math.floor(cx - r), Math.floor(cy - r), Math.ceil(cx + r), Math.ceil(cy + r)); }, // dithered light
+    capsule(a0, b0, a1, b1, r, c) { // a rounded limb from one point to another, at any angle
+      const dx = a1 - a0, dy = b1 - b0, l2 = dx * dx + dy * dy || 1;
+      p.fill((a, b) => { const t = Math.max(0, Math.min(1, ((a - a0) * dx + (b - b0) * dy) / l2)); return (a - a0 - t * dx) ** 2 + (b - b0 - t * dy) ** 2 <= r * r; }, c, Math.floor(Math.min(a0, a1) - r), Math.floor(Math.min(b0, b1) - r), Math.ceil(Math.max(a0, a1) + r), Math.ceil(Math.max(b0, b1) + r));
+    },
+    // Shapes drawn twice: grown by a pixel in the outline colour, then filled. parts: ['r', x, y, w, h], ['d', cx, cy, r], ['o', cx, cy, rx, ry] or ['c', x0, y0, x1, y1, r].
+    shape(parts, c, outline) {
+      const draw = (grow, col) => parts.forEach(([k, a, b, w, h, r]) => k === 'r' ? p.rect(a - grow, b - grow, w + grow * 2, h + grow * 2, col) : k === 'd' ? p.disc(a, b, w + grow, col) : k === 'o' ? p.oval(a, b, w + grow, h + grow, col) : p.capsule(a, b, w, h, r + grow, col));
+      if (outline) draw(1, outline); draw(0, c);
+    },
+    poly(pts, c) { // any flat shape, by its corners
+      const xs = pts.map(q => q[0]), ys = pts.map(q => q[1]);
+      p.fill((a, b) => { let inside = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > b) !== (yj > b) && a < (xj - xi) * (b - yi) / (yj - yi) + xi) inside = !inside; } return inside; }, c, Math.floor(Math.min(...xs)), Math.floor(Math.min(...ys)), Math.ceil(Math.max(...xs)), Math.ceil(Math.max(...ys)));
+    },
+    sprite(rows, pal, a, b) { rows.forEach((row, j) => [...row].forEach((ch, i) => { if (pal[ch]) p.px(a + i, b + j, pal[ch]); })); },
+    twinkle(a, b, c, big) { p.px(a, b, '#fffbe6'); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) p.px(a + dx, b + dy, c); if (big) for (const [dx, dy] of [[2, 0], [-2, 0], [0, 2], [0, -2]]) p.px(a + dx, b + dy, c); },
+  };
+  return p;
+}
+const pixelCard = (gw, gh, title, paint, words) => {
+  let pic = null;
+  return (g, w, h) => {
+    if (!pic) { pic = document.createElement('canvas'); pic.width = gw; pic.height = gh; paint(pixelPainter(pic.getContext('2d')), gw, gh); }
+    g.imageSmoothingEnabled = false; g.drawImage(pic, 0, 0, w, h); g.imageSmoothingEnabled = true;
+    if (title) pixelWords(g, title, w * .05, h * .93, Math.min(h * .24, w * .92 / (title.length * .5)), w / gw, 'left');
+    if (words) words(g, w, h, w / gw);
+  };
+};
+// The tube's pixel font with a dark outline and a drop shadow, both sized from the letters so small words stay sharp.
+function pixelWords(g, s, x, y, size, u, align = 'center', ink = '#ffe600', dark = '#140a24') {
+  const d = Math.max(1.5, size / 15);
+  g.font = `${size}px ${MONO}`; g.textAlign = align; g.textBaseline = 'alphabetic'; g.fillStyle = dark;
+  for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [2, 2], [1, 2], [2, 1]]) g.fillText(s, x + dx * d, y + dy * d);
+  g.fillStyle = ink; g.fillText(s, x, y);
+}
+// The middle card: Cyrill's pixel picture of the résumé's hold screen (landscape), set into the tall card on its own sky, the name above.
+const posterCard = (src, words) => {
+  const pic = new Image();
+  pic.onload = () => { hero.bmp = hero.bigBmp = null; dirty = true; };
+  pic.src = src;
+  return (g, w, h) => {
+    const sky = g.createLinearGradient(0, 0, 0, h); sky.addColorStop(0, '#b9cddb'); sky.addColorStop(.45, '#cfe0ea'); sky.addColorStop(1, '#e2eff3');
+    g.fillStyle = sky; g.fillRect(0, 0, w, h);
+    if (pic.naturalWidth) {
+      const ph = w * pic.naturalHeight / pic.naturalWidth, y = h - ph - h * .04;
+      g.drawImage(pic, 0, y, w, ph);
+      const fade = g.createLinearGradient(0, y, 0, y + ph * .22); fade.addColorStop(0, '#c6d8e4'); fade.addColorStop(1, 'rgba(198,216,228,0)'); g.fillStyle = fade; g.fillRect(0, y, w, ph * .22); // its top melts into the sky above
+      const foot = g.createLinearGradient(0, y + ph * .85, 0, y + ph); foot.addColorStop(0, 'rgba(226,239,243,0)'); foot.addColorStop(1, '#e2eff3'); g.fillStyle = foot; g.fillRect(0, y + ph * .85, w, h - y - ph * .85);
     }
-    g.fillStyle = '#e77f85'; g.beginPath(); g.moveTo(cx - r * .11, cy + r * .14); g.lineTo(cx + r * .11, cy + r * .14); g.lineTo(cx, cy + r * .27); g.fill();
-    g.beginPath(); g.moveTo(cx - r * .25, cy + r * .46); g.quadraticCurveTo(cx - r * .1, cy + r * .3, cx, cy + r * .38); g.quadraticCurveTo(cx + r * .1, cy + r * .3, cx + r * .25, cy + r * .46); g.stroke();
+    words(g, w, h);
+  };
+};
+// Lumpy pixel cloud: a shade layer one pixel down, the body, then a lit rim on top.
+const pixelCloud = (p, lumps, body, shade, lit) => {
+  for (const [x, y, r] of lumps) p.disc(x, y + 1.2, r, shade);
+  for (const [x, y, r] of lumps) p.disc(x, y, r, body);
+  for (const [x, y, r] of lumps) p.disc(x - r * .25, y - r * .3, r * .55, lit);
+};
+// Where the closed book sits on its card: U runs across the cover from the spine, V down it from the top, T is its thickness.
+const BOOK = { O: [10, 24], L: 32, D: 24, T: 6, U: [1, -.5], V: [1, .5] };
+const bookAt = (du, dv, up) => [BOOK.O[0] + BOOK.U[0] * du + BOOK.V[0] * dv, BOOK.O[1] + BOOK.U[1] * du + BOOK.V[1] * dv - up];
+const pixelArt = {
+  works(p, w, h) { // a door in the sky at sunset, standing on the clouds
+    const cx = 52.5;
+    p.bands(['#1d0c45', '#3d1463', '#7a1f6e', '#c03a6a', '#ef6a56', '#ffa85c'], 0, h);
+    for (const [x, y] of [[5, 4], [23, 3], [34, 8], [72, 9], [79, 3], [9, 17], [80, 20]]) p.px(x, y, '#fff2c0');
+    p.twinkle(16, 10, '#ffe08a', true); p.twinkle(68, 5, '#ffe08a');
+    p.disc(cx, 24, 17, '#ff9b5e'); p.disc(cx, 24, 14, '#ffc874'); p.disc(cx, 24, 11, '#ffe2a0'); // the sun behind it
+    pixelCloud(p, [[6, 38, 5], [13, 36, 6], [21, 39, 4], [74, 39, 5], [80, 37, 6]], '#f6b6c4', '#c7708d', '#ffe3e8'); // far clouds
+    const arch = (hw, top, c) => { const spring = top + hw * 1.1; p.fill((a, b) => b < 45 && b >= top && Math.abs(a - cx) <= hw && (b >= spring || ((a - cx) / hw) ** 2 + ((b - spring) / (hw * 1.1)) ** 2 <= 1), c); };
+    arch(11, 9, '#2b145c'); arch(10, 10, '#e9b54a'); arch(8.6, 11.5, '#6a4bd0'); arch(7.4, 12.8, '#e9b54a'); arch(6.4, 14, '#fff1c4'); arch(5.6, 14.8, '#3a2391');
+    p.rect(cx - .5, 16, 1, 29, '#22125e'); // where the leaves meet
+    p.twinkle(cx - .5, 27, '#ffd463', true); p.px(cx - 3.5, 33, '#ffd463'); p.px(cx + 2.5, 33, '#ffd463'); // star and studs
+    p.rect(cx - .5, 4, 1, 4, '#e9b54a'); p.px(cx - .5, 3, '#fff1c4'); // the spire
+    p.rect(cx - 13.5, 45, 27, 2, '#e9b54a'); p.rect(cx - 15.5, 47, 31, 2, '#c58a2c'); p.rect(cx - 17.5, 49, 35, 1, '#8a5a24'); // steps
+    pixelCloud(p, [[4, 54, 7], [14, 52, 6], [25, 55, 6], [38, 54, 5], [50, 55, 6], [62, 52, 7], [74, 54, 6], [84, 52, 6]], '#fff1f3', '#e49ab0', '#ffffff'); // the cloud bank it stands on
   },
-  tome(g, w, h) { // an open book on a wooden table, by candlelight
-    g.fillStyle = '#5f3923'; g.fillRect(0, 0, w, h);
-    g.strokeStyle = 'rgba(25,12,5,.75)'; g.lineWidth = Math.max(1, h * .008); for (let i = 1; i < 5; i++) { g.beginPath(); g.moveTo(0, h * i / 5); g.lineTo(w, h * i / 5); g.stroke(); }
-    const glow = g.createRadialGradient(w * .84, h * .24, 0, w * .84, h * .24, h * .62); glow.addColorStop(0, 'rgba(255,190,100,.75)'); glow.addColorStop(1, 'rgba(255,190,100,0)'); g.fillStyle = glow; g.fillRect(0, 0, w, h);
-    box(g, w * .82, h * .22, w * .04, h * .3, 2, '#efe5cc'); g.fillStyle = '#ffd486'; g.beginPath(); g.ellipse(w * .84, h * .16, h * .025, h * .06, 0, 0, 7); g.fill();
-    const page = (x0, x1, c) => { g.fillStyle = c; g.beginPath(); g.moveTo(w * .5, h * .46); g.quadraticCurveTo(w * (x0 + .5) / 2, h * .4, w * x0, h * .47); g.lineTo(w * x1, h * .86); g.quadraticCurveTo(w * (x1 + .5) / 2, h * .8, w * .5, h * .9); g.closePath(); g.fill(); };
-    page(.26, .17, '#2c1510'); page(.74, .83, '#2c1510');
-    g.save(); g.translate(0, -h * .025); page(.27, .19, '#f1e6c9'); page(.73, .81, '#e9dcbb'); g.restore();
-    g.strokeStyle = 'rgba(70,45,25,.55)'; g.lineWidth = Math.max(1, h * .012); g.beginPath(); g.moveTo(w * .5, h * .44); g.lineTo(w * .5, h * .87); g.stroke();
-    text(g, 'CHRONICLE', w * .42, h * .19, h * .2, DISPLAY, '#ffe3a8');
+  field(p, w, h) { // Hoshi riding a bike across a notebook page
+    p.rect(0, 0, w, h, '#f4efe0');
+    for (let y = 5; y < h; y += 5) p.rect(0, y, w, 1, '#b4c8ea'); // ruled lines
+    p.rect(9, 0, 1, h, '#ee8f95'); // margin
+    p.shape([['d', 74, 9, 5]], '#ffd23f', '#3a2b1a'); p.px(72, 8, '#3a2b1a'); p.px(76, 8, '#3a2b1a'); p.rect(73, 11, 3, 1, '#3a2b1a'); // a sun with a face
+    p.shape([['d', 24, 10, 4], ['d', 30, 8, 5], ['d', 36, 10, 4], ['r', 22, 10, 16, 4]], '#ffffff', '#5a5a66'); p.px(28, 10, '#5a5a66'); p.px(32, 10, '#5a5a66'); // a cloud, smiling
+    p.fill((a, b) => b > 34 + Math.sin(a / 9) * 2.2, '#7cc85a', 0, 28); p.fill((a, b) => b > 34 + Math.sin(a / 9) * 2.2 && b < 36 + Math.sin(a / 9) * 2.2, '#a9e27e', 0, 28); // the hill
+    p.rect(0, 45, w, 3, '#e3a079'); for (let x = 2; x < w; x += 6) p.rect(x, 45, 1, 3, '#c97d5a'); // brick path
+    for (const x of [14, 30, 60]) { p.px(x, 38, '#ff6f91'); p.px(x - 1, 39, '#ff6f91'); p.px(x + 1, 39, '#ff6f91'); p.px(x, 40, '#ff6f91'); p.px(x, 39, '#ffd23f'); p.rect(x, 41, 1, 3, '#3f8a3a'); } // flowers
+    // The bike: two wheels, a blue frame, a basket.
+    const back = [52, 39], front = [72, 39], line = '#2a2633';
+    for (const [x, y] of [back, front]) { p.disc(x, y, 6, line); p.disc(x, y, 4.8, '#f4efe0'); p.disc(x, y, 1, line); p.line(x - 4, y, x + 4, y, '#b9b5c4'); p.line(x, y - 4, x, y + 4, '#b9b5c4'); }
+    p.line(52, 39, 60, 39, '#3d6ee0', 2); p.line(60, 39, 69, 31, '#3d6ee0', 2); p.line(57, 31, 69, 31, '#3d6ee0', 2); p.line(57, 31, 52, 39, '#3d6ee0', 2); p.line(69, 31, 72, 39, '#3d6ee0', 2);
+    p.line(69, 31, 70, 27, line); p.rect(68, 26, 4, 1, line); p.rect(55, 29, 5, 1, line); // handlebar, seat
+    p.shape([['r', 71, 27, 7, 5]], '#c9894a', '#5a3a1e'); p.rect(72, 29, 5, 1, '#a86f38'); // basket
+    // Hoshi: an orange round cat, stripes, big eyes, paws on the bars.
+    const fur = '#f7a93b', dark = '#5a3216';
+    p.shape([['o', 59, 24, 7, 6]], fur, dark); p.oval(60, 26, 4, 3.4, '#ffe3a8'); // body and belly
+    p.line(53, 25, 48, 21, dark, 3); p.line(48, 21, 47, 16, dark, 3); p.line(53, 25, 48, 21, fur); p.line(48, 21, 47, 16, fur); // tail, curling up from the body
+    const ear = (x, flip) => { p.fill((a, b) => b >= 11 && b <= 18 && Math.abs(a - x) <= (b - 11) * .62 + .5, dark); p.fill((a, b) => b >= 13 && b <= 18 && Math.abs(a - x) <= (b - 13) * .5, fur); p.px(x - .5, 16, '#ffb0a0'); };
+    ear(61.5); ear(70.5);
+    p.shape([['o', 66, 21, 7, 6]], fur, dark); // head, wider than tall like a flat-faced cat
+    for (const x of [64, 66, 68]) p.rect(x, 15, 1, 2, '#d97f22'); p.rect(53, 21, 3, 1, '#d97f22'); p.rect(53, 24, 3, 1, '#d97f22'); // stripes
+    for (const x of [61, 68]) { p.rect(x, 20, 4, 3, '#2a160a'); p.rect(x + 1, 21, 2, 1, '#f0a020'); p.px(x + 1, 20, '#ffffff'); p.rect(x, 18, 4, 1, dark); } // eyes, with a flat grumpy brow
+    p.rect(65, 24, 2, 1, '#ff8fa0'); p.px(64, 25, dark); p.px(67, 25, dark); // nose and mouth
+    p.shape([['r', 64, 27, 6, 2]], fur, dark); p.shape([['r', 55, 28, 3, 3]], fur, dark); // arm to the bars, foot on the pedal
+    p.rect(40, 40, 7, 1, '#b4c8ea'); p.rect(42, 37, 5, 1, '#b4c8ea'); // speed lines
   },
-  hero(g, w, h) {
-    g.fillStyle = '#d6d6d6'; g.fillRect(0, 0, w, h);
-    g.fillStyle = '#a9a9a9';
-    for (let i = 0; i < 20; i++) { const a = i / 20 * Math.PI * 2, b = a + Math.PI / 20; g.beginPath(); g.moveTo(w / 2, h * .55); g.lineTo(w / 2 + Math.cos(a) * w * 1.2, h * .55 + Math.sin(a) * w * 1.2); g.lineTo(w / 2 + Math.cos(b) * w * 1.2, h * .55 + Math.sin(b) * w * 1.2); g.fill(); }
-    g.beginPath();
-    for (let i = 0; i < 28; i++) {
-      const a = i / 28 * Math.PI * 2, r = (i % 2 ? .22 : .46 + .1 * Math.sin(i * 2.4)) * w;
-      g.lineTo(w / 2 + Math.cos(a) * r * 1.08, h * .55 + Math.sin(a) * r);
-    }
-    g.closePath(); g.fillStyle = '#fff'; g.fill(); g.strokeStyle = '#000'; g.lineWidth = 4; g.stroke();
-    const outlined = (s, y, size, fill) => { g.font = `${size}px ${DISPLAY}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round'; g.lineWidth = size * .2; g.strokeStyle = '#000'; g.strokeText(s, 0, y); g.fillStyle = fill; g.fillText(s, 0, y); };
-    g.save(); g.translate(w / 2, 0);
-    outlined('HELLO', h * .12, w * .12, '#fff'); outlined('MY NAME IS', h * .22, w * .12, '#fff');
-    g.save(); g.translate(0, h * .52); g.rotate(-.12); g.transform(1, 0, -.12, 1, 0, 0); outlined('CYRILL', 0, w * .27, '#ffe600'); g.restore();
-    outlined("AND I'M AN ASPIRING", h * .74, w * .065, '#fff'); outlined('SOFTWARE / AI ENGINEER', h * .85, w * .082, '#fff');
-    g.restore();
+  tome(p, w, h) { // the Chronicle book itself, closed on a wooden table: maroon leather, a double gold border, a star in a ring, brass corners
+    for (let y = 0; y < h; y++) p.rect(0, y, w, 1, ['#7a4a2a', '#83522f', '#76462a'][Math.floor(y / 8) % 3]); // planks
+    for (let y = 7; y < h; y += 8) p.rect(0, y, w, 1, '#4a2a16');
+    for (const [x, y, n] of [[6, 3, 7], [64, 2, 5], [72, 19, 8], [4, 21, 5], [76, 28, 4], [10, 35, 6], [70, 42, 7], [30, 51, 6], [66, 52, 4]]) p.rect(x, y, n, 1, '#9a6a42'); // grain
+    const { O, L, D, T } = BOOK, at = bookAt;
+    p.poly([at(0, 0, 0), at(0, L, 0), at(D, L, 0), at(D, 0, 0)].map(([x, y]) => [x + 3, y + 2]), '#5a341c'); // shadow on the table
+    // The visible sides: the rounded spine along the front, the page ends at the right.
+    p.poly([at(0, 0, 0), at(0, L, 0), at(0, L, T), at(0, 0, T)], '#2a1210'); p.poly([at(0, .6, .8), at(0, L - .6, .8), at(0, L - .6, T - .3), at(0, .6, T - .3)], '#5a2620');
+    p.line(...at(0, .6, T - 1.4), ...at(0, L - .6, T - 1.4), '#7a3a30'); // light along the spine's curve
+    for (const v of [4, 9, L - 9, L - 4]) p.line(...at(0, v, 1), ...at(0, v, T - .5), '#d9b25a'); // gold bands
+    p.poly([at(0, L, 0), at(D, L, 0), at(D, L, T), at(0, L, T)], '#2a1210'); p.poly([at(1.2, L, 1), at(D - .8, L, 1), at(D - .8, L, T - 1), at(1.2, L, T - 1)], '#efe4c8');
+    for (let k = 2; k < T - 1; k += 1.5) p.line(...at(1.2, L, k), ...at(D - .8, L, k), '#d8c8a2'); // page edges
+    // The cover, painted in its own flat coordinates (du across from the spine, dv down from the top).
+    p.poly([at(-.9, -.9, T), at(-.9, L + .9, T), at(D + .9, L + .9, T), at(D + .9, -.9, T)], '#2a1210');
+    const det = BOOK.U[0] * BOOK.V[1] - BOOK.U[1] * BOOK.V[0];
+    const cover = (test, c) => p.fill((a, b) => { const x = a - O[0], y = b - O[1] + T, du = (x * BOOK.V[1] - y * BOOK.V[0]) / det, dv = (BOOK.U[0] * y - BOOK.U[1] * x) / det; return du >= 0 && du <= D && dv >= 0 && dv <= L && test(du, dv); }, c, 0, 0, w, h);
+    cover(() => true, '#552520');
+    let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647, spots = Array.from({ length: 70 }, () => [rnd() * D, rnd() * L, rnd() > .5]);
+    for (const [u, v, light] of spots) cover((du, dv) => Math.abs(du - u) < .9 && Math.abs(dv - v) < .9, light ? '#61302a' : '#4a1f1b'); // worn leather
+    const band = (inset, width) => (du, dv) => { const e = Math.min(du, dv, D - du, L - dv); return e >= inset && e < inset + width; };
+    cover(band(1.3, 1.6), '#d9b25a'); cover(band(4, 1.1), '#c9a04a'); // double gold border
+    const cu = D / 2, cv = L * .58;
+    cover((du, dv) => { const r = Math.hypot(du - cu, dv - cv); return r >= 4.8 && r < 6.4; }, '#d9b25a'); // the ring
+    cover((du, dv) => { const r = Math.hypot(du - cu, dv - cv), t = Math.atan2(dv - cv, du - cu), c = Math.abs(Math.cos(4 * t)); return r < 4.4 * (.34 + .66 * c ** 2); }, '#e9c46a'); // eight-pointed star
+    cover((du, dv) => Math.hypot(du - cu, dv - cv) < 1.1, '#552520');
+    for (const [u, v] of [[D, L], [D, 0]]) cover((du, dv) => Math.abs(du - u) < 2.4 && Math.abs(dv - v) < 2.4 && Math.abs(du - u) + Math.abs(dv - v) < 3.6, '#c99a40'); // brass corners
+    p.poly([at(1, L - .5, 1), at(3, L - .5, 1), at(3, L + 5, -4), at(2, L + 4, -3.4), at(1, L + 5, -4)], '#d8262a'); // ribbon hanging out the bottom
+    p.twinkle(70, 8, '#ffe08a'); p.twinkle(8, 10, '#ffe08a', true); // a little magic about it
   },
 };
 const COPY = 'Placeholder case study. Replace this with the problem, what you did, and what changed because of it.';
@@ -292,14 +397,19 @@ const photoStory = (name, src, focus = .5) => {
     g.drawImage(pic, (w - dw) / 2, (h - dh) * focus, dw, dh);
   } };
 };
-const STORIES = [photoStory('Sunset', 'photos/sunset.jpg', .64), photoStory('La Union at night', 'photos/moon.jpg', .28), photoStory('Baguio', 'photos/garden.jpg', .55), photoStory('La Union', 'photos/hut.jpg', .55), photoStory('Shiro', 'photos/tabby-chin.jpg', .2), photoStory('Hoshi', 'photos/hoshi-sleep.jpg', .2)];
+const STORIES = [photoStory('Cyrill', 'photos/me-jacket.jpg', .2), photoStory('Up in the mountains', 'photos/me-view.jpg', .55), photoStory('Sunset', 'photos/sunset.jpg', .64),photoStory('La Union at night', 'photos/moon.jpg', .28), photoStory('Baguio', 'photos/garden.jpg', .55), photoStory('La Union', 'photos/hut.jpg', .55), photoStory('Shiro', 'photos/tabby-chin.jpg', .2), photoStory('Hoshi', 'photos/hoshi-sleep.jpg', .2)];
 // wide and tall place each card on the one page as [x, y, scale], for landscape and portrait screens.
-const hero = { hero: true, t: 'Cyrill', c: 'Hello', w: 430, h: 500, depth: 1, wide: [0, -10, 1.25], tall: [0, -340, 1.15], draw: art.hero };
-const stories = { stories: true, t: 'Stories', c: 'Stories', w: 340, h: 225, depth: .9, wide: [520, 152, 1.335], tall: [197, 362, 1.1], draw: STORIES[0].draw };
+const hero = { hero: true, t: 'Résumé', c: 'Hello', theme: 'ascii', sub: "Who I am, what I've built, where I've worked. Hold to connect.", w: 430, h: 500, depth: 1, wide: [0, -10, 1.25], tall: [0, -340, 1.15], draw: posterCard('photos/cards/hands.webp', (g, w, h) => { pixelWords(g, 'CYRILL', w / 2, h * .17, h * .15, 1); pixelWords(g, 'SOFTWARE / AI ENGINEER', w / 2, h * .26, h * .058, 1, 'center', '#ffffff'); }) };
+const stories = { stories: true, t: 'Stories', c: 'Stories', theme: 'pop', w: 340, h: 225, depth: .9, wide: [520, 152, 1.335], tall: [197, 362, 1.1], draw: STORIES[0].draw };
 const projects = [
-  { t: 'Works', c: 'Projects', sub: "Everything I've made", theme: 'clouds', portal: true, w: 340, h: 225, depth: 1.15, wide: [-520, -172, 1.335], tall: [-197, 92, 1.1], draw: art.orbit },
-  { t: 'Field Notes', c: 'Personal', sub: "Everything that isn't a project", theme: 'paper', notebook: true, w: 340, h: 225, depth: 1.15, wide: [520, -172, 1.335], tall: [197, 92, 1.1], draw: art.field },
-  { t: 'Chronicle', c: 'Experience', sub: 'Experience, certifications, awards, education, skills', tome: true, copy: 'Experience, education, certifications, awards and skills.', w: 340, h: 225, depth: .9, wide: [-520, 152, 1.335], tall: [-197, 362, 1.1], draw: art.tome },
+  { t: 'Projects', c: "What I've built", sub: "Everything I've made", theme: 'clouds', portal: true, w: 340, h: 225, depth: 1.15, wide: [-520, -172, 1.335], tall: [-197, 92, 1.1], draw: pixelCard(85, 56, 'PROJECTS', pixelArt.works) },
+  { t: 'Personal', c: 'Life outside work', sub: "Everything that isn't a project", theme: 'paper', notebook: true, w: 340, h: 225, depth: 1.15, wide: [520, -172, 1.335], tall: [197, 92, 1.1], draw: pixelCard(85, 56, 'PERSONAL', pixelArt.field) },
+  { t: 'Experiences', c: 'Work, school, awards', theme: 'wood', sub: 'Experience, certifications, awards, education, skills', tome: true, copy: 'Experience, education, certifications, awards and skills.', w: 340, h: 225, depth: .9, wide: [-520, 152, 1.335], tall: [-197, 362, 1.1], draw: pixelCard(85, 56, 'EXPERIENCES', pixelArt.tome, (g, w, h, u) => { // the cover's title, set into its slant like the real book
+    const [x, y] = bookAt(BOOK.D / 2, BOOK.L * .2, BOOK.T), k = u;
+    g.save(); g.setTransform(g.getTransform().multiply(new DOMMatrix([BOOK.U[0] * k, BOOK.U[1] * k, BOOK.V[0] * k, BOOK.V[1] * k, x * u, y * u])));
+    g.font = '700 2.3px Cinzel, Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#2a1210'; g.fillText('CHRONICLE', .25, .3); g.fillStyle = '#e9c46a'; g.fillText('CHRONICLE', 0, 0);
+    g.restore();
+  }) },
 ];
 const items = [hero, stories, ...projects];
 const TICKER = 'OPEN TO WORK. FINDING COMPANIES TO INTERN AT.     ';
@@ -325,6 +435,7 @@ function toScene(x, y) {
   const u = (x / W * 2 - 1) * S, v = (y / H * 2 - 1) * S;
   return [(u * (1 + K * v * v) + 1) / 2 * W, (v * (1 + K * u * u) + 1) / 2 * H];
 }
+function toClient(sx, sy) { let x = sx, y = sy; for (let i = 0; i < 6; i++) { const [a, b] = toScene(x, y); x += sx - a; y += sy - b; } return [x, y]; } // undoes the tube's bulge
 // depth: cards shift by different amounts when the board moves
 const place = c => [W / 2 + (c.x + (pan.x + look.x) * c.depth - cam.x) * sc * zoomK, H / 2 + (c.y + (pan.y + look.y) * c.depth - cam.y) * sc * zoomK];
 const sizeOf = c => [c.w * c.s * sc * zoomK, c.h * c.s * sc * zoomK];
@@ -348,21 +459,22 @@ const closeUpZoom = c => { // a tall screen leaves room below the card for the l
   return Math.max(1, Math.min(H * fitH / (c.h * c.s * sc), W * fitW / (c.w * c.s * sc)));
 };
 function setFocus(c) { // select a card: the camera flies to it and its lettering pops
-  if (focus !== c) { popAt = 0; focus = c; }
+  if (focus !== c) { popAt = 0; focus = c; if (c.stories) storyStage = 'stack'; }
   zoomGoal = 1;
   live.textContent = c.stories ? `Stories. ${STORIES[storyIndex].name}.` : `${c.t}, ${c.c}.`;
   syncBack();
 }
-function clearFocus() { zoomGoal = 0; popAt = 0; live.textContent = ''; syncBack(); }
-function stepStory(d) {
-  storyIndex = (storyIndex + d + STORIES.length) % STORIES.length; storyAt = performance.now(); stories.bmp = null;
+function clearFocus() { zoomGoal = 0; popAt = 0; storyStage = 'stack'; live.textContent = ''; syncBack(); }
+function stepStory(d, dx, dy) {
+  if (focus === stories && zoomGoal && storyStage === 'stack' && d > 0 && !reduced) stackThrow(dx, dy);
+  storyIndex = (storyIndex + d + STORIES.length) % STORIES.length; storyAt = performance.now(); stories.bmp = null; rowGoal += d * rowSize()[2];
   if (focus === stories) { popAt = 0; glitch = reduced ? 0 : .5; } // only a selected story gets the tear and a fresh pop; on the board it just changes
 }
 function stepFocus(d) {
   if (focus === stories && zoomGoal) { stepStory(d); return; }
   const i = focus ? items.indexOf(focus) : -1; setFocus(items[(i + d + items.length) % items.length]);
 }
-function syncBack() { backBtn.textContent = view || zoomGoal ? '◀ Back to board' : '⏏ Back to room'; }
+function syncBack() { backBtn.textContent = focus === stories && zoomGoal && storyStage === 'row' ? '◀ Back to stack' : view || zoomGoal ? '◀ Back to board' : '⏏ Back to room'; }
 
 /* ---------- Scene drawing (2D canvas, then pushed through the CRT shader) ---------- */
 const gl = crt.getContext('webgl', { antialias: false, alpha: false });
@@ -415,32 +527,52 @@ function storyFrame(x, y, w, h, progress) { // rounded border with the story's p
   g.lineWidth = Math.max(2, w * .012); g.strokeStyle = 'rgba(255,255,255,.72)'; path(); g.stroke();
   g.strokeStyle = '#ffe600'; g.setLineDash([progress * length, length]); path(); g.stroke(); g.setLineDash([]);
 }
+// Moving film grain: one tile of noise, shifted to a new random spot about 24 times a second and laid over with 'overlay'.
+let grainTile = null, grainAt = 0, grainOff = [0, 0];
+function drawGrain(w, h, alpha) {
+  if (!grainTile) {
+    grainTile = document.createElement('canvas'); grainTile.width = grainTile.height = 256;
+    const x = grainTile.getContext('2d'), img = x.createImageData(256, 256); let seed = 1013904223;
+    const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+    for (let i = 0; i < img.data.length; i += 4) { const v = Math.max(0, Math.min(255, (.5 + (rnd() + rnd() - 1) * .95) * 255)); img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
+    x.putImageData(img, 0, 0);
+  }
+  const now = performance.now();
+  if (!reduced && now - grainAt > 1000 / 24) { grainAt = now; grainOff = [Math.random() * 256, Math.random() * 256]; }
+  g.save(); g.beginPath(); g.roundRect(-w / 2, -h / 2, w, h, w * .04); g.clip();
+  g.globalCompositeOperation = 'overlay'; g.globalAlpha = alpha * (.24 + Math.random() * .05); // a touch of flicker
+  const pat = g.createPattern(grainTile, 'repeat'); pat.setTransform(new DOMMatrix().translate(-grainOff[0], -grainOff[1]));
+  g.fillStyle = pat; g.fillRect(-w / 2, -h / 2, w, h);
+  g.globalCompositeOperation = 'source-over'; g.globalAlpha = alpha * .12; g.fillStyle = '#000'; for (let y = -h / 2; y < h / 2; y += 3) g.fillRect(-w / 2, y, w, 1); // faint scanlines
+  g.restore();
+}
 function drawCard(c, now, alpha) {
   const [px, py] = place(c), [bw, bh] = sizeOf(c), grow = 1 + (c.k || 0) * .05, w = bw * grow, h = bh * grow, since = now - (c.shakeAt || -1e9);
   const shake = reduced || since > 420 ? 0 : (1 - since / 420); // the little shake when the mouse arrives
   g.save(); g.globalAlpha = alpha;
   g.translate(px + Math.sin(since * .09) * 3.5 * shake, py + Math.cos(since * .11) * 2 * shake); g.rotate(Math.sin(since * .06) * .03 * shake);
-  if (c.stories && c === focus && zoomNow > .2) { // neighbours peek out behind the current story
-    const dim = Math.min(1, zoomNow) * alpha * .4, nw = w * .86, nh = h * .86;
-    [[-1, -.62], [1, .62]].forEach(([d, side]) => {
-      const n = STORIES[(storyIndex + d + STORIES.length) % STORIES.length];
-      n.bmp = n.bmp || bitmap({ w: c.w, h: c.h, draw: n.draw }, c.w * c.s * sc * closeUpZoom(c) * .86, c.h * c.s * sc * closeUpZoom(c) * .86);
-      g.globalAlpha = dim; g.drawImage(n.bmp, side * w * Math.min(1, zoomNow) - nw / 2, -nh / 2, nw, nh);
-    });
-    g.globalAlpha = alpha;
-  }
   if (c.theme === 'paper' && c.themeK) { g.globalAlpha = alpha * c.themeK; box(g, -w / 2 + 7, -h / 2 + 9, w, h, w * .04, 'rgba(30,40,60,.24)'); g.globalAlpha = alpha; } // a paper cutout's shadow
   g.drawImage(cardBitmap(c), -w / 2, -h / 2, w, h);
+  if (c.stories && !(c === focus && zoomNow > .2)) drawGrain(w, h, alpha); // on the board the photos read like film; once opened they're clean
   if (c.stories) storyFrame(0, 0, w, h, reduced ? 1 : Math.min(1, (now - storyAt) / STORY_MS));
   if (c === focusCard) { g.strokeStyle = '#ffe600'; g.lineWidth = 4; g.strokeRect(-w / 2 - 6, -h / 2 - 6, w + 12, h + 12); }
   g.restore();
-  if ((c.k || 0) > .2 && c !== focus) {
-    const label = c.hero ? 'About' : c.stories ? 'Stories' : `${c.t} / ${c.c}`, size = Math.max(18, 22 * sc);
-    g.font = `${size}px ${MONO}`; const tw = g.measureText(label).width + 16;
-    g.globalAlpha = Math.min(1, c.k * 1.4) * alpha; g.fillStyle = '#000'; g.fillRect(px - tw / 2, py + h / 2 + 8, tw, size + 8);
-    text(g, label, px, py + h / 2 + 12 + size / 2, size, MONO, '#fff'); g.globalAlpha = 1;
-  }
 }
+// A card's name on a yellow tag pinned across its top edge. Drawn after every card, so the card below can't cover it, and kept on screen.
+function drawTag(name, sub, x, y, k, alpha = 1) {
+  const size = Math.max(20, Math.min(40, H * .044, W * .07)), subSize = Math.round(size * .48), pop = reduced ? 1 : backOut(Math.min(1, k));
+  g.font = `${size}px ${LETTERING}`; let tw = g.measureText(name.toUpperCase()).width;
+  if (sub) { g.font = `600 ${subSize}px ${BODY}`; tw = Math.max(tw, g.measureText(sub).width); }
+  const w = tw + size * 1.1, h = size * 1.3 + (sub ? subSize * 1.35 : 0), r = size * .32;
+  x = Math.max(w / 2 + 10, Math.min(W - w / 2 - 10, x)); y = Math.max(h / 2 + 10, Math.min(H - h / 2 - 10, y));
+  g.save(); g.globalAlpha = Math.min(1, k * 1.6) * alpha; g.translate(x, y); g.rotate(-.035); g.scale(pop, pop);
+  box(g, -w / 2 + 4, -h / 2 + 6, w, h, r, 'rgba(0,0,0,.5)');
+  box(g, -w / 2, -h / 2, w, h, r, '#ffe600'); g.lineWidth = 3; g.strokeStyle = '#000'; g.stroke();
+  text(g, name.toUpperCase(), 0, -h / 2 + size * .7, size, LETTERING, '#000');
+  if (sub) { g.font = `600 ${subSize}px ${BODY}`; g.fillStyle = '#2b2b2b'; g.fillText(sub, 0, h / 2 - subSize * .95); } // text() can't set a weight
+  g.restore();
+}
+const tagName = c => c.hero ? 'Résumé' : c.t, tagSub = c => c.hero ? 'About me' : c.stories ? 'Photos' : c.c;
 function drawTicker(alpha) {
   const size = Math.max(15, Math.min(30, H * .036, W * .046)), bh = size * 1.75, tall = W < H, stickerTop = tall ? $('#btn-talk').getBoundingClientRect().top : 0; // on a tall screen it runs full width, above the sticker
   const x = W * (tall ? .07 : .09), y = stickerTop ? toScene(W / 2, stickerTop - 4)[1] - bh : H * .925 - bh / 2, right = tall ? W * .93 : W - Math.max(150, Math.min(W * .19, 280)), bw = right - x;
@@ -594,7 +726,217 @@ function drawPaper(now) {
     g.globalAlpha = alpha;
   }
 }
-const THEMES = { clouds: drawClouds, paper: drawPaper };
+/* ---------- Stories: the photos ride a turning ring in front of a comic sky ---------- */
+// shortcut: drawn in code as a stand-in, until Cyrill has an original pop-art picture to put here instead.
+let pop = null;
+function drawPop(now) {
+  if (!pop || pop.w !== W || pop.h !== H) { // halftone dots, growing toward the edges
+    const b = document.createElement('canvas'), x = b.getContext('2d'), step = Math.max(14, Math.min(W, H) * .022);
+    b.width = W; b.height = H; x.fillStyle = 'rgba(25,8,45,.3)';
+    for (let yy = 0, row = 0; yy < H + step; yy += step, row++) for (let xx = row % 2 * step / 2; xx < W + step; xx += step) {
+      const r = step * .5 * Math.min(1, Math.hypot(xx - W / 2, yy - H * .42) / Math.hypot(W / 2, H / 2) * 1.3);
+      if (r > .7) { x.beginPath(); x.arc(xx, yy, r, 0, 7); x.fill(); }
+    }
+    pop = { w: W, h: H, dots: b };
+  }
+  const cx = W / 2, cy = H * .42, R = Math.hypot(W, H), turn = reduced ? 0 : now / 40000, colors = ['#ff2e7e', '#ff8a2a', '#ffd400', '#2ec8ff', '#8a4dff'], n = 25;
+  for (let i = 0; i < n; i++) {
+    const a = turn + i / n * Math.PI * 2, b = a + Math.PI * 2 / n + .01;
+    g.fillStyle = colors[i % colors.length]; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R); g.lineTo(cx + Math.cos(b) * R, cy + Math.sin(b) * R); g.fill();
+  }
+  const sun = g.createRadialGradient(cx, cy, 0, cx, cy, Math.min(W, H) * .45); sun.addColorStop(0, '#fff6b0'); sun.addColorStop(1, 'rgba(255,214,0,0)');
+  g.fillStyle = sun; g.fillRect(0, 0, W, H); g.drawImage(pop.dots, 0, 0, W, H);
+  const edge = g.createRadialGradient(cx, cy, Math.min(W, H) * .25, cx, cy, R * .62); edge.addColorStop(0, 'rgba(12,6,28,.38)'); edge.addColorStop(1, 'rgba(12,6,28,.82)');
+  g.fillStyle = edge; g.fillRect(0, 0, W, H); // darker toward the edges, so the photos and words stay readable
+}
+// Opened from the stack, the photos run in a row that flexes where it passes the edge of an invisible lens in the middle:
+// the left end dips, the right end lifts, a faint colour ghost in the bend. Drag, flick, scroll or use the arrows; click the middle photo to hold it up close.
+let rowPos = 0, rowGoal = 0, rowVel = 0, rowHeld = false, rowFling = 0, rowFlingAt = 0, rowTimer = 0, rowFocus = 0, rowFocusGoal = 0, rowOpenAt = 0, rowLast = 0;
+function rowSize() { const ch = Math.min(H * .44, W * (W < H ? .62 : .3) / .8), cw = ch * .8; return [cw, ch, cw + 14]; } // card width, height, and the step from one to the next
+const rowEase = t => { t = Math.max(0, Math.min(1, t)); return t < .5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2; };
+function rowLift(dx, ch) { // how far a point of the row rises at dx from the lens's middle: flat inside, flexing across its edge
+  const half = Math.max(W * .37, ch * 1.1), t = Math.max(0, Math.min(1, (Math.abs(dx) - half * .45) / (half * .85))), ramp = t * t * t * (t * (t * 6 - 15) + 10);
+  return ramp * Math.sign(dx) * ch * .42 * (1 - rowEase(rowFocus)); // twist: left end down, right end up
+}
+function drawRow(alpha, now) {
+  const [cw, ch, pitch] = rowSize(), n = STORIES.length, loop = n * pitch, [px, py] = place(stories), dt = Math.min(.05, (now - (rowLast || now)) / 1000); rowLast = now;
+  if (reduced) { rowPos = rowGoal; rowVel = 0; }
+  else if (!rowHeld) { const k = 60; rowVel += (k * (rowGoal - rowPos) - 2 * Math.sqrt(k) * rowVel) * dt; rowPos += rowVel * dt; if (Math.abs(rowGoal - rowPos) < .05 && Math.abs(rowVel) < .5) { rowPos = rowGoal; rowVel = 0; } }
+  rowFocus += (rowFocusGoal - rowFocus) * (reduced ? 1 : 1 - Math.exp(-dt * 9));
+  const squeeze = 1 - .18 * Math.min(1, Math.abs(rowHeld ? rowFling * 60 : rowVel) / 2600), fe = rowEase(rowFocus), grow = Math.min(1.3, H * .84 / ch, W * .92 / cw);
+  const intro = reduced ? 9 : (now - rowOpenAt) / 1000, draws = [];
+  for (let i = 0; i < n; i++) for (const k of [-1, 0, 1]) {
+    const rel = ((i * pitch - rowPos) % loop + loop * 1.5) % loop - loop / 2 + k * loop; // wrapped, so the row never ends
+    if (Math.abs(rel) > W * .5 + cw * 2) continue;
+    const delay = Math.min(Math.abs(rel) / (W * .6), 1) * .34, local = Math.max(0, Math.min(1, (intro - delay) / .6)); // cards rise in from below, middle first
+    let x = px + rel, sc = squeeze * (.5 + .5 * rowEase((local - .18) / .82)), a = Math.min(1, local * 4);
+    const up = (1 - (1 - (1 - local) ** 5)) * H * .62, mid = Math.abs(rel) < pitch / 2;
+    if (fe > 0) { if (mid) sc *= 1 + (grow - 1) * fe; else { const part = rowEase(fe * 1.25 - Math.min(Math.abs(rel) / W, 1) * .25); x += Math.sign(rel) * part * W * .7; a *= 1 - part; } }
+    if (a > .01) draws.push({ i, rel, x, sc, a, up, mid });
+  }
+  draws.sort((m, o) => Math.abs(o.rel) - Math.abs(m.rel)); // far ones first, the middle on top
+  for (const d of draws) {
+    const s = STORIES[d.i], w = cw * d.sc, h = ch * d.sc, T = 12;
+    if (!s.rowBmp || s.rowBmp.width !== Math.ceil(cw * maxPr)) s.rowBmp = bitmap({ w: stories.w, h: stories.w * ch / cw, draw: s.draw }, cw, ch);
+    const b = s.rowBmp;
+    for (let j = 0; j < T; j++) { // vertical strips, each lifted by the lens where it stands, so the cards bend and stay joined
+      const sx = d.x + ((j + .5) / T - .5) * w, lift = rowLift(sx - px, ch), slope = (rowLift(sx - px + 4, ch) - rowLift(sx - px - 4, ch)) / 8, y = py + d.up - lift - h / 2;
+      g.globalAlpha = alpha * d.a; g.drawImage(b, j / T * b.width, 0, b.width / T, b.height, d.x - w / 2 + j * w / T, y, w / T + .8, h);
+      if (Math.abs(slope) > .15) { g.globalCompositeOperation = 'screen'; g.globalAlpha = alpha * d.a * Math.min(.35, Math.abs(slope) * .4); for (const off of [-4, 4]) g.drawImage(b, j / T * b.width, 0, b.width / T, b.height, d.x - w / 2 + j * w / T, y + off * Math.sign(slope), w / T + .8, h); g.globalCompositeOperation = 'source-over'; } // light splitting in the bend
+    }
+  }
+  g.globalAlpha = alpha;
+  if (!rowHeld && Math.abs(rowGoal - rowPos) < 2 && fe < .02 && intro > 1) storyFrame(px, py, cw, ch, 1);
+  const pad = v => String(v).padStart(2, '0');
+  g.globalAlpha = alpha * (1 - fe) * Math.min(1, Math.max(0, intro - .6) * 3); text(g, `${pad(storyIndex + 1)} / ${pad(n)}`, px, py + ch / 2 + 18, 15, MONO, 'rgba(255,255,255,.8)'); // which photo, of how many
+  g.globalAlpha = 1;
+}
+function rowDrag(dx) { rowHeld = true; rowPos -= dx; rowGoal = rowPos; rowFling = dx; rowFlingAt = performance.now(); rowFocusGoal = 0; storyAt = performance.now(); dirty = true; } // the row follows the hand
+function rowSettle() { // lands on the nearest photo, carried on by a flick, and that photo becomes the story
+  const [, , pitch] = rowSize(), n = STORIES.length, fresh = performance.now() - rowFlingAt < 80, carry = fresh ? -rowFling * 9 : 0, was = storyIndex;
+  rowHeld = false; rowVel = fresh ? -rowFling * 30 : 0;
+  const i = Math.round((rowPos + carry) / pitch); rowGoal = i * pitch; storyIndex = (i % n + n) % n; storyAt = performance.now();
+  if (storyIndex !== was) { stories.bmp = null; popAt = 0; live.textContent = `Stories. ${STORIES[storyIndex].name}.`; }
+}
+function rowClick(clientX, clientY) { // the middle photo opens up close (and closes again); one to the side slides to the middle
+  const [sx, sy] = toScene(clientX, clientY), [px, py] = place(stories), [cw, ch, pitch] = rowSize();
+  if (rowFocusGoal) { rowFocusGoal = 0; return true; }
+  if (Math.abs(sy - py) > ch * .9) return false;
+  const steps = Math.round((sx - px) / pitch);
+  if (!steps) rowFocusGoal = 1; else stepStory(steps);
+  return true;
+}
+function openRow() { const [, , pitch] = rowSize(); storyStage = 'row'; storyAt = performance.now(); rowGoal = rowPos = Math.round(rowPos / pitch / STORIES.length) * STORIES.length * pitch + storyIndex * pitch; rowVel = 0; rowFocusGoal = rowFocus = 0; rowOpenAt = performance.now(); popAt = 0; syncBack(); }
+// Selecting Stories first shows the photos as a fanned stack: throw the top one aside to see the next, click it to open the ring there.
+let storyStage = 'stack', stageK = 0, stackDrag = null, stackFly = null, stackShift = 0, stackWheelAt = 0;
+const STACK_VISIBLE = 4, STACK_THROW = 90, STACK_FLY_MS = 560;
+const stackSize = () => { const [cw, ch] = rowSize(); return [cw * 1.05, ch * 1.05]; };
+function stackPhoto(i, cx, cy, w, h, rot, shade, alpha) { // one photo, turned about a point near its lower right corner, like a fanned hand of cards
+  const s = STORIES[i], [bw] = stackSize();
+  if (!s.stackBmp || s.stackBmp.width !== Math.ceil(bw * maxPr)) s.stackBmp = bitmap({ w: stories.w, h: stories.w * h / w, draw: s.draw }, ...stackSize());
+  const ox = cx + w * .4, oy = cy + h * .4;
+  g.save(); g.globalAlpha = alpha; g.translate(ox, oy); g.rotate(rot); g.translate(-ox, -oy);
+  g.shadowColor = 'rgba(10,4,24,.5)'; g.shadowBlur = w * .1; g.shadowOffsetY = w * .04; g.drawImage(s.stackBmp, cx - w / 2, cy - h / 2, w, h); g.shadowColor = 'transparent';
+  if (shade > .01) { g.globalAlpha = alpha * shade; box(g, cx - w / 2, cy - h / 2, w, h, w * .04, '#0c061c'); }
+  g.restore();
+}
+function drawStack(alpha, now) {
+  const [px, py] = place(stories), [cw, ch] = stackSize(), n = STORIES.length, vis = Math.min(STACK_VISIBLE, n);
+  stackShift *= reduced ? 0 : .8; if (Math.abs(stackShift) < .01) stackShift = 0;
+  if (stackDrag && !stackDrag.held) { stackDrag.dx *= .75; stackDrag.dy *= .75; if (Math.hypot(stackDrag.dx, stackDrag.dy) < .5) stackDrag = null; } // springs back when let go short
+  const slot = pos => ({ rot: pos * .14, k: 1 - pos * .06, shade: pos * .1 }); // fan: each one further back turns a little more and shrinks
+  const fly = stackFly && (now - stackFly.at) / STACK_FLY_MS;
+  if (fly >= 1) stackFly = null;
+  const flying = () => { // out along the throw, then tucked in at the back
+    const f = stackFly, out = Math.min(1, fly / .45), back = Math.max(0, (fly - .45) / .55), e = 1 - (1 - out) ** 3, b = back * back * (3 - 2 * back), end = slot(vis - 1), far = cw * 1.25;
+    const x = f.dx + (f.ux * far - f.dx) * e, y = f.dy + (f.uy * far - f.dy) * e;
+    stackPhoto(f.i, px + x * (1 - b), py + y * (1 - b), cw * (1 + (end.k - 1) * b), ch * (1 + (end.k - 1) * b), f.rot * (1 - b) + end.rot * b, end.shade * b, alpha);
+  };
+  if (stackFly && fly > .45) flying(); // already behind the others
+  for (let pos = vis - 1; pos >= 0; pos--) {
+    const i = (storyIndex + pos) % n;
+    if (stackFly && stackFly.i === i) continue;
+    const at = slot(Math.max(0, pos + stackShift)), top = pos === 0 && stackDrag;
+    stackPhoto(i, px + (top ? stackDrag.dx : 0), py + (top ? stackDrag.dy : 0), cw * at.k, ch * at.k, at.rot + (top ? stackDrag.dx * .0015 : 0), at.shade, alpha);
+  }
+  if (stackFly && fly <= .45) flying(); // still on its way out, over the pile
+  if (!stackDrag && !stackFly) { g.globalAlpha = alpha; storyFrame(px, py, cw, ch, 1); g.globalAlpha = 1; }
+}
+function stackThrow(dx = 0, dy = 0) { // the top photo goes to the back and the next one comes up
+  const len = Math.hypot(dx, dy), [ux, uy] = len > 1 ? [dx / len, dy / len] : [.96, -.28];
+  stackFly = { i: storyIndex, at: performance.now(), dx, dy, ux, uy, rot: dx * .0015 };
+  stackShift = 1; stackDrag = null;
+}
+function stackRelease(sx) { // far enough, or a quick flick, sends it back; otherwise it springs home
+  const d = stackDrag; if (!d) return;
+  d.held = false;
+  if (Math.hypot(d.dx, d.dy) > STACK_THROW || Math.abs(sx) > 44) stepStory(1, d.dx, d.dy);
+}
+function stackHit(clientX, clientY) { const [sx, sy] = toScene(clientX, clientY), [px, py] = place(stories), [cw, ch] = stackSize(); return Math.abs(sx - px) < cw / 2 && Math.abs(sy - py) < ch / 2; }
+/* ---------- Experiences, selected: the old wood of the table, dithered, warm, rippling ---------- */
+// From Cyrill's recipe: blurred photo behind, 13 px dither cells by brightness, contrast 115, 28% grey, a soft-light gold tint, ripples, bloom, vignette.
+const woodPic = new Image(); woodPic.src = 'textures/wood-old.jpg';
+const BAYER4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(v => (v + .5) / 16);
+let wood = null;
+function drawWood(now) {
+  if (!woodPic.naturalWidth) { g.fillStyle = '#3a2a1c'; g.fillRect(0, 0, W, H); return; }
+  const cell = 13, cols = Math.ceil(W / cell), rows = Math.ceil(H / cell), t = reduced ? 0 : now / 1000;
+  if (!wood || wood.w !== W || wood.h !== H) { // once per size: the blurred backdrop, and each cell's tinted colour and brightness
+    const cover = (x, w, h) => { const k = Math.max(w / woodPic.naturalWidth, h / woodPic.naturalHeight); x.drawImage(woodPic, (w - woodPic.naturalWidth * k) / 2, (h - woodPic.naturalHeight * k) / 2, woodPic.naturalWidth * k, woodPic.naturalHeight * k); };
+    const back = document.createElement('canvas'); back.width = Math.ceil(W / 2); back.height = Math.ceil(H / 2); const bx = back.getContext('2d'); bx.filter = 'blur(6px) sepia(.5) brightness(.7)'; cover(bx, back.width, back.height);
+    const sample = document.createElement('canvas'); sample.width = cols; sample.height = rows; const sx = sample.getContext('2d', { willReadFrequently: true }); cover(sx, cols, rows);
+    const d = sx.getImageData(0, 0, cols, rows).data, tint = [216, 180, 106], soft = (a, b) => (1 - 2 * b) * a * a + 2 * b * a; // soft-light, on 0 to 1
+    const tone = [], shade = [], level = new Float32Array(cols * rows);
+    for (let i = 0; i < cols * rows; i++) {
+      let c = [d[i * 4], d[i * 4 + 1], d[i * 4 + 2]].map(v => Math.max(0, Math.min(255, (v - 128) * 1.15 + 128)) / 255); // contrast 115
+      const l = .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; c = c.map(v => v * .72 + l * .28); // 28% grey
+      c = c.map((v, k) => (v * .62 + soft(v, tint[k] / 255) * .38) * [1.1, .97, .76][k]); // gold, soft light, 38%, and warmed: the photo itself is a cold grey
+      tone.push(`rgb(${c.map(v => Math.round(Math.min(1, v * 1.12) * 255)).join(',')})`); shade.push(`rgb(${c.map((v, k) => Math.round(v * [.42, .34, .26][k] * 255)).join(',')})`); level[i] = .2126 * c[0] + .7152 * c[1] + .0722 * c[2];
+    }
+    const layer = document.createElement('canvas'); layer.width = Math.ceil(W); layer.height = Math.ceil(H);
+    const glow = document.createElement('canvas'); glow.width = Math.ceil(W / 6); glow.height = Math.ceil(H / 6);
+    const vig = document.createElement('canvas'); vig.width = Math.ceil(W); vig.height = Math.ceil(H); const vx = vig.getContext('2d'), vg = vx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .25, W / 2, H / 2, Math.hypot(W, H) * .6); vg.addColorStop(0, 'rgba(20,10,4,0)'); vg.addColorStop(1, 'rgba(20,10,4,.7)'); vx.fillStyle = vg; vx.fillRect(0, 0, W, H);
+    wood = { w: W, h: H, back, tone, shade, level, layer, glow, vig, at: -1 };
+  }
+  if (t - wood.at >= 1 / 15 || wood.at < 0) { // the dither, redrawn about 15 times a second
+    wood.at = t; const x = wood.layer.getContext('2d'); x.clearRect(0, 0, W, H);
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const i = r * cols + c, dist = Math.hypot(c - cols / 2, (r - rows / 2) * 1.2), ripple = Math.sin(dist * .45 - t * 2.4) * .15; // rings rolling out from the middle
+      const on = wood.level[i] * 1.25 + ripple > BAYER4[(r % 4) * 4 + c % 4];
+      x.fillStyle = on ? wood.tone[i] : wood.shade[i]; x.fillRect(c * cell, r * cell, cell - 1, cell - 1);
+    }
+    x.globalAlpha = 1; const gx = wood.glow.getContext('2d'); gx.clearRect(0, 0, wood.glow.width, wood.glow.height); gx.drawImage(wood.layer, 0, 0, wood.glow.width, wood.glow.height);
+  }
+  const a = g.globalAlpha;
+  g.globalAlpha = a * .9; g.drawImage(wood.back, 0, 0, W, H); // the blurred photo underneath
+  g.globalAlpha = a * .88; g.drawImage(wood.layer, 0, 0, W, H); // the blur shows a little through the gaps and the cells
+  g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha = a * .32; g.drawImage(wood.glow, 0, 0, W, H); g.restore(); // bloom
+  g.globalAlpha = a; g.drawImage(wood.vig, 0, 0, W, H);
+}
+
+/* ---------- The résumé card, selected: light rising over a dark horizon, written in characters ---------- */
+// After React Bits' GradientASCII ('horizon'), on the canvas: a glow over a dark curve, characters from dim to bright by its light,
+// flickering, scrambling under the pointer, decoding in when it opens, a ring of light where it's clicked.
+const ASCII_CHARS = ' =+xX0S8#@', ASCII_RAMP = [[30, 63, 216], [56, 189, 248], [165, 216, 255], [246, 248, 255]];
+let asciiBg = null;
+function drawAsciiLight(now) {
+  const cell = 18, cw = Math.round(cell * .6), cols = Math.ceil(W / cw), rows = Math.ceil(H / cell), t = reduced ? 0 : now / 1000, n = ASCII_CHARS.length;
+  if (!asciiBg || asciiBg.w !== W || asciiBg.h !== H) {
+    const atlas = document.createElement('canvas'), ax = atlas.getContext('2d'), q = Math.min(2, pr); atlas.width = n * cw * q; atlas.height = cell * q; ax.scale(q, q);
+    ax.font = `300 ${Math.round(cell * .78)}px "JetBrains Mono", Consolas, monospace`; ax.textAlign = 'center'; ax.textBaseline = 'middle'; ax.fillStyle = '#fff';
+    for (let i = 0; i < n; i++) ax.fillText(ASCII_CHARS[i], i * cw + cw / 2, cell / 2 + 1);
+    const field = document.createElement('canvas'); field.width = cols; field.height = rows;
+    const layer = document.createElement('canvas'); layer.width = Math.ceil(W * q); layer.height = Math.ceil(H * q);
+    asciiBg = { w: W, h: H, q, atlas, field, layer, at: -1, open: now };
+  }
+  if (g.globalAlpha < .05) asciiBg.open = now; // decode in again each time it opens
+  const A = asciiBg, intro = reduced ? 1 : Math.min(1, (now - A.open) / 2400), ramp = v => { const x = Math.max(0, Math.min(1, (v - .3) / .7)) * (ASCII_RAMP.length - 1), i = Math.min(ASCII_RAMP.length - 2, Math.floor(x)), f = x - i; return ASCII_RAMP[i].map((c, k) => Math.round(c + (ASCII_RAMP[i + 1][k] - c) * f)); };
+  if (t - A.at >= 1 / 15 || A.at < 0) {
+    A.at = t; const fx = A.field.getContext('2d'), img = fx.createImageData(cols, rows), x = A.layer.getContext('2d'), span = .5 * Math.max(W / H, 1), px = reticle.px ?? -1e9, py = reticle.py ?? -1e9, wave = A.wave && (now - A.wave[2]) * .7;
+    x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, A.layer.width, A.layer.height);
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const u = ((c + .5) / cols - .5) * (W / H), v = .5 - (r + .5) / rows; // centred, height 1
+      const wob = Math.sin(u * 3.1 + t * .6) * .02 + Math.sin(u * 7.3 - t * .4) * .01, arch = -.17 - .2 * (u / span) ** 2 + .02 * Math.sin(t * .6) + wob, edge = v - arch; // the dark curve and how far above it
+      const sun = .6 + .4 * Math.exp(-2.2 * ((u - .1 * Math.sin(t * .31) * span) / span) ** 2), glow = Math.exp(-edge * 3.4) * sun * (.92 + .08 * Math.sin(t * 1.3 + u * 2)); // brightest on the rim, fading upwards
+      const ring = wave && wave < Math.hypot(W, H) ? Math.max(0, 1 - Math.abs(Math.hypot(c * cw - A.wave[0], r * cell - A.wave[1]) - wave) / 40) * (1 - wave / Math.hypot(W, H)) : 0; // a click sends a ring of light out
+      const reveal = Math.max(0, Math.min(1, (intro * 1.45 - Math.min(1, Math.max(0, edge * 1.3))) / .45)), light = Math.min(1, (edge < 0 ? 0 : glow * reveal) + ring * .5);
+      const i = r * cols + c, col = ramp(light), alpha = Math.max(0, Math.min(1, light / .38)) * .9;
+      img.data.set([col[0], col[1], col[2], Math.round(alpha * 255)], i * 4);
+      if (alpha < .1) continue;
+      const seed = Math.abs(Math.sin(c * 12.9898 + r * 78.233) * 43758.5453) % 1, tick = Math.floor(t * 9 + seed * 9), flick = (Math.abs(Math.sin(c * 3.1 + r * 1.7 + tick * 17.7)) % 1 - .5) * .08;
+      if (seed > .8 * (.3 + light * 1.1)) continue; // density: brighter cells fill first
+      let k = Math.max(1, Math.min(n - 1, Math.round((Math.pow(light, .75) + flick) * (n - 1))));
+      if (Math.hypot(c * cw + cw / 2 - px, r * cell + cell / 2 - py) < H * .1 || reveal < 1 && seed < 1 - reveal) k = 1 + Math.floor(Math.abs(Math.sin(c * 7 + r * 3 + Math.floor(t * 20))) * (n - 1)) % (n - 1); // scrambled under the pointer, and while decoding in
+      x.globalAlpha = alpha * .85; x.drawImage(A.atlas, k * cw * A.q, 0, cw * A.q, cell * A.q, c * cw * A.q, r * cell * A.q, cw * A.q, cell * A.q);
+    }
+    fx.putImageData(img, 0, 0); x.globalAlpha = 1;
+  }
+  const a = g.globalAlpha;
+  g.fillStyle = '#04081c'; g.fillRect(0, 0, W, H);
+  g.save(); g.imageSmoothingEnabled = true; g.globalAlpha = a * .6; g.drawImage(A.field, 0, 0, W, H); g.restore(); // the light itself, smooth
+  g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha = a * .5; g.drawImage(A.layer, 0, 0, W, H); g.restore(); // the characters, lit
+}
+const THEMES = { clouds: drawClouds, paper: drawPaper, pop: drawPop, wood: drawWood, ascii: drawAsciiLight };
 const paperOpen = () => focus && focus.theme === 'paper' && zoomGoal && (focus.themeK || 0) > .5 && !view;
 function caption(s, y, size, font, onPaper) { // words that sit directly on a background
   if (onPaper) { text(g, s, W / 2, y, size, font, '#26323c'); return; }
@@ -610,15 +952,17 @@ function drawBoard(now) {
   for (const c of items) if (c.themeK) { g.globalAlpha = c.themeK; THEMES[c.theme](now); g.globalAlpha = 1; backdrop = Math.max(backdrop, c.themeK); }
   const others = (1 - Math.min(1, zoomNow) * (COARSE || W < H ? .92 : .75)) * (1 - backdrop); // on a phone the neighbours sit right behind the lettering
   if (others > .01) for (const c of items) if (c !== focus) drawCard(c, now, others);
-  if (focus) drawCard(focus, now, 1);
+  const openK = focus === stories ? Math.max(0, Math.min(1, (zoomNow - .2) / .5)) : 0; // a selected Stories card opens into the stack, and a click opens the row
+  stageK = reduced ? +(storyStage === 'row') : stageK + ((storyStage === 'row') - stageK) * .15;
+  if (focus && openK < 1) drawCard(focus, now, 1 - openK);
+  if (openK > 0 && stageK < .99) drawStack(openK * (1 - stageK), now);
+  if (openK > 0 && stageK > .01) drawRow(openK * stageK, now);
+  if (others > .01) for (const c of items) if (c !== focus && (c.k || 0) > .02) { const [px, py] = place(c), [, h] = sizeOf(c); drawTag(tagName(c), tagSub(c), px, py - h * (1 + c.k * .05) / 2, c.k, others); } // hover
   if (focus && zoomNow > .5) {
-    const fade = Math.min(1, (zoomNow - .5) * 3), [, py] = place(focus), [, h] = sizeOf(focus), onPaper = focus.theme === 'paper';
-    g.globalAlpha = fade;
-    const label = focus.stories ? 'Stories' : focus.c, labelSize = Math.max(18, H * .028);
-    if (focus.theme) caption(label, W < H ? py - h / 2 - Math.max(24, H * .04) : H * .095, labelSize, BODY, onPaper);
-    else text(g, label, W / 2, Math.max(H * .075, py - h / 2 - Math.max(24, H * .04)), labelSize, BODY, '#f4f1e8');
-    g.globalAlpha = 1;
-    if (popAt) {
+    const fade = Math.min(1, (zoomNow - .5) * 3), [, py] = place(focus), h = focus.stories ? rowSize()[1] : sizeOf(focus)[1], onPaper = focus.theme === 'paper';
+    const upClose = focus.stories && storyStage === 'row' ? rowFocus : 0; // a photo held up close has the screen to itself
+    drawTag(focus.stories ? 'Stories' : focus.c, '', W / 2, py - h / 2, fade * (1 - upClose)); // the big lettering below already says the name
+    if (popAt && upClose < .5) {
       const ly = Math.min(H * .93, py + h / 2 + Math.max(38, H * (W < H ? .11 : .075)));
       drawLettering(focus.stories ? STORIES[storyIndex].name : focus.t, ly, now);
       const after = reduced ? 1 : Math.max(0, Math.min(1, (now - popAt - 1000) / 300)); // waits for the burst to clear
@@ -628,7 +972,7 @@ function drawBoard(now) {
         below += Math.max(22, H * .034);
       }
       if (COARSE) { // touch has no hover to say what happens next
-        const hint = focus.stories ? 'Tap or swipe for next picture' : focus.hero ? 'Tap for about · Swipe for next' : onPaper ? 'Tap card to open · Drag the paper' : 'Tap to open · Swipe for next';
+        const hint = focus.stories ? 'Tap or swipe for next picture' : focus.hero ? 'Tap for resume · Swipe for next' : onPaper ? 'Tap card to open · Drag the paper' : 'Tap to open · Swipe for next';
         g.globalAlpha = after;
         if (focus.theme) caption(hint, Math.min(H - 14, below), Math.max(16, H * .02), MONO, onPaper);
         else text(g, hint, W / 2, Math.min(H - 14, below), Math.max(16, H * .02), MONO, '#f4f1e8');
@@ -637,6 +981,30 @@ function drawBoard(now) {
     }
   }
   if (zoomNow < .9) drawTicker(1 - Math.min(1, zoomNow / .6));
+  drawReticle(now);
+}
+// The board's cursor: four brackets that spin round the pointer, then snap onto the card under it. Mouse only.
+const reticle = { x: 0, y: 0, w: 18, h: 18, turn: 0, lock: 0, press: 0, at: 0, on: false };
+const reticleLive = () => reticle.on && !COARSE && !view && !(focus && zoomGoal && focus.theme); // an opened backdrop gets the ordinary cursor back
+function drawReticle(now) {
+  const R = reticle, dt = Math.min(.05, (now - (R.at || now)) / 1000); R.at = now;
+  if (!reticleLive()) { R.ready = false; return; }
+  const c = hover && !drag ? hover : null, ease = k => 1 - Math.exp(-dt * k);
+  let gx = R.px, gy = R.py, gw = 18, gh = 18;
+  if (c) { // locked: hug the card, leaning a little toward the pointer
+    const [px, py] = place(c), [bw, bh] = sizeOf(c), grow = 1 + (c.k || 0) * .05;
+    gx = px + (R.px - px) * .06; gy = py + (R.py - py) * .06; gw = bw * grow / 2 + 8; gh = bh * grow / 2 + 8;
+  }
+  if (!R.ready) { R.x = gx; R.y = gy; R.w = gw; R.h = gh; R.ready = true; }
+  R.x += (gx - R.x) * ease(c ? 22 : 40); R.y += (gy - R.y) * ease(c ? 22 : 40); R.w += (gw - R.w) * ease(20); R.h += (gh - R.h) * ease(20);
+  R.lock += ((c ? 1 : 0) - R.lock) * ease(18); R.press += ((drag ? 1 : 0) - R.press) * ease(30);
+  if (c) R.turn += (Math.round(R.turn / (Math.PI / 2)) * Math.PI / 2 - R.turn) * ease(18); else if (!reduced) R.turn += dt * Math.PI; // a turn every two seconds while it roams
+  const odd = Math.abs(Math.round(R.turn / (Math.PI / 2))) % 2 === 1 && R.lock > .5, sq = 1 - R.press * .14, w = (odd ? R.h : R.w) * sq, h = (odd ? R.w : R.h) * sq, arm = 12;
+  g.save(); g.globalCompositeOperation = 'difference'; g.strokeStyle = '#fff'; g.fillStyle = '#fff'; g.lineWidth = 3; g.lineCap = 'square';
+  g.translate(R.x, R.y); g.rotate(R.turn);
+  for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) { g.beginPath(); g.moveTo(sx * w, sy * h - sy * arm); g.lineTo(sx * w, sy * h); g.lineTo(sx * w - sx * arm, sy * h); g.stroke(); }
+  g.restore();
+  g.save(); g.globalCompositeOperation = 'difference'; g.fillStyle = '#fff'; g.beginPath(); g.arc(R.px, R.py, 2.5 * (1 - R.press * .35), 0, 7); g.fill(); g.restore(); // the dot stays on the pointer
 }
 function wrapLines(s, maxW) {
   const lines = []; let line = '';
@@ -645,50 +1013,114 @@ function wrapLines(s, maxW) {
   }
   return [...lines, line];
 }
-function drawProject() {
-  const { c, p } = view, cw = Math.min(W - 64, Math.max(560, W * .5)), x = (W - cw) / 2, heroH = Math.round(cw * .62), detailH = Math.round(cw * .46);
-  const ease = 1 - (1 - p) ** 3;
-  if (!c.shots) { c.heroBmp = c.heroBmp || bitmap(c, cw, heroH); c.detailBmp = c.detailBmp || bitmap(c, cw, detailH, 1.7); }
-  g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
-  g.globalAlpha = ease;
-  let y = Math.max(72, H * .1) - view.scroll + (1 - ease) * 50;
-  text(g, c.c, W / 2, y, Math.max(20, 24 * sc), BODY, '#f4f1e8'); y += 44;
-  const titleSize = Math.min(cw * .13, 88);
-  if (c.shots) { g.save(); g.beginPath(); g.roundRect(x, y, cw, heroH, 16); g.clip(); worksReel(g, c, x, y, cw, heroH, performance.now()); g.restore(); }
-  else g.drawImage(c.heroBmp, x, y, cw, heroH);
-  y += heroH + 30 + titleSize / 2;
-  text(g, c.t.toUpperCase(), W / 2, y, titleSize, DISPLAY, '#ffe600'); y += titleSize * .85;
-  const bodySize = Math.max(17, Math.min(21, cw * .03));
-  g.font = `${bodySize}px ${BODY}`;
-  for (const line of wrapLines(c.copy || COPY, Math.min(cw, 620))) { text(g, line, W / 2, y, bodySize, BODY, '#d8d6cf'); y += bodySize * 1.5; }
-  y += 30;
-  if (c.features) {
-    const width = Math.min(cw, 620), left = (W - width) / 2, indent = bodySize * 1.2;
-    g.font = `${bodySize}px ${BODY}`;
-    for (const feature of c.features) {
-      g.fillStyle = '#ffe600'; g.fillRect(left, y - bodySize * .2, bodySize * .4, bodySize * .4);
-      for (const line of wrapLines(feature, width - indent)) { text(g, line, left + indent, y, bodySize, BODY, '#f4f1e8', 'left'); y += bodySize * 1.42; }
-      y += bodySize * .5;
-    }
-    y += 30;
-  }
-  if (c.shots) { // every screenshot, with what it shows
-    const caption = Math.max(15, bodySize * .85);
-    for (const shot of c.shots) {
-      const pic = shot.pics[0]; if (!pic || !pic.naturalWidth) continue;
-      const tall = cw * pic.naturalHeight / pic.naturalWidth;
-      if (y + tall > 0 && y < H) { g.save(); g.beginPath(); g.roundRect(x, y, cw, tall, 12); g.clip(); g.drawImage(pic, x, y, cw, tall); g.restore(); }
-      y += tall + caption * 1.2; text(g, shot.cap, W / 2, y, caption, BODY, '#d8d6cf'); y += caption * 2.6;
-    }
-  } else { g.drawImage(c.detailBmp, x, y, cw, detailH); y += detailH + 44; }
-  text(g, 'End of case study', W / 2, y, 22, MONO, '#8b8a85'); y += 80;
-  g.globalAlpha = 1;
-  view.max = Math.max(0, y + view.scroll - H);
+// A project's page: screenshots in cream frames with stars at the corners, features on a frosted panel.
+function projectFrame(x, y, w, h, r, draw) { // cream border, a teal glow and a star at each corner, round any picture
+  g.save(); g.shadowColor = 'rgba(63,193,176,.55)'; g.shadowBlur = 26; g.fillStyle = WORKS_NAVY; g.beginPath(); g.roundRect(x, y, w, h, r); g.fill(); g.restore();
+  g.save(); g.beginPath(); g.roundRect(x, y, w, h, r); g.clip(); draw(); g.restore();
+  g.strokeStyle = WORKS_CREAM; g.lineWidth = 3; g.beginPath(); g.roundRect(x, y, w, h, r); g.stroke();
+  for (const [sx, sy] of [[x, y], [x + w, y], [x, y + h], [x + w, y + h]]) worksStar(sx, sy, 9, WORKS_CREAM);
 }
+// Behind a project's page, the same night sky as the Projects list (Cyrill's pick): its painted washes and twinkling stars,
+// the stars drifting a little as the parts go by.
+const projectStars = Array.from({ length: 60 }, (_, i) => ({ x: Math.abs(Math.sin(i * 12.9) * 43758.5) % 1, y: Math.abs(Math.cos(i * 7.3) * 9999) % 1, d: .05 + (i * 7 % 10) / 33, r: 1 + (i * 5 % 7) * .6, p: i * 1.7, gold: i % 5 === 0 }));
+function projectNight(t) {
+  if (view.skyKey !== `${W}x${H}`) { view.sky = worksPaintSky(); view.skyKey = `${W}x${H}`; }
+  g.drawImage(view.sky, 0, 0, W, H);
+  for (const m of projectStars) { const y = ((m.y * H - view.scroll * m.d * .3) % H + H) % H; g.globalAlpha = reduced ? .8 : (.55 + .45 * Math.sin(t * (1 + m.d * 3) + m.p)) * .9; worksStar(m.x * W, y, m.r + 1.5, m.gold ? WORKS_TEAL : WORKS_CREAM); }
+  g.globalAlpha = 1;
+}
+// A project's page, on the Projects list's night sky. On a wide screen it reads like a case study: the project's words stay put
+// on the right (its name on a cream tag, what kind of project, what it is, its topics, its links), while the left side moves one part
+// per scroll, swipe or arrow key (each picture with what it shows under it, what it does, the end), star dots between the two.
+// On a tall screen the words come first, as the first part, and everything stacks in one column.
+function projectWords(c, x, y, w, size, split, draw) { // returns where the words end and where the links go
+  const tag = Math.min(w * .13, 62, H * .08), names = c.t.toUpperCase().split(' '), blockH = tag * 1.42, gap = tag * .16;
+  const widthOf = s => { g.font = `400 ${tag}px ${WORKS_LABEL}`; return g.measureText(s).width + tag * .9; };
+  const lines = widthOf(names.join(' ')) <= w ? [names.join(' ')] : names; // one tag if the name fits, else a word a tag, stepping right
+  let right = x;
+  lines.forEach((line, i) => {
+    const bw = Math.min(w - i * tag * .5, widthOf(line)), by = y + i * (blockH + gap), bx = x + i * tag * .5; right = Math.max(right, bx + bw);
+    if (draw) { g.fillStyle = 'rgba(5,12,30,.45)'; g.beginPath(); g.roundRect(bx + 4, by + 6, bw, blockH, 12); g.fill(); g.fillStyle = WORKS_CREAM; g.beginPath(); g.roundRect(bx, by, bw, blockH, 12); g.fill(); worksWords(line, bx + bw / 2, by + blockH / 2 + tag * .04, tag, WORKS_NAVY); }
+  });
+  y += lines.length * (blockH + gap) + size * .2;
+  // What kind of project, on a coral pill under the tag's right end.
+  const kind = (c.tags ? `${c.tags[0]} project` : c.c).toUpperCase(), ks = Math.max(12, size * .78);
+  g.font = `400 ${ks}px ${WORKS_LABEL}`; const kw = g.measureText(kind).width + ks * (2.2 + kind.length * .12), kh = ks * 2.2;
+  if (draw) { g.fillStyle = WORKS_CORAL; g.beginPath(); g.roundRect(right - kw, y, kw, kh, kh / 2); g.fill(); worksWords(kind, right - kw / 2, y + kh / 2 + ks * .04, ks, WORKS_NAVY, { spread: ks * .12 }); }
+  y += kh + size * 1.6;
+  // What it is, and beside it (below it, when tall) the topics.
+  const copyW = split ? w * .6 : w; g.font = `600 ${size}px ${WORKS_BODY}`; const copy = wrapLines(c.copy || COPY, copyW);
+  const top = y;
+  for (const line of copy) { if (draw) text(g, line, x, y, size, WORKS_BODY, 'rgba(244,236,216,.94)', 'left'); y += size * 1.62; }
+  const topics = c.topics || [], ts = Math.max(11, size * .78);
+  let ty = split ? top - size * .5 : y + size * .6, tx = split ? x + w * .68 : x;
+  if (topics.length) {
+    if (draw) worksWords('TOPICS', tx, ty, ts, WORKS_TEAL, { align: 'left', spread: ts * .25 });
+    ty += ts * 1.9;
+    for (const topic of topics) {
+      g.font = `400 ${ts}px ${WORKS_LABEL}`; const pw = g.measureText(topic).width + ts * 2.2, ph = ts * 2.1;
+      if (!split && tx + pw > x + w) { tx = x; ty += ph + 8; }
+      if (draw) { g.fillStyle = WORKS_TEAL; g.beginPath(); g.roundRect(tx, ty - ph / 2, pw, ph, ph / 2); g.fill(); worksWords(topic, tx + pw / 2, ty + ts * .04, ts, '#0b2e2a'); }
+      if (split) ty += ph + 8; else tx += pw + 8;
+    }
+    if (!split) y = ty + ts * 1.6;
+  }
+  const bottom = Math.max(y, split ? ty : 0);
+  return { bottom, links: [x, bottom + size * .6] };
+}
+function drawProject() {
+  const { c, p } = view, now = performance.now(), t = reduced ? 0 : now / 1000, ease = 1 - (1 - p) ** 3, split = W > H * 1.05 && W >= 760;
+  // The left side (all of it when tall), and the words' column.
+  const lx = split ? Math.max(28, W * .05) : 0, lw = split ? W * .5 : W, mid = lx + lw / 2, colX = split ? W * .6 : Math.max(20, W * .07), colW = split ? W * .95 - colX : W - colX * 2;
+  const cw = split ? lw : Math.min(W - 40, 640), bodySize = Math.max(15, Math.min(19, (split ? colW : cw) * (split ? .042 : .03))), width = Math.min(cw, 640), caption = Math.max(15, Math.min(18, cw * .028));
+  if (c.shots) worksLoadShots(c); // once; the pictures may not have loaded yet if the page opened without the list
+  if (!c.shots) { const bw = Math.round(Math.min(cw, H * .62 * 1.6)); c.heroBmp = c.heroBmp || bitmap(c, bw, Math.round(bw * .62)); c.detailBmp = c.detailBmp || bitmap(c, cw, Math.round(cw * .46), 1.7); }
+  g.font = `${bodySize}px ${WORKS_BODY}`;
+  const feats = (c.features || []).map(f => wrapLines(f, width - bodySize * 4.2)), pad = bodySize * 1.1;
+  const groups = Math.ceil(feats.length / 6), each = Math.ceil(feats.length / Math.max(1, groups)), chunks = Array.from({ length: groups }, (_, i) => feats.slice(i * each, (i + 1) * each)); // a long list reads better over two parts
+  const parts = []; // each draws itself centred on its own screen, given the top of its block
+  if (!split) { const size = Math.max(15, Math.min(18, W * .042)), h = projectWords(c, colX, 0, colW, size, false, false).bottom; parts.push({ h: h + 70, words: true, draw: y => { const at = projectWords(c, colX, y, colW, size, false, true); view.linksAt = at.links; } }); }
+  const shotPart = (pic, cap) => { const ar = pic && pic.naturalWidth ? pic.naturalWidth / pic.naturalHeight : 16 / 10, pw = Math.min(cw, H * (split ? .66 : .6) * ar), ph = pw / ar;
+    return { h: ph + caption * 3.2, draw: y => { // each picture as big as fits, framed, and under it what it shows on a frosted strip
+      if (!pic || !pic.naturalWidth) return;
+      const px = mid - pw / 2; projectFrame(px, y, pw, ph, 14, () => g.drawImage(pic, px, y, pw, ph)); view.zoomHot.push({ x: px, y, w: pw, h: ph, pic, cap });
+      if (cap) { g.font = `400 ${caption}px ${WORKS_LABEL}`; const sw = Math.min(pw, g.measureText(cap).width + caption * 2.4), sh = caption * 2.1, sy = y + ph + caption * 1.1; g.fillStyle = 'rgba(8,26,92,.6)'; g.strokeStyle = 'rgba(244,236,216,.35)'; g.lineWidth = 1.2; g.beginPath(); g.roundRect(mid - sw / 2, sy, sw, sh, sh / 2); g.fill(); g.stroke(); worksWords(cap, mid, sy + sh / 2 + caption * .04, caption, WORKS_CREAM); }
+    } }; };
+  const shots = c.shots || [];
+  if (shots.length) parts.push(shotPart(shots[0].pics[0], shots[0].cap));
+  chunks.forEach((list, ci) => { const panelH = list.reduce((n, l) => n + l.length * bodySize * 1.45 + bodySize * .55, 0) + pad * 1.4;
+    parts.push({ h: 50 + panelH, draw: y => {
+      worksWords(ci ? "And there's more" : 'What it does', mid, y, Math.max(24, Math.min(40, cw * .06)), WORKS_CREAM, { font: WORKS_SCRIPT }); y += 50;
+      const left = mid - width / 2; g.fillStyle = 'rgba(8,26,92,.55)'; g.strokeStyle = 'rgba(244,236,216,.3)'; g.lineWidth = 1.5; g.beginPath(); g.roundRect(left, y, width, panelH, 20); g.fill(); g.stroke(); // a frosted panel, a coral star for each
+      y += pad + bodySize * .5;
+      list.forEach(ls => { worksStar(left + pad + bodySize * .3, y, bodySize * .42, WORKS_CORAL); ls.forEach(line => { text(g, line, left + pad + bodySize * 1.5, y, bodySize, WORKS_BODY, WORKS_CREAM, 'left'); y += bodySize * 1.45; }); y += bodySize * .55; });
+    } }); });
+  for (const shot of shots.slice(1)) parts.push(shotPart(shot.pics[0], shot.cap));
+  if (!c.shots) { parts.push({ h: c.heroBmp.height / maxPr, draw: y => g.drawImage(c.heroBmp, mid - c.heroBmp.width / maxPr / 2, y, c.heroBmp.width / maxPr, c.heroBmp.height / maxPr) }); parts.push({ h: Math.round(cw * .46), draw: y => g.drawImage(c.detailBmp, mid - cw / 2, y, cw, Math.round(cw * .46)) }); }
+  parts.push({ h: 90, draw: y => { worksStar(mid - 110, y + 20, 7, WORKS_TEAL); worksStar(mid + 110, y + 20, 7, WORKS_TEAL); worksWords('End of case study', mid, y + 20, 20, 'rgba(244,236,216,.75)'); worksWords('Back to the surface with Escape or Back', mid, y + 62, 15, 'rgba(244,236,216,.5)'); } });
+  view.parts = parts.length; view.max = (parts.length - 1) * H;
+  projectNight(t);
+  view.zoomHot = []; g.globalAlpha = ease;
+  parts.forEach((part, i) => { const at = i * H - view.scroll + H / 2 + (1 - ease) * 50; if (Math.abs(at - H / 2) < H) part.draw(at - part.h / 2); });
+  if (split) { // the words, staying put; a smaller size if a long description would run off the screen
+    let size = bodySize; while (size > 13 && projectWords(c, colX, 0, colW, size, true, false).bottom > H * .8) size -= 1;
+    const h = projectWords(c, colX, 0, colW, size, true, false).bottom, y = Math.max(H * .1, (H - h - 70) / 2) + (1 - ease) * 30;
+    view.linksAt = projectWords(c, colX, y, colW, size, true, true).links;
+  }
+  g.globalAlpha = 1;
+  // The links are real buttons, placed under the words: beside the picture when wide, with the first part when tall.
+  if (view.linksAt && !linksBox.hidden) {
+    const [lxs, lys] = view.linksAt, [cx, cy] = toClient(lxs, lys), on = split || Math.abs(view.scroll) < H * .5;
+    Object.assign(linksBox.style, { left: `${cx}px`, top: `${cy}px`, maxWidth: `${(split ? colW : W - colX * 2)}px`, visibility: on ? '' : 'hidden', opacity: ease });
+  }
+  const n = parts.length, step = Math.min(20, H * .6 / n), rx = split ? (lx + lw + colX) / 2 : W - Math.max(13, W * .028), top = H / 2 - step * (n - 1) / 2, at = Math.round(view.scroll / H); // where you are
+  for (let i = 0; i < n; i++) { const dy = top + i * step; if (i === at) worksStar(rx, dy, 8, WORKS_CORAL, .12); else { g.fillStyle = 'rgba(244,236,216,.45)'; g.beginPath(); g.arc(rx, dy, 2.6, 0, 7); g.fill(); } }
+}
+function viewStep(d) { if (!view) return; const n = view.parts || 1, i = Math.max(0, Math.min(n - 1, Math.round(view.target / H) + d)); view.target = i * H; dirty = true; } // one part at a time
 function drawScene() {
   g.setTransform(pr, 0, 0, pr, 0, 0);
   g.imageSmoothingQuality = 'high';
-  view ? drawProject() : gate ? drawGate(performance.now()) : book ? drawBook(performance.now()) : tome ? drawTome(performance.now()) : works ? drawWorks(performance.now()) : drawBoard(performance.now());
+  view ? drawProject() : gate ? drawGate(performance.now()) : book ? drawBook(performance.now()) : tome ? drawTome(performance.now()) : resume ? drawResume(performance.now()) : works ? drawWorks(performance.now()) : drawBoard(performance.now());
 }
 
 /* ---------- CRT shader ---------- */
@@ -1087,7 +1519,7 @@ function step(dt) {
     tickerX += dt * .07;
     if (COARSE && !reduced) { const t = performance.now(); lookTarget.x = Math.sin(t / 2900) * 14; lookTarget.y = Math.cos(t / 3700) * 10; } // no mouse to look around with, so the board drifts by itself
     if (!storyAt) storyAt = performance.now();
-    if (!reduced && performance.now() - storyAt > STORY_MS) stepStory(1);
+    if (!reduced && performance.now() - storyAt > STORY_MS && !(focus === stories && zoomGoal)) stepStory(1); // opened, the stack and the row wait for a hand; only the board's card turns by itself
     dirty = true; // the ticker and the story border never stop moving
   }
   for (const c of items) {
@@ -1102,10 +1534,10 @@ function step(dt) {
     if (view.p < 1) { view.p = reduced ? 1 : Math.min(1, view.p + .05); dirty = true; }
     if (view.c.shots && !reduced) dirty = true; // the reel keeps playing
     const d = view.target - view.scroll;
-    if (Math.abs(d) > .3) { view.scroll += d * .18; dirty = true; }
+    if (Math.abs(d) > .3 && !drag) { view.scroll += d * .18; dirty = true; }
   }
   glitch = Math.max(0, glitch - dt / 320);
-  scan += ((mode === 'room' ? 0 : gate || book || tome || works ? .3 : 1) - scan) * .03; // the detail in these two shouldn't sit behind heavy scanlines
+  scan += ((mode === 'room' ? 0 : resume ? .06 : gate || book || tome || works ? .3 : 1) - scan) * .03; // the detail in these two shouldn't sit behind heavy scanlines
   const clampVel = v => Math.max(-.011, Math.min(.011, v));
   shaderVx += (clampVel(vx * sc / W * 3) - shaderVx) * .25;
   shaderVy += (clampVel(-vy * sc / H * 3) - shaderVy) * .25;
@@ -1143,7 +1575,7 @@ function updateSound() {
     hissGain = audioCtx.createGain(); hissGain.gain.value = 0;
     src.connect(hissGain).connect(audioCtx.destination); src.start();
   }
-  if (hissGain) hissGain.gain.setTargetAtTime(tvOn ? v * (channel === 2 ? .22 : .03) : 0, audioCtx.currentTime, .05);
+  if (hissGain) hissGain.gain.setTargetAtTime(tvOn && mode === 'room' ? v * (channel === 2 ? .22 : .03) : 0, audioCtx.currentTime, .05); // the tube's static belongs to the room, not to what's inside it
 }
 function setChannel(n) {
   if (n === channel) return;
@@ -1226,33 +1658,35 @@ function openProject(c, viaKeyboard = false, passedGate = false) {
   syncBack();
   live.textContent = `${c.t}, ${c.c}. ${c.copy || COPY} ${(c.features || []).join('. ')}`;
   linksBox.replaceChildren(...(c.links || []).map(([label, href]) => { const a = document.createElement('a'); a.href = href; a.target = '_blank'; a.rel = 'noopener'; a.textContent = label; return a; }));
-  linksBox.hidden = !c.links;
+  linksBox.hidden = !c.links; linksBox.removeAttribute('style'); linksBox.style.visibility = 'hidden';
   crt.style.cursor = 'grab';
   keyboardFocus(backBtn);
 }
 function closeProject() {
   const c = view.c, viaKeyboard = view.viaKeyboard;
-  view = null; glitch = reduced ? 0 : 1; dirty = true; linksBox.hidden = true;
+  view = null; glitch = reduced ? 0 : 1; dirty = true; linksBox.hidden = true; linksBox.removeAttribute('style');
   syncBack(); live.textContent = ''; backBtn.hidden = noRoom;
   if (viaKeyboard) navButtons.get(c).focus();
 }
-const goBack = () => { if (view) closeProject(); else if (gate) closeGate(); else if (book) closeBook(); else if (tome) closeTome(); else if (works) closeWorks(); else if (zoomGoal) clearFocus(); else leave(); };
+const goBack = () => { if (view) closeProject(); else if (gate) closeGate(); else if (book) closeBook(); else if (tome) closeTome(); else if (resume) closeResume(); else if (works) closeWorks(); else if (zoomGoal && focus === stories && storyStage === 'row') { if (rowFocusGoal) rowFocusGoal = 0; else { storyStage = 'stack'; syncBack(); } } else if (zoomGoal) clearFocus(); else leave(); };
 backBtn.addEventListener('click', goBack);
 
 /* ---------- Input inside the TV ---------- */
 // First click selects a card, a click on the selected one opens it.
 function activate(c, viaKeyboard = false) {
   if (focus !== c || !zoomGoal) setFocus(c);
-  else if (c.hero) $('#about').showModal();
-  else if (c.stories) stepStory(1);
+  else if (c.hero) openResume(c, viaKeyboard);
+  else if (c.stories) { if (storyStage === 'stack') openRow(); else rowFocusGoal = 1 - rowFocusGoal; }
   else openProject(c, viaKeyboard);
 }
 crt.addEventListener('pointerdown', e => {
+  if (asciiBg && hero.themeK > .5) asciiBg.wave = [...toScene(e.clientX, e.clientY), performance.now()];
   if (mode !== 'inside') return;
   drag = { x: e.clientX, y: e.clientY, startX: e.clientX, startY: e.clientY, moved: 0, vy: 0, at: 0, rake: paperOpen() && !hit(e.clientX, e.clientY) }; focusCard = null; dirty = true;
   if (drag.rake && paper) { paper.last = null; paper.n = null; }
+  if (resume) resumePress(e.clientX, e.clientY);
   crt.setPointerCapture(e.pointerId); crt.style.cursor = 'grabbing';
-  if (e.pointerType === 'touch' && !view && !gate && !book && !tome && !works) { const c = hit(e.clientX, e.clientY); if (c) { c.shakeAt = performance.now(); hover = c; } } // a press gets the hover's shake and label
+  if (e.pointerType === 'touch' && !view && !gate && !book && !tome && !resume && !works) { const c = hit(e.clientX, e.clientY); if (c) { c.shakeAt = performance.now(); hover = c; } } // a press gets the hover's shake and label
   if (e.pointerType === 'touch' && works && !view) worksHover(e.clientX, e.clientY);
 });
 crt.addEventListener('pointermove', e => {
@@ -1261,6 +1695,7 @@ crt.addEventListener('pointermove', e => {
   if (!drag) {
     if (e.pointerType === 'mouse' && book) { if (book.phase === 'ride') bookHover(e.clientX, e.clientY); }
     else if (e.pointerType === 'mouse' && tome) { if (tome.phase === 'read') tomeHover(e.clientX, e.clientY); }
+    else if (e.pointerType === 'mouse' && resume) resumeHover(e.clientX, e.clientY);
     else if (e.pointerType === 'mouse' && works && !view) worksHover(e.clientX, e.clientY);
     else if (e.pointerType === 'mouse' && !view && !gate) {
       const c = hit(e.clientX, e.clientY);
@@ -1273,31 +1708,37 @@ crt.addEventListener('pointermove', e => {
   drag.x = e.clientX; drag.y = e.clientY; drag.moved += Math.abs(dx) + Math.abs(dy);
   if (drag.moved > 6) hover = null;
   drag.vy = dy; drag.at = performance.now();
-  if (view) view.target = view.scroll = Math.max(0, Math.min(view.max, view.scroll - dy));
+  if (view) view.scroll = Math.max(0, Math.min(view.max, view.scroll - dy)); // the page follows the hand; letting go lands on a part
   else if (gate) return;
   else if (book) { if (book.phase === 'ride') bookDrag(dx); return; }
   else if (tome) { tomeDrag(dx); return; }
+  else if (resume) { resumeDrag(dy, e.clientX, e.clientY); return; }
   else if (works) { worksDrag(dy); if (drag.moved > 6) works.hover = null; return; }
+  else if (drag.slide || (focus === stories && zoomGoal && Math.abs(e.clientX - drag.startX) > Math.abs(e.clientY - drag.startY))) { drag.slide = true; if (storyStage === 'stack') stackDrag = { dx: e.clientX - drag.startX, dy: e.clientY - drag.startY, held: true }; else rowDrag(dx); } // sideways moves the stack or the row; up and down still change card
   else if (drag.rake) rakeTo(...toScene(e.clientX, e.clientY));
   else { tug.x += dx / sc; tug.y += dy / sc; }
   dirty = true;
 });
 function endDrag(e) {
   if (!drag) return;
-  const clicked = drag.moved < 6 && e.type === 'pointerup', { startX, startY, vy, at, rake } = drag;
+  const clicked = drag.moved < 6 && e.type === 'pointerup', { startX, startY, vy, at, rake, slide } = drag;
   drag = null; crt.style.cursor = 'grab';
   if (e.pointerType === 'touch') hover = null;
   if (gate) { if (clicked) gateClick(); return; }
   if (book) { if (book.phase === 'ride') { if (clicked) bookClick(e.clientX, e.clientY); else if (e.type === 'pointerup') bookFling(); } return; }
   if (tome) { tomeRelease(clicked, e.clientX, e.clientY); return; }
+  if (resume) { resumeRelease(clicked, e.clientX, e.clientY); return; }
   if (works && !view) { if (clicked) { works.pull = 0; worksClick(e.clientX, e.clientY); } else worksRelease(vy, at); if (e.pointerType === 'touch') works.hover = null; return; }
+  if (slide) { if (storyStage === 'stack') stackRelease(e.clientX - startX); else rowSettle(); if (!clicked) return; }
+  if (clicked && view && view.zoomHot) { const [sx, sy] = toScene(e.clientX, e.clientY), z = view.zoomHot.find(q => sx > q.x && sx < q.x + q.w && sy > q.y && sy < q.y + q.h); if (z && z.pic) { zoomPicture(z.pic.src, z.cap, e.clientX, e.clientY); return; } }
+  if (clicked && !view && focus === stories && zoomGoal && (storyStage === 'stack' ? stackHit(e.clientX, e.clientY) && (openRow(), true) : rowClick(e.clientX, e.clientY))) return;
+  if (view && !clicked && e.type === 'pointerup') { const moved = (view.scroll - view.target) / H, flick = performance.now() - at < 80 && Math.abs(vy) > 5; viewStep(flick ? (vy < 0 ? 1 : -1) : Math.abs(moved) > .15 ? Math.sign(moved) : 0); return; } // a flick, or a drag past a sixth of the screen, moves one part
   if (clicked && !view) {
     const c = hit(e.clientX, e.clientY);
     if (c) activate(c); else if (zoomGoal) clearFocus();
   } else if (e.type === 'pointerup' && e.pointerType === 'touch') {
     const sx = e.clientX - startX, sy = e.clientY - startY;
-    if (view) { if (performance.now() - at < 80) view.target = Math.max(0, Math.min(view.max, view.scroll - vy * 14)); } // a flick keeps the page moving
-    else if (!rake && focus && zoomGoal && Math.max(Math.abs(sx), Math.abs(sy)) > 44) {
+    if (!view && !rake && focus && zoomGoal && Math.max(Math.abs(sx), Math.abs(sy)) > 44) {
       // Sideways follows stepFocus, so it turns story pictures. Up and down always change card, or nothing could leave Stories.
       if (Math.abs(sx) > Math.abs(sy)) stepFocus(sx < 0 ? 1 : -1);
       else setFocus(items[(items.indexOf(focus) + (sy < 0 ? 1 : -1) + items.length) % items.length]);
@@ -1305,6 +1746,8 @@ function endDrag(e) {
   }
 }
 crt.addEventListener('pointerup', endDrag);
+crt.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; [reticle.px, reticle.py] = toScene(e.clientX, e.clientY); reticle.on = mode === 'inside' && !view && !gate && !book && !tome && !resume && !works; if (reticleLive()) crt.style.cursor = 'none'; else if (crt.style.cursor === 'none') crt.style.cursor = 'grab'; }); // the brackets stand in for the system cursor
+crt.addEventListener('pointerleave', () => { reticle.on = false; reticle.ready = false; });
 crt.addEventListener('pointercancel', endDrag);
 crt.addEventListener('wheel', e => {
   if (mode !== 'inside') return;
@@ -1312,8 +1755,11 @@ crt.addEventListener('wheel', e => {
   if (gate) return;
   if (book) { if (book.phase === 'ride') bookMove((e.deltaY + e.deltaX) * .018); return; }
   if (tome) { tomeWheel(e.deltaY + e.deltaX); return; }
+  if (resume) { resumeWheel(e.deltaY); return; }
   if (works && !view) { worksWheel(e.deltaY); return; }
-  if (view) view.target = Math.max(0, Math.min(view.max, view.target + e.deltaY));
+  if (view) { const now = performance.now(); view.acc = now > (view.lock || 0) ? (view.acc || 0) + e.deltaY : 0; if (Math.abs(view.acc) >= 60) { viewStep(Math.sign(view.acc)); view.acc = 0; view.lock = now + (reduced ? 200 : 750); } } // one gesture, one part
+  else if (focus === stories && zoomGoal && storyStage === 'row') { rowDrag(-(Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) * 1.25); clearTimeout(rowTimer); rowTimer = setTimeout(() => { rowFlingAt = 0; rowSettle(); }, 150); } // any wheel moves the open row
+  else if (focus === stories && zoomGoal && Math.abs(e.deltaX) > Math.abs(e.deltaY)) { if (Math.abs(e.deltaX) > 20 && performance.now() > stackWheelAt) { stackWheelAt = performance.now() + 450; stepStory(1, -Math.sign(e.deltaX) * 60, 0); } } // a sideways swipe throws the top photo
   else {
     // Wheel up zooms toward whatever is nearest the mouse and selects it without a click. Letting go snaps to in or out.
     const opening = zoomGoal === 0 || zoomGoal < .35;
@@ -1330,11 +1776,12 @@ addEventListener('keydown', e => {
   if (gate) { if ((e.key === 'Enter' || e.key === ' ') && document.activeElement !== backBtn) { e.preventDefault(); gateClick(); } return; }
   if (book) { const step = { ArrowRight: 7, ArrowDown: 7, ArrowLeft: -7, ArrowUp: -7 }[e.key]; if (step) { e.preventDefault(); if (book.phase === 'ride') bookMove(step); } return; }
   if (tome) { tomeKey(e); return; }
+  if (resume) { resumeKey(e); return; }
   if (works && !view) { worksKey(e); return; }
   if (e.key === '?') { $('#about').showModal(); return; }
   if (view) {
-    const dy = { ArrowUp: -90, ArrowDown: 90 }[e.key];
-    if (dy) { e.preventDefault(); view.target = Math.max(0, Math.min(view.max, view.target + dy)); dirty = true; }
+    const dy = { ArrowUp: -1, ArrowDown: 1, PageUp: -1, PageDown: 1, ' ': 1 }[e.key];
+    if (dy) { e.preventDefault(); viewStep(dy); }
     return;
   }
   const inField = document.activeElement && document.activeElement.tagName === 'BUTTON';
@@ -1385,6 +1832,18 @@ talk.addEventListener('pointerenter', () => setPeel(true)); talk.addEventListene
 talk.addEventListener('focus', () => { if (usedKeyboard) setPeel(true); }); talk.addEventListener('blur', () => setPeel(false));
 drawPeel(PEEL_REST);
 
+/* ---------- Pictures open large when clicked, anywhere on the site ---------- */
+// It grows out of the point that was clicked; a click anywhere, or Escape, puts it away.
+function zoomPicture(src, caption = '', clientX = innerWidth / 2, clientY = innerHeight / 2) {
+  if (!src) return;
+  const z = $('#zoom'), img = z.querySelector('img');
+  img.src = src; img.alt = caption || 'Picture'; z.querySelector('p').textContent = caption;
+  img.style.setProperty('--from', `${(clientX / innerWidth * 100).toFixed(1)}% ${(clientY / innerHeight * 100).toFixed(1)}%`); // grows from about where it was clicked
+  img.style.animation = 'none'; void img.offsetWidth; img.style.animation = '';
+  if (!z.open) z.showModal();
+}
+$('#zoom').addEventListener('click', () => $('#zoom').close());
+
 /* ---------- Dialogs ---------- */
 $('#btn-about').addEventListener('click', () => $('#about').showModal());
 $('#btn-talk').addEventListener('click', () => $('#contact').showModal());
@@ -1413,5 +1872,9 @@ initRoom().catch(err => {
 </script>
 <script src="gate.js"></script>
 <script src="notebook.js"></script>
+<script src="notebook-models.js"></script>
 <script src="works.js"></script>
 <script src="tome.js"></script>
+<script src="resume.js"></script>
+<script src="sound.js"></script>
+<script src="tour.js"></script>

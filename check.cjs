@@ -6,7 +6,7 @@ const fs = require('fs');
 const http = require('http');
 const path = require('path');
 
-const TYPES = { '.html': 'text/html', '.jpg': 'image/jpeg', '.png': 'image/png', '.js': 'text/javascript', '.json': 'application/json', '.wasm': 'application/wasm' };
+const TYPES = { '.html': 'text/html', '.jpg': 'image/jpeg', '.png': 'image/png', '.js': 'text/javascript', '.json': 'application/json', '.wasm': 'application/wasm', '.webp': 'image/webp', '.mp3': 'audio/mpeg' };
 const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0;font:14px/1.4 system-ui,sans-serif}[hidden]{display:none!important}</style></head><body>${fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8')}</body></html>`; // same skeleton the Artifact host wraps around the file
 
 (async () => {
@@ -38,7 +38,7 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
   }
 
   const PHONE = { deviceScaleFactor: 3, hasTouch: true, isMobile: true }, TOMES = 8;
-  for (const [name, viewport, device] of [['desktop', { width: 1440, height: 860 }], ['phone', { width: 390, height: 844 }, PHONE], ['small', { width: 360, height: 640 }, PHONE], ['landscape', { width: 844, height: 390 }, PHONE]]) {
+  for (const [name, viewport, device] of [['desktop', { width: 1440, height: 860 }], ['phone', { width: 390, height: 844 }, PHONE], ['small', { width: 360, height: 640 }, PHONE], ['landscape', { width: 844, height: 390 }, PHONE]].filter(([n]) => !process.argv[2] || n === process.argv[2])) { // `node check.cjs landscape` runs one size
     const context = await browser.newContext({ viewport, ...device });
     const page = await context.newPage();
     const errors = [];
@@ -49,6 +49,11 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     await page.waitForFunction(() => roomReady, null, { timeout: 120000 });
     await page.waitForTimeout(3500);
     await page.screenshot({ path: `${name}-1-room.png` });
+    // A first visit: the room's tour points at the TV. Skipping it skips the board's walk too.
+    assert.ok(await page.evaluate(() => tour && tour.kind === 'room' && !coach.hidden), 'a first visit points at the TV');
+    await page.click('#coach [data-skip]');
+    assert.deepStrictEqual(await page.evaluate(() => [!!tour, tourSeen.room, tourSeen.board, coach.hidden]), [false, 1, 1, true], 'skipping ends the tour');
+    await page.evaluate(() => ['box-works', 'box-resume', 'box-book', 'box-tome'].forEach(tourMark)); // no first-time bubbles over the boxes; their "?" is checked in the book
     const litShare = await page.evaluate(() => sg.getImageData(0, 0, SCREEN_W, SCREEN_H).data.filter((v, i) => i % 4 === 1 && v > 60).length / (SCREEN_W * SCREEN_H));
     assert.ok(litShare > .2, `TV picture is not black (${litShare} lit)`);
 
@@ -89,6 +94,17 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     await page.waitForTimeout(700);
     assert.strictEqual(await page.evaluate(() => crt.classList.contains('full') && room.hidden), true);
     await page.screenshot({ path: `${name}-5-inside.png` });
+    // The board's walk, as the lemon's "Show me around" starts it: a card per step, each with a spotlight on its target.
+    await page.evaluate(() => { $('#about').showModal(); }); await page.click('#tour-again');
+    for (let i = 0; i < 7; i++) {
+      assert.strictEqual(await page.evaluate(() => tour && tour.i), i, `tour step ${i + 1}`);
+      await page.waitForFunction(() => tour.placed, null, { timeout: 30000 }); // placed on the next frame
+      const inView = await page.evaluate(() => { const r = tour.card.getBoundingClientRect(), s = tour.spot.getBoundingClientRect(); return r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight && (tour.spot.hidden || s.width > 20); });
+      assert.ok(inView, `tour step ${i + 1} fits the screen`);
+      if (i === 2) await page.screenshot({ path: `${name}-5b-tour.png` });
+      await page.click('#coach [data-next]');
+    }
+    assert.strictEqual(await page.evaluate(() => !tour && coach.hidden), true, 'Done ends the walk');
 
     // One page: every card fits on screen without overlapping another or the stickers' corners.
     const layout = await page.evaluate(() => {
@@ -120,7 +136,7 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
       await page.mouse.move(orbit[0], orbit[1]);
       await page.mouse.wheel(0, -500);
       await page.waitForFunction(() => focus && zoomGoal === 1, null, { timeout: 30000 });
-      assert.strictEqual(await page.evaluate(() => focus.t), 'Works', 'wheel selects nearest card');
+      assert.strictEqual(await page.evaluate(() => focus.t), 'Projects', 'wheel selects nearest card');
       await page.waitForFunction(() => popAt > 0, null, { timeout: 60000 });
       await page.waitForTimeout(350);
       await page.screenshot({ path: `${name}-6-focus.png` });
@@ -152,15 +168,21 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     await page.keyboard.press('Escape');
     assert.strictEqual(await page.evaluate(() => zoomGoal), 0, 'Escape lets go of the selection');
 
-    // Stories: selecting shows the current picture, and clicking it moves on.
+    // Stories: selecting shows the photo stack, clicking the top photo opens the ring there, and clicking the ring moves on.
     await page.evaluate(() => setFocus(stories));
-    await page.waitForFunction(() => popAt > 0, null, { timeout: 60000 });
+    await page.waitForFunction(() => popAt > 0 && zoomNow > .98, null, { timeout: 60000 }); // arrived, not just popped: on the slow renderer the camera is still moving at the pop
     await page.waitForTimeout(350);
     await page.screenshot({ path: `${name}-9-stories.png` });
     const before = await page.evaluate(() => storyIndex);
     const storyCentre = await page.evaluate(() => [...place(stories)]);
     await page.mouse.click(storyCentre[0], storyCentre[1]);
-    assert.notStrictEqual(await page.evaluate(() => storyIndex), before, 'clicking a story moves on');
+    const opened = await page.evaluate(() => [storyStage, storyIndex]);
+    assert.deepStrictEqual(opened, ['row', before], `clicking the stack opens the row on that photo (got ${opened})`);
+    const nextOver = await page.evaluate(() => Math.min(rowSize()[2], W / 2 - 14)); // on a phone the next photo only peeks in at the edge
+    await page.mouse.click(storyCentre[0] + nextOver, storyCentre[1]);
+    assert.notStrictEqual(await page.evaluate(() => storyIndex), before, 'clicking beside the middle of the row moves on');
+    await page.evaluate(() => goBack());
+    assert.deepStrictEqual(await page.evaluate(() => [storyStage, zoomGoal]), ['stack', 1], 'back from the row returns to the stack');
     await page.evaluate(() => clearFocus());
     await page.waitForFunction(() => !focus, null, { timeout: 60000 });
     // A story changing on the board must not disturb another selected card.
@@ -190,14 +212,14 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     await page.mouse.move(viewport.width * from[0], viewport.height * from[1]); await page.mouse.down();
     await page.mouse.move(viewport.width * to[0], viewport.height * to[1], { steps: 8 }); await page.mouse.up();
     assert.notStrictEqual(await rowsAt(), beforeRake, 'a drag rakes the paper');
-    assert.strictEqual(await page.evaluate(() => [focus.t, pan.x, paper.raked].join()), 'Field Notes,0,true', 'raking leaves the board where it is');
+    assert.strictEqual(await page.evaluate(() => [focus.t, pan.x, paper.raked].join()), 'Personal,0,true', 'raking leaves the board where it is');
     await page.waitForTimeout(600);
     await page.screenshot({ path: `${name}-c-raked.png` });
-    // The middle box and the last two keep the plain board.
+    // The résumé card has its own backdrop, the ASCII horizon, which covers the board.
     await page.evaluate(() => setFocus(hero));
-    await page.waitForFunction(() => projects[1].themeK === 0 && zoomNow > .98, null, { timeout: 90000 });
+    await page.waitForFunction(() => projects[1].themeK === 0 && hero.themeK > .98 && zoomNow > .98, null, { timeout: 90000 });
     // Polled: under software rendering the first read after a fade can return an old frame.
-    await page.waitForFunction(() => [...sceneCanvas.getContext('2d').getImageData(sceneCanvas.width >> 1, 2, 1, 1).data].slice(0, 3).join() === '13,13,14', null, { timeout: 30000, polling: 200 });
+    await page.waitForFunction(() => [...sceneCanvas.getContext('2d').getImageData(sceneCanvas.width >> 1, 2, 1, 1).data].slice(0, 3).join() !== '13,13,14', null, { timeout: 30000, polling: 200 });
     await page.evaluate(() => clearFocus());
     await page.waitForFunction(() => !focus, null, { timeout: 60000 });
 
@@ -222,7 +244,7 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     assert.strictEqual(await page.evaluate(() => gate && gate.phase), 'load', 'a click does nothing while loading');
     await page.evaluate(() => clearInterval(window.heldLoad));
     await page.click('#back');
-    assert.strictEqual(await page.evaluate(() => [gate, view, focus && focus.t].join()), ',,Works', 'back leaves the loading screen for the selected card');
+    assert.strictEqual(await page.evaluate(() => [gate, view, focus && focus.t].join()), ',,Projects', 'back leaves the loading screen for the selected card');
     assert.strictEqual(await page.evaluate(() => $('#btn-talk').hidden), false, 'stickers come back');
     await clickOrbit();
     // The camera goes one way, from the plaza to the door, with no fade to white on the way.
@@ -241,7 +263,7 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     await page.screenshot({ path: `${name}-g-open.png` });
     await page.evaluate(() => clearInterval(window.heldDoor));
     await page.waitForFunction(() => works && !gate, null, { timeout: 60000 });
-    assert.strictEqual(await page.evaluate(() => works.c.t), 'Works', 'the door leads to the works page');
+    assert.strictEqual(await page.evaluate(() => works.c.t), 'Projects', 'the door leads to the works page');
     await page.waitForFunction(() => works.flash === 0, null, { timeout: 30000 });
     await page.waitForTimeout(1600);
     await page.screenshot({ path: `${name}-j-works.png` });
@@ -255,7 +277,7 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     await page.keyboard.press('ArrowUp');
     assert.strictEqual(await page.evaluate(() => works.page), 0, 'arrow up goes back one section');
     const pageOf = kind => page.evaluate(k => works.pages.findIndex(p => p.kind === k), kind);
-    const settle = () => page.waitForFunction(() => { window.settled = (window.settled || 0) + 1; return true; }).then(() => page.waitForTimeout(1200));
+    const settle = () => page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))).then(() => page.waitForTimeout(1200)); // two real frames, however slow, so the click areas are the new screen's
     // Filters: Solo leaves out the thesis, and All brings it back.
     const onCount = () => page.evaluate(() => WORKS_WORDS.items.filter(i => i.on).length);
     const allCount = await onCount();
@@ -280,6 +302,8 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     await page.mouse.click(...frame);
     assert.strictEqual(await page.evaluate(() => view && view.c.t), first, 'a project opens');
     assert.ok(await page.evaluate(() => !linksBox.hidden && linksBox.querySelector('a').href.includes('github.com/RIll-cmd/')), 'the project links to its repo');
+    await page.waitForFunction(() => getComputedStyle(linksBox).visibility === 'visible', null, { timeout: 30000 }); // placed under the words on the first frame
+    assert.ok(await page.evaluate(() => { const a = linksBox.querySelector('a'), r = a.getBoundingClientRect(); return document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2) === a; }), 'the project link can be clicked');
     await page.waitForFunction(() => view.c.shots.every(shot => shot.pics.length && shot.pics.every(pic => pic.naturalWidth > 0)), null, { timeout: 60000 });
     await page.waitForTimeout(800);
     await page.screenshot({ path: `${name}-p-case.png` });
@@ -312,7 +336,7 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     assert.strictEqual(await page.evaluate(() => works.pages[works.page].kind), 'talk', 'End goes to the last section');
     await page.screenshot({ path: `${name}-n-ask.png` });
     await page.click('#back');
-    assert.strictEqual(await page.evaluate(() => [works, focus && focus.t].join()), ',Works', 'back leaves the works page for the selected card');
+    assert.strictEqual(await page.evaluate(() => [works, focus && focus.t].join()), ',Projects', 'back leaves the works page for the selected card');
     await page.evaluate(() => clearFocus());
     await page.waitForFunction(() => !focus, null, { timeout: 60000 });
 
@@ -324,6 +348,13 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     await page.waitForFunction(() => book && book.phase === 'ride' && !book.from, null, { timeout: 180000 });
     await page.waitForTimeout(800);
     await page.screenshot({ path: `${name}-h-notebook.png` });
+    // The map of worlds along the top: a click on an icon rides there, over the hills.
+    const icon = await page.evaluate(() => { const m = book.mapHot.find(q => q.i === 1); const [x, y] = toClient(m.x, m.y); return [x, y]; });
+    const txBefore = await page.evaluate(() => book.tx);
+    await page.mouse.click(...icon);
+    assert.ok(await page.evaluate(b => book.tx > b + 20, txBefore), 'a map icon rides to its world');
+    await page.waitForFunction(() => book.world === 1, null, { timeout: 60000 });
+    await page.evaluate(() => { book.tx = book.x = BOOK_FLAT + 7; }); await page.waitForFunction(() => book.world === 0, null, { timeout: 60000 });
     assert.strictEqual(await page.evaluate(() => bookWorld.body.material === bookWorld.spr.cat[0].mat), true, 'the cat rides in the first world');
     await page.mouse.move(cx, cy);
     await page.mouse.wheel(0, 500);
@@ -336,23 +367,91 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     assert.ok(await page.evaluate(t => book.tx > t, afterKey), 'dragging the page rides on');
     assert.strictEqual(await page.evaluate(() => gate || view), null, 'a drag does not leave the notebook');
     // Round the loop to the start again: everything should come back around.
-    await page.evaluate(() => { book.x = book.tx = BOOK_LOOP + 15; });
-    await page.waitForFunction(() => { const p = bookWorld.props.find(n => n.name === 'about'); return p.mesh.visible && Math.abs(p.mesh.position.x - (BOOK_LOOP + 15)) < 1; }, null, { timeout: 30000 });
+    await page.evaluate(() => { book.x = book.tx = BOOK_LOOP + BOOK_FLAT + 15; });
+    await page.waitForFunction(() => { const p = bookWorld.props.find(n => n.name === 'about'); return p.mesh.visible && Math.abs(p.mesh.position.x - (BOOK_LOOP + p.x)) < 1; }, null, { timeout: 30000 });
     await page.waitForTimeout(600);
     await page.screenshot({ path: `${name}-i-looped.png` });
-    const notePoint = await page.evaluate(() => { for (let y = 20; y < H; y += 12) for (let x = 20; x < W; x += 12) { const p = bookPick(x, y); if (p && p.name === 'about') return [x, y]; } return null; });
+    const notePoint = await page.evaluate(() => { for (let y = 20; y < H; y += 12) for (let x = 20; x < W; x += 12) { const p = bookPick(x, y); if (p && p.name === 'about' && bookMapAt(x, y) < 0) return [x, y]; } return null; }); // not under the map of worlds, which takes its own clicks
     assert.ok(notePoint, 'the note can be picked somewhere on screen');
     await page.mouse.click(...notePoint);
     await page.waitForTimeout(100);
     assert.strictEqual(await page.evaluate(() => book.say && book.say.prop && book.say.prop.name), 'about', 'clicking a drawing makes it speak');
     await page.click('#back');
-    assert.strictEqual(await page.evaluate(() => [book, gate, view, focus && focus.t].join()), ',,,Field Notes', 'back leaves the notebook for the selected card');
+    assert.strictEqual(await page.evaluate(() => [book, gate, view, focus && focus.t].join()), ',,,Personal', 'back leaves the notebook for the selected card');
+
+    // The middle card: draw a circle, see the name, scroll to the hands, hold until they touch, read the résumé.
+    await page.evaluate(() => { clearFocus(); activate(hero); activate(hero); });
+    assert.strictEqual(await page.evaluate(() => resume && resume.phase), 'intro', 'the middle card starts on the glass');
+    await page.waitForFunction(() => resumePics.glass.naturalWidth && resumePics.point[0].naturalWidth && resume.L, null, { timeout: 60000 });
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: `${name}-u-intro.png` });
+    assert.strictEqual(await page.evaluate(() => { for (let i = 0; i <= 44; i++) { const a = i / 44 * 6.6, r = Math.min(W, H) * .16; resumeHover(W / 2 + Math.cos(a) * r, H * .4 + Math.sin(a) * r); } return [resume.phase, resume.path.length].join(); }), 'intro,0', 'circling without holding the button draws nothing');
+    assert.strictEqual(await page.evaluate(() => { for (let i = 0; i < 12; i++) resumeTrace(100 + i * 9, 200, 1000 + i * 20); return resume.phase; }), 'intro', 'a straight line is not a circle');
+    await page.evaluate(() => { resume.path = []; const t = performance.now(), r = Math.min(W, H) * .16; for (let i = 0; i <= 44; i++) { const a = i / 44 * 6.6; resumeTrace(W / 2 + Math.cos(a) * r, H * .4 + Math.sin(a) * r, t + i * 8); } });
+    assert.strictEqual(await page.evaluate(() => resume.phase), 'title', 'a drawn circle wakes the page');
+    await page.waitForTimeout(1500);
+    await page.screenshot({ path: `${name}-v-title.png` });
+    await page.mouse.move(cx, cy); await page.mouse.wheel(0, 5000);
+    await page.waitForFunction(() => resume.a > .93, null, { timeout: 30000 });
+    await page.waitForFunction(() => resumePics.world.naturalWidth && resumePics.robot.every(i => i.naturalWidth) && resumePics.human.every(i => i.naturalWidth), null, { timeout: 60000 });
+    await page.waitForTimeout(700);
+    await page.screenshot({ path: `${name}-w-hands.png` });
+    await page.mouse.move(cx, cy); await page.mouse.down();
+    await page.waitForFunction(() => resume.hold > .3, null, { timeout: 20000 });
+    await page.mouse.up();
+    await page.waitForFunction(() => resume.hold === 0, null, { timeout: 20000 });
+    assert.strictEqual(await page.evaluate(() => resume.phase), 'world', 'letting go too early does not connect');
+    await page.mouse.down();
+    await page.waitForFunction(() => resume.hold > .8, null, { timeout: 30000 });
+    await page.screenshot({ path: `${name}-x-reach.png` });
+    await page.waitForFunction(() => resume.phase === 'read', null, { timeout: 30000 });
+    await page.mouse.up();
+    assert.ok(await page.evaluate(() => resume.L.tipGap < 8), 'the fingertips touch');
+    await page.waitForFunction(() => resumePics.tie.naturalWidth && resume.wash === 0, null, { timeout: 30000 });
+    await page.screenshot({ path: `${name}-y-resume.png` });
+    assert.ok(await page.evaluate(() => { const fits = t => t.t === undefined || (g.font = t.font, t.x + g.measureText(t.t).width <= W && t.x >= 0); return resume.L.blocks.every(b => b.items.every(fits) && (b.body || []).every(fits)); }), 'no line runs off the screen');
+    assert.deepStrictEqual(await page.evaluate(() => resumePics.works.filter(i => i.complete && !i.naturalWidth).map(i => i.src)), [], 'every project picture loads');
+    await page.mouse.move(cx, cy); await page.mouse.wheel(0, 700);
+    await page.waitForFunction(() => resume.y > 50, null, { timeout: 20000 });
+    assert.strictEqual(await page.evaluate(() => [resume.open.Professional, !!resume.open.Courses].join()), 'true,false', 'the first certificates start open');
+    const before2 = await page.evaluate(() => resume.L.max);
+    await page.evaluate(() => resumeGo('Courses'));
+    await page.waitForFunction(m => resume.L.max > m + 10, before2, { timeout: 20000 });
+    await page.evaluate(() => { resumeGo('Courses'); resumeGo('sec:Skills'); });
+    await page.waitForFunction(() => resume.section === 'Skills' && Math.abs(resume.y - resume.ty) < 3, null, { timeout: 20000 });
+    await page.screenshot({ path: `${name}-z-skills.png` });
+    await page.evaluate(() => { resume.y = resume.ty = resume.L.max; });
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: `${name}-z-end.png` });
+    const hello = await page.evaluate(() => { for (let y = 10; y < H; y += 5) for (let x = 10; x < W; x += 5) { const h = resumeSpot(x, y); if (h && h.go === 'hello' && document.elementFromPoint(x, y) === crt) return [x, y]; } return null; });
+    assert.ok(hello, 'Say hello can be clicked');
+    await page.mouse.move(...hello); await page.mouse.down(); await page.mouse.up();
+    assert.ok(await page.evaluate(() => $('#contact').open), 'Say hello opens the contact dialog');
+    await page.evaluate(() => $('#contact').close());
+    await page.keyboard.press('Escape');
+    assert.strictEqual(await page.evaluate(() => !!resume), false, 'Escape closes the resume');
+    assert.strictEqual(await page.evaluate(() => $('#btn-talk').hidden), false, 'stickers come back after the resume');
+    await page.evaluate(() => openResume(hero, false));
+    assert.strictEqual(await page.evaluate(() => resume.phase), 'read', 'coming back goes straight to the resume');
+    await page.keyboard.press('Escape');
+    await page.evaluate(() => { resumeDone = false; openResume(hero, false); });
+    await page.keyboard.press('Enter'); await page.keyboard.press('Enter');
+    await page.waitForFunction(() => resume.a > .93, null, { timeout: 30000 });
+    await page.keyboard.press('Enter');
+    await page.waitForFunction(() => resume.phase === 'read', null, { timeout: 90000 }); // the hold counts frames (dt is capped), and late in a run the software renderer gives about 1 fps
+    await page.keyboard.press('Escape');
+    await page.evaluate(() => clearFocus());
+    await page.waitForFunction(() => !focus, null, { timeout: 60000 });
 
     // Box 3: the book on the table. Every turn of the page is a chapter.
     await page.evaluate(() => { clearFocus(); openTome(projects[2], false); });
     await page.waitForFunction(() => tome && tome.phase === 'read' && !tome.from && !tome.turn, null, { timeout: 180000 });
     await page.waitForTimeout(400);
     await page.screenshot({ path: `${name}-s-tome.png` });
+    // Every box has a "?" beside Back that says how it works.
+    await page.click('#help');
+    assert.strictEqual(await page.evaluate(() => $('#guide').open && $('#guide h2').textContent), 'Experiences', 'the book has a "?" that explains it');
+    await page.click('#guide [data-close]');
     const settled = n => page.waitForFunction(k => tome.at === k && !tome.turn, n, { timeout: 60000 });
     await page.mouse.move(cx, cy); await page.mouse.wheel(0, 600); // the emulated phones divide this by their pixel ratio
     await settled(1);
@@ -393,16 +492,16 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
       await page.waitForTimeout(2500); // the burst clears and the hint fades in
       await page.screenshot({ path: `${name}-6-focus.png` });
       await swipe(-120, 0);
-      assert.strictEqual(await page.evaluate(() => focus.t), 'Field Notes', 'swipe left moves to the next card');
+      assert.strictEqual(await page.evaluate(() => focus.t), 'Personal', 'swipe left moves to the next card');
       await swipe(120, 0);
-      assert.strictEqual(await page.evaluate(() => focus.t), 'Works', 'swipe right moves back');
+      assert.strictEqual(await page.evaluate(() => focus.t), 'Projects', 'swipe right moves back');
       await page.evaluate(() => setFocus(stories));
       const picture = await page.evaluate(() => storyIndex);
       await swipe(-120, 0);
       assert.strictEqual(await page.evaluate(() => focus.t), 'Stories', 'sideways swipe stays on Stories');
       assert.notStrictEqual(await page.evaluate(() => storyIndex), picture, 'sideways swipe turns the picture');
       await swipe(0, -120);
-      assert.strictEqual(await page.evaluate(() => focus.t), 'Works', 'swipe up leaves Stories');
+      assert.strictEqual(await page.evaluate(() => focus.t), 'Projects', 'swipe up leaves Stories');
       await page.evaluate(() => clearFocus());
       await page.waitForFunction(() => !focus, null, { timeout: 60000 });
       await swipe(-120, 0);

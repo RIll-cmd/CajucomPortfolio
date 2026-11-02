@@ -1,11 +1,6 @@
 {
   "version": "0.0.1",
   "configurations": [
-    {
-      "name": "portfolio",
-      "runtimeExecutable": "node",
-      "runtimeArgs": ["check.cjs", "serve"],
-      "port": 8765
-    }
+    { "name": "portfolio", "runtimeExecutable": "node", "runtimeArgs": ["check.cjs", "serve"], "port": 8765 }
   ]
 }

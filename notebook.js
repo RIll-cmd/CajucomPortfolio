@@ -24,11 +24,46 @@ const BOOK_PHOTOS = [
   { id: 'photo-erwin', src: 'photos/erwin.jpg', cap: 'Erwin', tint: '#f4b6a5', focus: .1 },
   { id: 'photo-hoshi', src: 'photos/orange-face.jpg', cap: 'Hoshi', tint: '#ffd9a0', focus: .4 },
   { id: 'photo-off', src: 'photos/hoshi-floor.jpg', cap: 'Hoshi, off duty', tint: '#ffd9a0', focus: .5 },
+  { id: 'photo-me', src: 'photos/me-view.jpg', cap: 'the human', tint: '#c7e6b4', focus: .3 },
+  { id: 'photo-view', src: 'photos/me-view.jpg', cap: 'up in the mountains', tint: '#a5ddf2', focus: .55 },
   { id: 'photo-shiro', src: 'photos/tabby-bow.jpg', cap: 'Shiro', tint: '#a9dcf0', focus: .25 },
 ];
-const BOOK_SIZE = 36, BOOK_LOOP = BOOK_SIZE * BOOK_WORDS.worlds.length, BOOK_FLIP_MS = reduced ? 1 : 850;
+const BOOK_SIZE = 80, BOOK_FLAT = 22, BOOK_LOOP = BOOK_SIZE * BOOK_WORDS.worlds.length, BOOK_FLIP_MS = reduced ? 1 : 850;
 const BOOK_PX = COARSE ? .75 : 1.25, BOOK_FOV = 36, BOOK_CAT = 1.22;
 const BOOK_INK = '#26252b', BOOK_FONT = 'Gaegu, "Comic Sans MS", cursive';
+/* ---------- The land: never quite flat, and a different way across at every crossing ----------
+   Home to Food: a steep hump. Food to Up late: a cliff climbed straight up. Up late to Places: a lip, a jump over a chasm, a landing at the sea.
+   Places to My people: a rope bridge over a river. My people back to Home: one long ride down. Each world sits at its own height. */
+const BOOK_BASE = [0, 0, 0, 0, 0], BOOK_GAP = [-2, -1], BOOK_BRIDGE = [-2, -1], BOOK_FADE_W = 16; // no chasm or bridge in this layout
+const BOOK_PEAK = 6, BOOK_TOP = 2; // how high each crossing climbs, and half the width of the flat top the signpost stands on
+const bookMod = x => ((x % BOOK_LOOP) + BOOK_LOOP) % BOOK_LOOP;
+const bookStep = (a, b, v) => { const t = Math.max(0, Math.min(1, (v - a) / (b - a))); return t * t * (3 - 2 * t); };
+const bookBase = x => BOOK_BASE[Math.floor(bookMod(x) / BOOK_SIZE)];
+function bookGround(x) { // the height of the paper ground: flat, then one straight slope up to a flat top where two worlds meet, then straight down
+  const u = bookMod(x) % BOOK_SIZE, d = Math.min(u, BOOK_SIZE - u); // how far from the nearest top
+  return d <= BOOK_TOP ? BOOK_PEAK : d >= BOOK_FLAT ? 0 : BOOK_PEAK * (BOOK_FLAT - d) / (BOOK_FLAT - BOOK_TOP);
+}
+const bookRide = bookGround;
+// Each key: where in the loop, how far the view turns (degrees, + looks back left), how far it tips down, how far back it sits, how much higher it aims.
+const BOOK_CAM = [0, 1, 2, 3, 4].flatMap(i => { const d = i % 2 ? -1 : 1, b = i * BOOK_SIZE; // per world: the top behind, the way down, the flat, the way up
+  return [[b, 2 * d, 10, 1.42, 1.4], [b + 8, -4 * d, 15, 1.16, .2], [b + 19, -7 * d, 11, .9, -.3], [b + 30, -8 * d, 5, .96, 0], [b + 44, 3 * d, 6, 1, 0], [b + 57, -3 * d, 4, 1.02, 0], [b + 66, 4 * d, -3, 1.2, 1.3], [b + 75, 5 * d, 1, 1.38, 1.6]]; });
+function bookCamAt(m) { // a smooth curve through the keys, round the loop
+  const n = BOOK_CAM.length, k = BOOK_CAM, at = i => k[((i % n) + n) % n], span = i => { const a = at(i)[0], b = at(i + 1)[0]; return b > a ? b - a : b + BOOK_LOOP - a; };
+  let i = n - 1; for (let j = 0; j < n; j++) if (m >= k[j][0] && (j === n - 1 || m < k[j + 1][0])) { i = j; break; }
+  if (m < k[0][0]) i = n - 1;
+  const t = (((m - k[i][0]) % BOOK_LOOP) + BOOK_LOOP) % BOOK_LOOP / span(i), p0 = at(i - 1), p1 = at(i), p2 = at(i + 1), p3 = at(i + 2);
+  const cr = c => .5 * (2 * p1[c] + (-p0[c] + p2[c]) * t + (2 * p0[c] - 5 * p1[c] + 4 * p2[c] - p3[c]) * t * t + (-p0[c] + 3 * p1[c] - 3 * p2[c] + p3[c]) * t * t * t);
+  return { yaw: cr(1) * Math.PI / 180, pitch: cr(2) * Math.PI / 180, dist: cr(3), lift: cr(4) };
+}
+const bookSlope = (x, f = bookRide) => (f(x + .05) - f(x - .05)) / .1;
+const bookIn = (x, [a, b]) => { const m = bookMod(x); return m > a && m < b; };
+// The look: thin ink lines, light shading and soft colour for everything but Hoshi and his wheels, who keep their crayon.
+let bookCatStyle = false;
+const BOOK_LINE = .55;
+const bookSoft = c => { if (bookCatStyle || !/^#[0-9a-f]{6}$/i.test(c)) return c; const n = parseInt(c.slice(1), 16), mix = (v, p) => Math.round(v * .85 + p * .15); return `rgb(${mix(n >> 16, 251)},${mix(n >> 8 & 255, 246)},${mix(n & 255, 234)})`; };
+// Things that are always a little alive, by name.
+const BOOK_IDLE = { bush: { sway: .02, bend: true }, kite: { sway: .12 }, lantern: { sway: .07 }, bunting: { sway: .012 }, mushroom: { sway: .02 }, shell: { sway: .01 }, tree: { sway: .02 }, pine: { sway: .025 }, grass: { sway: .07, bend: true }, flower: { sway: .08, bend: true }, cloud: { slide: .6 }, star: { twinkle: true }, sun: { sway: .05 }, moon: { bob: .12 }, egg: { bob: .1 }, mailbox: { sway: .015 }, bowl: { bob: .04 }, boba: { sway: .03 }, owl: { sway: .04 }, gull: { sway: .12 }, tent: { sway: .008 }, lighthouse: { sway: .006 }, icecream: { sway: .03 } };
+const BOOK_SKY = ['#ffffff', '#fff0dc', '#cfc8f2', '#e2f2ff', '#f6dbe6']; // the page's tint in each world, blended across the hills
 let bookWorld = null, bookBuilder = null, bookBuilt = 0, bookRnd = Math.random;
 
 /* ---------- A shaky hand: lines, pencil fill, marker outline ---------- */
@@ -45,16 +80,16 @@ function bookPoly(pts, closed = true, shake = 1.2) { // straight sides, slightly
 const bookOval = (cx, cy, rx, ry = rx, shake = 1.2, n = 16) => bookCurve(Array.from({ length: n }, (_, i) => [cx + Math.cos(i / n * 6.2832) * rx, cy + Math.sin(i / n * 6.2832) * ry]), true, shake);
 const bookFluff = (cx, cy, rx, ry = rx, n = 26, tuft = .08) => bookCurve(Array.from({ length: n * 2 }, (_, i) => { const a = i / (n * 2) * 6.2832, k = i % 2 ? 1 + tuft : 1 - tuft * .3; return [cx + Math.cos(a) * rx * k, cy + Math.sin(a) * ry * k]; }), true, .8);
 function bookPencil(x, shape, color, angle = -.9) { // flat colour, then the strokes of a pencil over it
-  x.save(); x.fillStyle = color; x.globalAlpha = .9; x.fill(shape); x.clip(shape); x.globalAlpha = 1;
+  x.save(); x.fillStyle = bookSoft(color); x.globalAlpha = .9; x.fill(shape); x.clip(shape); x.globalAlpha = 1;
   const [x0, y0, x1, y1] = shape.box, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, reach = Math.hypot(x1 - x0, y1 - y0) / 2 + 4, dx = Math.cos(angle), dy = Math.sin(angle);
   for (let d = -reach; d < reach; d += 4.5 + bookRnd() * 3) {
     const ox = cx - dy * d, oy = cy + dx * d;
-    x.strokeStyle = bookRnd() < .5 ? 'rgba(255,255,255,.2)' : 'rgba(40,20,50,.08)'; x.lineWidth = 1.5 + bookRnd() * 2;
+    x.strokeStyle = bookRnd() < .5 ? `rgba(255,255,255,${bookCatStyle ? .2 : .1})` : `rgba(40,20,50,${bookCatStyle ? .08 : .04})`; x.lineWidth = 1.5 + bookRnd() * 2;
     x.beginPath(); x.moveTo(ox - dx * reach, oy - dy * reach); x.lineTo(ox + dx * reach, oy + dy * reach); x.stroke();
   }
   x.restore();
 }
-function bookInk(x, shape, width = 4.2, color = BOOK_INK) { x.lineJoin = x.lineCap = 'round'; x.strokeStyle = color; x.lineWidth = width; x.stroke(shape); x.globalAlpha = .4; x.save(); x.translate(.9, -.7); x.lineWidth = width * .6; x.stroke(shape); x.restore(); x.globalAlpha = 1; }
+function bookInk(x, shape, width = 4.2, color = BOOK_INK) { width *= bookCatStyle ? 1 : BOOK_LINE; x.lineJoin = x.lineCap = 'round'; x.strokeStyle = color; x.lineWidth = width; x.stroke(shape); x.globalAlpha = .4; x.save(); x.translate(.9, -.7); x.lineWidth = width * .6; x.stroke(shape); x.restore(); x.globalAlpha = 1; }
 const bookDraw = (x, shape, color, width = 4.2, angle) => { bookPencil(x, shape, color, angle); bookInk(x, shape, width); };
 const bookLine = (x, pts, width = 3.4, color = BOOK_INK) => bookInk(x, bookCurve(pts, false, .7), width, color);
 function bookWrite(x, text, px, py, size, color = '#34323a', { align = 'center', bold = false, width = 0, gap = 1.12 } = {}) { // returns where the next line goes
@@ -333,8 +368,8 @@ function* buildBook() {
   Promise.race([Promise.all(['400 40px Gaegu', '700 40px Gaegu'].map(f => document.fonts.load(f))), new Promise(r => setTimeout(r, 2500))]).catch(() => {}).finally(() => { fonts = true; });
   while (!fonts) yield;
   const spr = {};
-  const make = function* (list) { for (const [name, w, h, draw, opts] of list) { spr[name] = bookSprite(w, h, draw, opts); bookBuilt += .9 / 58; yield; } };
-  spr.cat = BOOK_COSTUMES.map((draw, i) => bookSprite(4.4, 4.2, draw, { edge: 5 })); bookBuilt = .1; yield;
+  const make = function* (list) { for (const [name, w, h, draw, opts] of list) { bookCatStyle = name === 'wheel' || name === 'smallWheel'; spr[name] = bookSprite(w, h, draw, opts); bookCatStyle = false; bookBuilt += .9 / 58; yield; } };
+  bookCatStyle = true; spr.cat = BOOK_COSTUMES.map((draw, i) => bookSprite(4.4, 4.2, draw, { edge: 5 })); bookCatStyle = false; bookBuilt = .1; yield;
   yield* make([
     ['wheel', 1.34, 1.34, (x, w) => { bookDraw(x, bookOval(w / 2, w / 2, w * .47), '#fbf7ec', 7); for (let i = 0; i < 8; i++) { const a = i / 8 * 6.2832; bookLine(x, [[w / 2, w / 2], [w / 2 + Math.cos(a) * w * .44, w / 2 + Math.sin(a) * w * .44]], 1.8, '#74727f'); } bookDraw(x, bookOval(w / 2, w / 2, 8), '#d8d3c6', 2.4); }, { edge: 2 }],
     ['smallWheel', .5, .5, (x, w) => { bookDraw(x, bookOval(w / 2, w / 2, w * .46), '#ffd24c', 3.6); bookLine(x, [[w / 2 - 12, w / 2], [w / 2 + 12, w / 2]], 2); }, { edge: 2 }],
@@ -349,6 +384,27 @@ function* buildBook() {
     ['places', 5.4, 4.7, bookNote(BOOK_WORDS.places.slice(1), { title: BOOK_WORDS.places[0], tape: '#a5ddf2' })],
     ['dusk', 35.4, 13, bookArt.dusk, { scale: .42, edge: 0 }], ['pine', 3.6, 7.4, bookArt.pine], ['tent', 6.4, 4.6, bookArt.tent], ['fire', 2.5, 2.7, bookArt.fire], ['owl', 1.7, 2.2, bookArt.owl], ['marshmallow', 2.2, 2.2, bookArt.marshmallow],
     ['people', 5, 3.9, bookNote(BOOK_WORDS.people.slice(1), { title: BOOK_WORDS.people[0], tape: '#c7e6b4' })],
+    ['fence', 2.8, 1.5, (x, w, h) => { for (const a of [14, w / 2, w - 14]) bookDraw(x, bookPoly([[a - 9, h], [a - 9, 18], [a, 6], [a + 9, 18], [a + 9, h]]), '#e9d3a8', 3.4); for (const y of [h * .38, h * .72]) bookDraw(x, bookPoly([[2, y - 9], [w - 2, y - 8], [w - 2, y + 9], [2, y + 8]]), '#e9d3a8', 3.4); }],
+    ['lamp', 1.2, 4.8, (x, w, h) => { bookDraw(x, bookPoly([[w / 2 - 7, h], [w / 2 - 7, 70], [w / 2 + 7, 70], [w / 2 + 7, h]]), '#4b4e5c', 3.6); bookDraw(x, bookPoly([[w / 2 - 34, 72], [w / 2 + 34, 72], [w / 2 + 22, 20], [w / 2 - 22, 20]]), '#ffe29a', 4); bookDraw(x, bookPoly([[w / 2 - 40, 22], [w / 2 + 40, 22], [w / 2, 2]]), '#4b4e5c', 3.4); bookDraw(x, bookPoly([[w / 2 - 26, h], [w / 2 + 26, h], [w / 2 + 18, h - 14], [w / 2 - 18, h - 14]]), '#4b4e5c', 3); }],
+    ['bunting', 9, 1.5, (x, w, h) => { bookLine(x, [[0, 10], [w * .25, 34], [w * .5, 42], [w * .75, 34], [w, 10]], 3); const cols = ['#e4584f', '#ffd24c', '#7dbf6a', '#4f7fd0', '#f2a7c3']; for (let i = 1; i < 14; i++) { const t = i / 14, ax = t * w, ay = 10 + 32 * Math.sin(t * Math.PI); bookDraw(x, bookPoly([[ax - 20, ay], [ax + 20, ay], [ax, ay + 62]]), cols[i % 5], 2.8); } }],
+    ['rock', 1.9, 1.1, (x, w, h) => { bookDraw(x, bookCurve([[8, h], [16, 40], [60, 8], [130, 18], [w - 10, 60], [w - 6, h]]), '#b9b6c4', 4); bookLine(x, [[60, 40], [86, 60]], 2.4, 'rgba(60,55,70,.5)'); }],
+    ['shell', .9, .75, (x, w, h) => { bookDraw(x, bookCurve([[8, h - 8], [w / 2, 4], [w - 8, h - 8], [w / 2, h - 2]]), '#f6c1cf', 3.2); for (const a of [-.5, -.25, 0, .25, .5]) bookLine(x, [[w / 2, h - 6], [w / 2 + a * 70, 18]], 2); }],
+    ['bush', 2.4, 1.5, (x, w, h) => { bookDraw(x, bookFluff(w / 2, h * .62, w * .46, h * .5, 18, .12), '#86c27a', 4); for (const [a, b] of [[.3, .5], [.62, .4], [.48, .7]]) bookDraw(x, bookOval(w * a, h * b, 7), '#f2a7c3', 2.2); }],
+    ['crate', 1.7, 1.4, (x, w, h) => { bookDraw(x, bookPoly([[4, 40], [w - 4, 40], [w - 4, h - 2], [4, h - 2]]), '#c99a5e', 3.6); bookLine(x, [[4, 40], [w - 4, h - 2]], 2.4); bookLine(x, [[w - 4, 40], [4, h - 2]], 2.4); for (let i = 0; i < 5; i++) bookDraw(x, bookOval(26 + i * 30, 34, 16), ['#e4584f', '#ffb347', '#7dbf6a'][i % 3], 2.6); }],
+    ['kite', 1.6, 3.6, (x, w, h) => { bookDraw(x, bookPoly([[w / 2, 4], [w - 8, 70], [w / 2, 150], [8, 70]]), '#f2a7c3', 3.6); bookLine(x, [[w / 2, 4], [w / 2, 150]], 2.2); bookLine(x, [[8, 70], [w - 8, 70]], 2.2); bookLine(x, [[w / 2, 150], [w / 2 + 20, 200], [w / 2 - 14, 250], [w / 2 + 10, 300], [w / 2 - 6, h - 4]], 2.4); for (const y of [205, 260, 315]) bookDraw(x, bookPoly([[w / 2 - 12, y - 8], [w / 2 + 12, y - 8], [w / 2, y + 10]]), '#ffd24c', 2); }],
+    ['mushroom', 1.2, 1.3, (x, w, h) => { bookDraw(x, bookPoly([[w / 2 - 16, h], [w / 2 - 12, 60], [w / 2 + 12, 60], [w / 2 + 16, h]]), '#fdf6ec', 3.2); bookDraw(x, bookCurve([[8, 66], [w / 2, 6], [w - 8, 66]]), '#e4584f', 3.6); for (const [a, b] of [[.32, .3], [.6, .22], [.72, .42]]) bookDraw(x, bookOval(w * a, h * b, 7), '#fdf6ec', 1.8); }],
+    ['lantern', 1, 1.6, (x, w, h) => { bookDraw(x, bookPoly([[w / 2 - 16, 4], [w / 2 + 16, 4], [w / 2 + 16, 22], [w / 2 - 16, 22]]), '#4b4e5c', 2.8); bookDraw(x, bookOval(w / 2, 86, 40, 62), '#ff8a5c', 3.6); for (const y of [60, 86, 112]) bookLine(x, [[w / 2 - 36, y], [w / 2 + 36, y]], 1.8, 'rgba(90,40,20,.5)'); bookDraw(x, bookPoly([[w / 2 - 12, 146], [w / 2 + 12, 146], [w / 2 + 12, 158], [w / 2 - 12, 158]]), '#4b4e5c', 2.4); }],
+    ...BOOK_WORDS.worlds.map((_, i) => [`climb${i}`, 4.6, 2.6, bookNote([['back to where it started.', 'food this way. pedal faster.', 'it is getting dark...', 'smells like the sea up here.', 'nearly there. everyone is waiting.'][i]], { title: ['home soon', 'almost dinner', 'one more climb', 'fresh air', 'up we go'][i], tape: ['#f7c3cf', '#ffd98a', '#b9b8f0', '#a5ddf2', '#c7e6b4'][i] })]),
+    ['plank', .66, .26, (x, w, h) => bookDraw(x, bookPoly([[4, 4], [w - 4, 6], [w - 4, h - 4], [4, h - 6]]), '#c58f55', 3.4), { edge: 2 }], ['post', .24, 1.7, (x, w, h) => bookDraw(x, bookPoly([[5, 4], [w - 5, 4], [w - 5, h], [5, h]]), '#9b6b3c', 3.4), { edge: 2 }],
+    ...BOOK_WORDS.worlds.map((next, i) => [`sign${i}`, 3.8, 4.4, (x, w, h) => {
+      const back = BOOK_WORDS.worlds[(i + BOOK_WORDS.worlds.length - 1) % BOOK_WORDS.worlds.length];
+      bookDraw(x, bookPoly([[w / 2 - 12, 40], [w / 2 + 12, 40], [w / 2 + 14, h], [w / 2 - 14, h]]), '#c99a5e', 4.4);
+      bookDraw(x, bookPoly([[22, 62], [w - 66, 58], [w - 14, 108], [w - 66, 156], [22, 152]]), '#ffe9a8', 4.4);
+      bookWrite(x, next, (w - 50) / 2 + 4, 108, 50, '#34323a', { bold: true });
+      bookDraw(x, bookPoly([[66, 186], [w - 22, 190], [w - 22, 278], [66, 282], [14, 234]]), '#f7c3cf', 4.4);
+      bookWrite(x, back, (w + 50) / 2 - 4, 236, 44, '#34323a', { bold: true });
+      bookDraw(x, bookOval(w / 2, 40, 16), '#c99a5e', 3.4);
+    }]),
     ['hi', 5, 3.7, bookNote(BOOK_WORDS.hi.slice(1), { title: BOOK_WORDS.hi[0], tape: '#ffd98a' })],
   ]);
   let waiting = 0;
@@ -365,61 +421,99 @@ function* buildBook() {
   px.strokeStyle = 'rgba(96,136,196,.55)'; px.lineWidth = 3; for (let y = 34; y < 2048; y += 68.3) { px.beginPath(); px.moveTo(0, y); px.lineTo(2048, y + (bookRnd() - .5) * 2); px.stroke(); }
   px.strokeStyle = 'rgba(226,84,92,.7)'; px.lineWidth = 4; px.beginPath(); px.moveTo(1024, 0); px.lineTo(1026, 2048); px.stroke();
   const pt = new THREE.CanvasTexture(px.canvas); pt.encoding = THREE.sRGBEncoding; pt.anisotropy = 8; pt.wrapS = pt.wrapT = THREE.RepeatWrapping; pt.repeat.set(4, 2);
-  const wall = new THREE.Mesh(new THREE.PlaneGeometry(120, 60), new THREE.MeshBasicMaterial({ map: pt, toneMapped: false })); wall.position.set(0, 30, 0); wall.renderOrder = -3; scene.add(wall);
+  const wall = new THREE.Mesh(new THREE.PlaneGeometry(120, 60), new THREE.MeshBasicMaterial({ map: pt, toneMapped: false })); wall.position.set(0, 26, 0); wall.renderOrder = -3; scene.add(wall); // reaches below the ground, for the chasm and the river
   bookBuilt = .94; yield;
 
   const flatMat = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false });
   const stickMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(0xb98a52).convertSRGBToLinear(), toneMapped: false });
   const threadMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(0x9b7a56).convertSRGBToLinear(), toneMapped: false });
-  const blur = tex => new THREE.ShaderMaterial({ transparent: true, depthWrite: false, toneMapped: false, uniforms: { map: { value: tex }, a: { value: .3 } }, vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }', fragmentShader: 'varying vec2 vUv; uniform sampler2D map; uniform float a; void main(){ float s = texture2D(map,vUv,3.5).a; gl_FragColor = vec4(.2,.24,.42,s*a); }' });
-  const blob = new THREE.Mesh(new THREE.CircleGeometry(.5, 20).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x28305a, transparent: true, opacity: .2, depthWrite: false, toneMapped: false })); // a soft-ish contact shadow on the ground
+  const blob = new THREE.Mesh(new THREE.CircleGeometry(.5, 20).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x28305a, transparent: true, opacity: .14, depthWrite: false, toneMapped: false })); // a soft-ish contact shadow on the ground, under the real one
   const props = [];
   const put = (name, wx, z, o = {}) => {
-    const s = spr[name], hang = !!o.hang, y = o.y || 0, geo = new THREE.PlaneGeometry(s.w, s.h).translate(0, hang ? -s.h / 2 : s.h / 2, 0), mesh = new THREE.Mesh(geo, s.mat);
-    const p = { name, s, x: wx, z, y, hang, mesh, say: o.say, tilt: o.tilt || 0, flat: !!o.flat, sway: o.sway ?? (hang ? .035 : 0), bob: o.bob || 0, phase: wx * 1.3, flick: !!o.flick, slide: o.slide || 0, kick: -1e9, noPop: !!o.noPop, shadow: o.shadow !== false };
+    const s = o.model ? { w: o.mw, h: o.mh } : spr[name], hang = !!o.hang, y = o.y || 0, mesh = o.model ? BOOK_MODELS[name]() : new THREE.Mesh(new THREE.PlaneGeometry(s.w, s.h).translate(0, hang ? -s.h / 2 : s.h / 2, 0), s.mat);
+    if (!o.model && o.shadow !== false && !o.noPop) { mesh.castShadow = true; mesh.customDepthMaterial = s.depth || (s.depth = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: s.tex, alphaTest: .5 })); } // the shadow of the drawing's own shape
+    const p = { name, s, x: wx, z, y, hang, mesh, say: o.say, tilt: o.tilt || 0, flat: !!o.flat, ground: !hang && !o.flat && !o.noPop, /* things on the ground stand on the land */ sway: o.sway ?? BOOK_IDLE[name]?.sway ?? (hang ? .035 : 0), bob: o.bob || BOOK_IDLE[name]?.bob || 0, phase: wx * 1.3, flick: !!o.flick, slide: o.slide || BOOK_IDLE[name]?.slide || 0, kick: -1e9, noPop: !!o.noPop, shadow: o.shadow !== false, bend: !!BOOK_IDLE[name]?.bend, twinkle: !!BOOK_IDLE[name]?.twinkle };
     mesh.position.set(wx, y, z); mesh.renderOrder = o.order || 0; scene.add(mesh);
     if (hang) { const t = new THREE.Mesh(new THREE.PlaneGeometry(.035, 30).translate(0, 15, 0), threadMat); t.position.y = -.02; mesh.add(t); }
     if (o.stick) { const t = new THREE.Mesh(new THREE.PlaneGeometry(.12, y + .2).translate(0, -(y + .2) / 2, 0), stickMat); t.position.set(0, .2, -.01); mesh.add(t); }
-    if (p.shadow && !o.noPop) { p.shade = new THREE.Mesh(geo, blur(s.tex)); p.shade.renderOrder = -1; scene.add(p.shade); }
     if (!hang && !p.flat && !y && p.shadow) { p.contact = blob.clone(); p.contact.scale.set(s.w * 1.05, 1, Math.min(1.4, s.w * .24)); scene.add(p.contact); }
     props.push(p); return p;
   };
-  const at = (world, u) => world * BOOK_SIZE + u;
+  const at = (world, u) => world * BOOK_SIZE + BOOK_FLAT + u; // a world's things stand on its flat middle
   // Home
   put('hills', at(0, 18), .04, { noPop: true, shadow: false, order: -2 });
   put('cloud', at(0, 3), 1.2, { hang: true, y: 10.1, say: 'i am just a cloud.' }); put('cloud', at(0, 25), .8, { hang: true, y: 10.8, say: 'still a cloud.' });
   put('welcome', at(0, 7), .08, { y: 5, flat: true, shadow: false, tilt: .025 });
   put('tree', at(0, 1), 1.6, { say: 'just a tree. a good one.' });
   put('about', at(0, 15.7), .1, { y: 4.1, flat: true, tilt: -.03, say: 'hi. this is me.' }); put('photo-home', at(0, 20), .1, { y: 4.7, flat: true, tilt: .06, say: 'that is me. Hoshi. look at the tongue.' }); put('photo-off', at(0, 11.8), .1, { y: 5.3, flat: true, tilt: -.05, say: 'also me. working hard.' });
-  put('house', at(0, 26), 1.4, { say: 'Home: San Miguel, Bulacan.' }); put('mailbox', at(0, 18.5), 3.6, { say: 'no letters. only cat hair.' }); put('tree', at(0, 33.2), 1.5);
+  put('photo-me', at(0, 30), .1, { y: 4.9, flat: true, tilt: -.05, say: 'this one is Cyrill. i let him stay.' }); put('house', at(0, 26), .35, { model: true, mw: 7, mh: 6.8, say: 'Home: San Miguel, Bulacan.' }); put('mailbox', at(0, 18.5), 3.6, { say: 'no letters. only cat hair.' }); put('tree', at(0, 33.2), 1.5);
   for (const [u, z, n] of [[5.5, 5.6, 'grass'], [11.5, 3.6, 'flower'], [13, 5.8, 'grass'], [21, 5.7, 'flower'], [22.5, 5.9, 'grass'], [30, 5.2, 'grass'], [33, 3.5, 'flower']]) put(n, at(0, u), z, { shadow: n === 'grass' ? false : undefined });
   // Food
   put('lights', at(1, 7), 1.2, { hang: true, y: 10.5, sway: .015 }); put('lights', at(1, 22), 1.2, { hang: true, y: 10.1, sway: .015 });
   put('food', at(1, 7.6), .1, { y: 3.9, flat: true, tilt: .025, say: 'katsu first. questions later.' });
   put('egg', at(1, 1.8), .9, { hang: true, y: 9.8, say: 'i am the sun of this page.' });
-  put('stall', at(1, 16), 1.4, { say: 'my usual spot.' }); put('bowl', at(1, 26), 2.8, { say: 'hot. wait.' });
+  put('stall', at(1, 16), .1, { model: true, mw: 8.6, mh: 6.2, say: 'my usual spot.' }); put('bowl', at(1, 26), 2.8, { say: 'hot. wait.' });
   put('boba', at(1, 12.6), 4.4, { say: 'half sugar. no regrets.' }); put('dumplings', at(1, 4), 4.4, { say: 'there were six.' }); put('icecream', at(1, 31.5), 4, { say: 'mine.' }); put('photo-food', at(1, 32), .1, { y: 4.6, flat: true, tilt: -.05, say: 'coffee, by the sea.' });
   // Up late
   put('night', at(2, 18), .05, { noPop: true, shadow: false, order: -2, y: -.2 });
   put('moon', at(2, 6), .9, { hang: true, y: 11, say: 'go to sleep.' });
   for (const [u, y] of [[1.5, 10.4], [11.5, 11.4], [20.5, 11], [28, 10.4], [33.5, 11.6]]) put('star', at(2, u), 1, { hang: true, y, sway: .08 });
   put('late', at(2, 10.2), .1, { y: 3.9, flat: true, tilt: -.025, say: 'what keeps me up.' });
-  put('desk', at(2, 21), 1.6, { say: 'This is where the hours go.' }); put('guitar', at(2, 3), 2.6, { say: 'mostly for decoration.' }); put('record', at(2, 15.6), .1, { y: 4.4, flat: true, tilt: .08, say: 'Mr. Incorrect. on repeat.' }); put('cassette', at(2, 28.5), .1, { y: 5.4, flat: true, tilt: -.06, say: 'still Mr. Incorrect.' });
+  put('desk', at(2, 21), .3, { model: true, mw: 7, mh: 5.2, say: 'This is where the hours go.' }); put('guitar', at(2, 3), 2.6, { say: 'mostly for decoration.' }); put('record', at(2, 15.6), .1, { y: 4.4, flat: true, tilt: .08, say: 'Mr. Incorrect. on repeat.' }); put('cassette', at(2, 28.5), .1, { y: 5.4, flat: true, tilt: -.06, say: 'still Mr. Incorrect.' });
   put('controller', at(2, 30), 3.6, { y: 1.8, stick: true, say: 'Wukong. one more try.', bob: .06 }); put('photo-late', at(2, 33.5), .1, { y: 3.2, flat: true, tilt: .05, say: 'a late night worth keeping.' });
   // Places
   put('sun', at(3, 23), .9, { hang: true, y: 11.3, say: 'too cool to set.' }); put('cloud', at(3, 7), .8, { hang: true, y: 10.8 }); put('gull', at(3, 12), 1.5, { hang: true, y: 8.9, sway: .1, say: 'mine? mine? mine?' }); put('gull', at(3, 16), 1.2, { hang: true, y: 10, sway: .1 });
   put('places', at(3, 8.5), .1, { y: 3.9, flat: true, tilt: .03, say: 'where I have been.' });
-  put('lighthouse', at(3, 3), 1.2, { say: 'Hong Kong. Baguio. La Union.' }); put('island', at(3, 18), 1.8, { say: 'Japan is next.' }); put('whale', at(3, 28), 3, { bob: .22, say: 'wooooo.' }); put('bottle', at(3, 13), 4.5, { bob: .2, sway: .09, say: 'a memory, in a bottle.' }); put('photo-falls', at(3, 33.2), .1, { y: 4.6, flat: true, tilt: -.06, say: 'a good day out.' }); put('photo-hk', at(3, 13.4), .1, { y: 4.8, flat: true, tilt: .05, say: 'Hong Kong. been there.' }); put('photo-baguio', at(3, 17.4), .1, { y: 5.5, flat: true, tilt: -.04, say: 'Baguio. the most memories.' }); put('photo-launion', at(3, 27.6), .1, { y: 4.9, flat: true, tilt: .05, say: 'La Union. took my breath away.' });
+  put('lighthouse', at(3, 3.4), .2, { model: true, mw: 2.6, mh: 9.6, say: 'Hong Kong. Baguio. La Union.' }); put('island', at(3, 18), 1.8, { say: 'Japan is next.' }); put('whale', at(3, 28), 3, { bob: .22, say: 'wooooo.' }); put('bottle', at(3, 13), 4.5, { bob: .2, sway: .09, say: 'a memory, in a bottle.' }); put('photo-view', at(3, 22.5), .1, { y: 4.7, flat: true, tilt: -.04, say: 'good view. no cats.' }); put('photo-falls', at(3, 33.2), .1, { y: 4.6, flat: true, tilt: -.06, say: 'a good day out.' }); put('photo-hk', at(3, 13.4), .1, { y: 4.8, flat: true, tilt: .05, say: 'Hong Kong. been there.' }); put('photo-baguio', at(3, 17.4), .1, { y: 5.5, flat: true, tilt: -.04, say: 'Baguio. the most memories.' }); put('photo-launion', at(3, 27.6), .1, { y: 4.9, flat: true, tilt: .05, say: 'La Union. took my breath away.' });
   for (const [z, off] of [[1.1, 0], [3.7, 11], [5.9, 23]]) put('waves', at(3, 18) + off * .05, z, { noPop: true, shadow: false, slide: .32, bob: .05 });
   // My people
   put('dusk', at(4, 18), .05, { noPop: true, shadow: false, order: -2, y: -.2 });
   put('star', at(4, 5), 1, { hang: true, y: 11.4, sway: .08 }); put('star', at(4, 26), 1, { hang: true, y: 11.1, sway: .08 });
   put('people', at(4, 7.6), .1, { y: 4.3, flat: true, tilt: -.03, say: 'my family, and two cats.' }); put('photo-clarissa', at(4, 12), .1, { y: 4.8, flat: true, tilt: .05, say: 'Clarissa Cajucom.' }); put('photo-erwin', at(4, 18.3), .1, { y: 4.9, flat: true, tilt: -.04, say: 'Erwin Cajucom.' }); put('photo-hoshi', at(4, 22), .1, { y: 4.7, flat: true, tilt: .05, say: 'Hoshi. orange. exotic. in charge.' }); put('photo-shiro', at(4, 26), .1, { y: 4.9, flat: true, tilt: -.05, say: 'Shiro. bow tie optional.' });
-  put('pine', at(4, 1.4), 1.6); put('pine', at(4, 15.8), 1.1); put('tent', at(4, 21), 1.8, { say: 'Sleeps two. And one very large cat.' }); put('pine', at(4, 34.5), 1.4);
+  put('pine', at(4, 6.2), 1.6); put('pine', at(4, 15.8), 1.1); put('tent', at(4, 21), .2, { model: true, mw: 6, mh: 4.5, say: 'Sleeps two. And one very large cat.' }); put('pine', at(4, 34.5), 1.4);
   put('owl', at(4, 15.8), 1.6, { y: 3.4, stick: false, say: 'who?', shadow: false }); put('fire', at(4, 15.8), 4.2, { flick: true, say: 'careful. the cat has already tried.' });
   put('marshmallow', at(4, 19.6), 5.1, { shadow: false, say: 'toasted, not burnt.' });
   put('hi', at(4, 31), .1, { y: 4.6, flat: true, tilt: .03, say: 'open to work. come say hi.' });
-  // The ground: one coloured sheet a world, folded down at the front.
+  // Each slope gets things for the world it leads to (j): on the ground either side of the top, hanging above it, and a note on the page.
+  const slopes = [
+    { ground: [['tree', -17, 1.6], ['flower', -12, 5.4], ['fence', -7, 2.8], ['bush', -4.5, 5.1], ['bush', 6, 5], ['fence', 10, 2.8], ['flower', 14, 5.3], ['grass', 18, 5.8]], hang: [['kite', -11, 9.8, 1], ['cloud', 12, 10.8, .9]] },
+    { ground: [['fence', -18, 2.8], ['lamp', -13, 2.2], ['flower', -9, 5.4], ['bush', -4.5, 5], ['crate', 5, 4.4], ['lamp', 11, 2.2], ['flower', 15, 5.3], ['bush', 18.5, 4.8]], hang: [['cloud', -14, 10.6, 1], ['bunting', 8, 9.4, 1.2]] },
+    { ground: [['bush', -18, 5], ['lamp', -13, 2.2], ['rock', -8, 5.5], ['crate', -4.5, 4.6], ['lamp', 7, 2.2], ['rock', 12, 5.6], ['bush', 17, 4.9]], hang: [['star', -15, 9.8, 1], ['star', -6, 10.6, 1], ['star', 9, 9.6, 1], ['star', 16, 10.2, 1]] },
+    { ground: [['rock', -17, 5.4], ['shell', -11, 5.8], ['bush', -5, 5], ['rock', 6, 5.5], ['shell', 11, 5.9], ['bottle', 15, 5], ['shell', 18.5, 5.6]], hang: [['gull', -13, 9.2, 1.5], ['gull', 9, 9.8, 1.2], ['cloud', 15, 10.8, .9]] },
+    { ground: [['pine', -17, 1.6], ['mushroom', -11, 5.4], ['rock', -5, 5.6], ['mushroom', 6.5, 5.5], ['pine', 12, 1.4], ['bush', 17.5, 5]], hang: [['lantern', -13, 9, 1.2], ['lantern', 9, 9.4, 1.2], ['star', 15, 10.6, 1]] },
+  ];
+  const says = { fence: 'keeps nothing in.', lamp: 'on all night.', bush: 'it rustles. that is all.', rock: 'a rock. very still.', shell: 'from La Union.', crate: 'fresh fruit. not for cats.', kite: 'stuck up here forever.', mushroom: 'do not eat.', lantern: 'for the walk home.' };
+  slopes.forEach((sl, j) => {
+    const top = j * BOOK_SIZE; // the top between world j - 1 and world j
+    for (const [name, d, z] of sl.ground) put(name, top + d, z, { say: says[name] });
+    for (const [name, d, y, z] of sl.hang) put(name, top + d, z, { hang: true, y, sway: name === 'bunting' ? .012 : undefined });
+    put(`climb${j}`, top - 9.5, .1, { y: 4.6, flat: true, tilt: (j % 2 ? -1 : 1) * .05, say: 'a note on the way up.' });
+  });
+  // More in every world: a layer behind the main things and a layer in front.
+  for (const [w, list] of [
+    [0, [['bush', 2.6, 5], ['fence', 8.6, 2.6], ['fence', 11.3, 2.6], ['rock', 20, 5.7], ['bush', 35, 5.1]]],
+    [1, [['lamp', .5, 2.2], ['crate', 9, 3.9], ['crate', 21.5, 3.7], ['bush', 34.5, 5.2], ['bunting', 16, 1.2, 8.6]]],
+    [2, [['lamp', 8.2, 2.4], ['rock', 13, 5.6], ['bush', 33, 5], ['star', 7, 1, 9.6], ['star', 25, 1, 9.2]]],
+    [3, [['rock', 6, 5.6], ['shell', 9.5, 5.9], ['shell', 24, 6], ['rock', 34, 5.3], ['gull', 31, 1.4, 9.4]]],
+    [4, [['mushroom', 3, 5.4], ['bush', 11.5, 5.2], ['mushroom', 25, 5.7], ['rock', 33, 5.3], ['lantern', 10, 1.2, 8.8], ['lantern', 28, 1.2, 9]]],
+  ]) for (const [name, u, z, y] of list) put(name, at(w, u), z, y ? { hang: true, y, sway: name === 'bunting' ? .012 : undefined } : { say: says[name] });
+  // And more again: trees and bushes along every slope (behind the path, clear of the notes), and a front row of small things in every world.
+  const greens = [['tree', 'bush'], ['tree', 'bush'], ['pine', 'bush'], ['bush', 'rock'], ['pine', 'mushroom']], smalls = [['grass', 'flower'], ['flower', 'grass'], ['grass', 'rock'], ['shell', 'rock'], ['mushroom', 'grass']];
+  for (let j = 0; j < 5; j++) {
+    const top = j * BOOK_SIZE, [big, low] = greens[j];
+    for (const [d, z] of [[-20, 1.1], [-15.5, .8], [-2.8, 1.3], [3, 1.1], [16.5, .8], [20.5, 1.2]]) put(big, top + d, z, { say: says[big] });
+    [[-18.5, 6.2], [-13.5, 6.4], [-8, 6.1], [-3.4, 6.3], [4.2, 6.2], [9, 6.4], [13.5, 6.1], [19, 6.3]].forEach(([d, z], k) => put(k % 2 ? low : smalls[j][0], top + d, z, { say: says[low] }));
+    let n = 0; for (let u = 1.5; u < 36; u += 4.2) put(smalls[j][n++ % 2], at(j, u), 6.3 + (n % 3) * .12);
+  }
+  BOOK_WORDS.worlds.forEach((name, i) => put(`sign${i}`, i * BOOK_SIZE + .6, .9, { say: `this way to ${name}. ${['downhill. finally.', 'all that climbing for a sign.', 'the view is better up here.', 'downhill to the sea. no.', 'last climb. promise.'][i]}` }));
+  // The skies of Up late and My people fade out at their edges, over the hills, instead of stopping in a straight line.
+  for (const name of ['night', 'dusk']) {
+    const old = spr[name].canvas, c = document.createElement('canvas'), o = c.getContext('2d'), fw = old.width * .13; c.width = old.width; c.height = old.height; o.drawImage(old, 0, 0); // a fresh sheet: the drawing's own context still carries its scale and clip
+    o.globalCompositeOperation = 'destination-out';
+    for (const [a, b] of [[0, fw], [c.width, c.width - fw]]) { const l = o.createLinearGradient(a, 0, b, 0); l.addColorStop(0, '#000'); l.addColorStop(1, 'rgba(0,0,0,0)'); o.fillStyle = l; o.fillRect(Math.min(a, b), 0, fw, c.height); }
+    spr[name].canvas = c; spr[name].tex.image = c; spr[name].tex.needsUpdate = true;
+  }
+  // The ground: one coloured sheet a world, folded down at the front, rising into a hill at each end.
   const floors = [
     [['#9fd18c', 'rgba(50,110,50,.14)'], x => { x.fillStyle = '#eba98f'; x.fillRect(0, 300, 2048, 96); x.strokeStyle = '#b9755e'; x.lineWidth = 3; for (let i = 0; i < 2048; i += 58) { x.beginPath(); x.moveTo(i, 300 + (i % 116 ? 0 : 48)); x.lineTo(i, 348 + (i % 116 ? 0 : 48)); x.stroke(); } x.beginPath(); x.moveTo(0, 348); x.lineTo(2048, 348); x.moveTo(0, 300); x.lineTo(2048, 300); x.moveTo(0, 396); x.lineTo(2048, 396); x.stroke(); }],
     [['#f6cf9a', 'rgba(160,90,30,.14)'], x => { for (let a = 0; a < 2048; a += 92) for (let b = 0; b < 512; b += 92) if (((a + b) / 92) % 2) { x.fillStyle = 'rgba(224,110,80,.3)'; x.fillRect(a, b, 92, 92); } }],
@@ -427,21 +521,37 @@ function* buildBook() {
     [['#a7d8f4', 'rgba(30,90,160,.16)'], null],
     [['#7db587', 'rgba(20,70,50,.17)'], x => { x.fillStyle = '#c9a26b'; x.beginPath(); x.moveTo(0, 310); for (let a = 0; a <= 2048; a += 64) x.lineTo(a, 310 + Math.sin(a * .03) * 10); for (let a = 2048; a >= 0; a -= 64) x.lineTo(a, 402 + Math.cos(a * .03) * 10); x.fill(); }],
   ];
-  const grounds = [];
+  const grounds = [], shadowOnly = new THREE.ShadowMaterial({ opacity: .2, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 });
   floors.forEach(([colors, strip], i) => {
-    const tex = bookFloor(colors, strip), top = new THREE.Mesh(new THREE.PlaneGeometry(BOOK_SIZE + .02, 7).rotateX(-Math.PI / 2).translate(0, 0, 3.5), new THREE.MeshBasicMaterial({ map: tex, toneMapped: false }));
-    const drop = new THREE.Mesh(new THREE.PlaneGeometry(BOOK_SIZE + .02, 8).translate(0, -4, 7), new THREE.MeshBasicMaterial({ map: tex, color: 0xb6b6c6, toneMapped: false }));
-    scene.add(top, drop); grounds.push({ x: at(i, 18), top, drop });
+    const shape = new THREE.Shape(), half = BOOK_SIZE / 2 + .01;
+    shape.moveTo(-half, -10); for (let lx = -half; lx <= half + 1e-6; lx += .125) shape.lineTo(lx, bookGround(i * BOOK_SIZE + BOOK_SIZE / 2 + lx)); shape.lineTo(half, -10); shape.closePath();
+    const geo = new THREE.ExtrudeGeometry(shape, { depth: 7, bevelEnabled: false, steps: 1 }), uv = geo.attributes.uv, pos = geo.attributes.position, caps = geo.groups[0];
+    for (let k = 0; k < pos.count; k++) if (k < caps.start + caps.count) uv.setXY(k, pos.getX(k) / 6, pos.getY(k) / 6); else uv.setXY(k, (pos.getX(k) + BOOK_SIZE / 2) / BOOK_SIZE, 1 - pos.getZ(k) / 7); // the top takes the world's floor; the cut edge, layers of paper
+    const edge = document.createElement('canvas'); edge.width = edge.height = COARSE ? 256 : 512; const ex = edge.getContext('2d'), base = new THREE.Color(colors[0]);
+    ex.fillStyle = `#${base.clone().multiplyScalar(.8).getHexString()}`; ex.fillRect(0, 0, edge.width, edge.height);
+    for (let y = 0; y < edge.height; y += 9 + bookRnd() * 10) { ex.fillStyle = bookRnd() < .5 ? 'rgba(255,255,255,.16)' : 'rgba(30,20,40,.1)'; ex.fillRect(0, y, edge.width, 2 + bookRnd() * 3); } // the layers of a thick card
+    for (let n = 0; n < 2500; n++) { ex.fillStyle = bookRnd() < .5 ? 'rgba(255,255,255,.1)' : 'rgba(30,20,40,.06)'; ex.fillRect(bookRnd() * edge.width, bookRnd() * edge.height, 1 + bookRnd() * 2, 1 + bookRnd() * 2); }
+    const edgeTex = new THREE.CanvasTexture(edge); edgeTex.encoding = THREE.sRGBEncoding; edgeTex.wrapS = edgeTex.wrapT = THREE.RepeatWrapping;
+    const slab = new THREE.Mesh(geo, [new THREE.MeshBasicMaterial({ map: edgeTex, toneMapped: false }), new THREE.MeshBasicMaterial({ map: bookFloor(colors, strip), toneMapped: false })]);
+    const over = new THREE.Mesh(geo, shadowOnly); over.receiveShadow = true; // the shadows that fall on it
+    const rim = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 4), new THREE.LineBasicMaterial({ color: new THREE.Color(0x3a3438).convertSRGBToLinear(), transparent: true, opacity: .35, toneMapped: false })); // a pencil line along its folds
+    scene.add(slab, over, rim); grounds.push({ x: at(i, 18), meshes: [slab, over, rim] });
     bookBuilt = Math.min(.99, bookBuilt + .008);
   });
+  // One soft light, high at the front left, so everything throws its shadow down and back onto the page and the ground.
+  const sun = new THREE.DirectionalLight(0xffffff, 1); sun.castShadow = true; sun.shadow.mapSize.set(COARSE ? 1024 : 2048, COARSE ? 1024 : 2048);
+  Object.assign(sun.shadow.camera, { left: -36, right: 36, top: 26, bottom: -12, near: 1, far: 90 }); sun.shadow.bias = -.0006; sun.shadow.radius = 3; scene.add(sun, sun.target);
+  const wallShade = new THREE.Mesh(new THREE.PlaneGeometry(120, 60), new THREE.ShadowMaterial({ opacity: .16, depthWrite: false })); wallShade.receiveShadow = true; wallShade.position.set(0, 26, .02); scene.add(wallShade);
   yield;
   // The guide.
   const guide = new THREE.Group(), body = new THREE.Mesh(new THREE.PlaneGeometry(spr.cat[0].w, spr.cat[0].h).translate(0, spr.cat[0].h / 2, 0), spr.cat[0].mat); guide.add(body); scene.add(guide);
   const wheel = () => { const m = new THREE.Mesh(new THREE.PlaneGeometry(spr.wheel.w, spr.wheel.h), spr.wheel.mat); guide.add(m); return m; };
   const small = () => { const m = new THREE.Mesh(new THREE.PlaneGeometry(spr.smallWheel.w, spr.smallWheel.h), spr.smallWheel.mat); guide.add(m); return m; };
   const wheels = [wheel(), wheel()], tiny = [small(), small()];
+  for (const m of [body, ...wheels, ...tiny]) { m.castShadow = true; m.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: m.material.map, alphaTest: .5 }); }
+  const stick = bookFold(new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, 16, 8).translate(0, -8, 0), bookTint('#c99a5e'))); scene.add(stick); // a paper puppet on a dowel, held from below
   const guideShadow = blob.clone(); scene.add(guideShadow);
-  bookWorld = { scene, cam, spr, props, grounds, wall, guide, body, wheels, tiny, guideShadow };
+  bookWorld = { scene, cam, spr, props, grounds, wall, wallShade, sun, stick, guide, body, wheels, tiny, guideShadow, sky: BOOK_SKY.map(c => new THREE.Color(c).convertSRGBToLinear()) };
   bookBuilt = 1;
   yield;
 }
@@ -451,7 +561,7 @@ function bookSnapshot() { const s = document.createElement('canvas'); s.width = 
 function openBook(c, viaKeyboard) {
   if (!renderer || !renderer.capabilities.isWebGL2) { openProject(c, viaKeyboard, true); return; } // can't draw the world here, so show the plain page
   if (!bookWorld && !bookBuilder) bookBuilder = buildBook();
-  book = { c, viaKeyboard, phase: bookWorld ? 'ride' : 'build', x: 7, tx: 7, last: performance.now(), from: bookSnapshot(), flipAt: performance.now(), world: -1, say: null, moved: false, side: 1, spinAt: -1e9, costume: 0, hover: null, unit: .02, flingBy: 0, flingAt: 0 };
+  book = { c, viaKeyboard, phase: bookWorld ? 'ride' : 'build', x: BOOK_FLAT + 7, tx: BOOK_FLAT + 7, last: performance.now(), from: bookSnapshot(), flipAt: performance.now(), world: -1, say: null, moved: false, side: 1, spinAt: -1e9, costume: 0, hover: null, unit: .02, flingBy: 0, flingAt: 0 };
   if (COARSE) renderer.setPixelRatio(Math.min(maxPr, 1.5));
   hover = null; focusCard = null; glitch = 0; dirty = true;
   $('#btn-about').hidden = $('#btn-talk').hidden = true;
@@ -478,21 +588,30 @@ function bookPick(clientX, clientY) { // nearest thing under the pointer. Rectan
   }
   return best;
 }
-function bookHover(clientX, clientY) { const p = bookPick(clientX, clientY); if (p && p !== book.hover) p.kick = performance.now(); book.hover = p; crt.style.cursor = p ? 'pointer' : 'grab'; }
+function bookMapAt(clientX, clientY) { const [sx, sy] = toScene(clientX, clientY); const m = (book.mapHot || []).find(q => Math.hypot(sx - q.x, sy - q.y) < q.r); return m ? m.i : -1; }
+function bookRideTo(i) { const base = i * BOOK_SIZE + BOOK_SIZE * .45; bookMove(base + BOOK_LOOP * Math.round((book.tx - base) / BOOK_LOOP) - book.tx); }
+function bookHover(clientX, clientY) { book.mapHover = bookMapAt(clientX, clientY); if (book.mapHover >= 0) { book.hover = null; crt.style.cursor = 'pointer'; return; } const p = bookPick(clientX, clientY); if (p && p !== book.hover) p.kick = performance.now(); book.hover = p; crt.style.cursor = p ? 'pointer' : 'grab'; }
 function bookClick(clientX, clientY) {
+  const m = bookMapAt(clientX, clientY); if (m >= 0) { bookRideTo(m); return; }
   const p = bookPick(clientX, clientY);
   if (!p) return;
   p.kick = performance.now(); book.say = { text: p.say, prop: p, at: p.kick }; live.textContent = p.say;
+  const photo = p.name.startsWith('photo-') && BOOK_PHOTOS.find(q => q.id === p.name); if (photo) zoomPicture(photo.src, photo.cap, clientX, clientY); // a pinned photo opens large
 }
 
 /* ---------- Drawing ---------- */
 function bookWrapped(text, size, maxW) { g.font = `700 ${size}px ${BOOK_FONT}`; const lines = []; let line = ''; for (const w of text.split(' ')) { const n = line ? `${line} ${w}` : w; if (g.measureText(n).width > maxW && line) { lines.push(line); line = w; } else line = n; } lines.push(line); return lines; }
-function bookBubble(text, ax, ay, alpha) {
+// The outfit for where Hoshi is, except while the song from the desk plays: then the headphones (Up late's outfit) stay on everywhere.
+let bookSongOn = false;
+const bookWear = () => bookSongOn ? 2 : book.world;
+function bookBubble(text, ax, ay, alpha, below = false) { // below: the thing hangs from above, so the bubble sits under it and points up
   const size = Math.max(19, Math.min(28, H * .034)), lines = bookWrapped(text, size, Math.min(W * .62, 340)), bw = Math.max(...lines.map(l => g.measureText(l).width)) + size * 1.5, bh = lines.length * size * 1.14 + size * .95;
-  const x = Math.max(W * .06, Math.min(W * .94 - bw, ax - bw / 2)), y = Math.max(H * .07, ay - bh - size * .8);
+  const under = below || ay - bh - size * .8 < H * .07; // no room above, so it goes under and points up
+  const x = Math.max(W * .06, Math.min(W * .94 - bw, ax - bw / 2)), y = under ? Math.min(H * .93 - bh, ay + size * .8) : ay - bh - size * .8;
   g.save(); g.globalAlpha = alpha; g.lineJoin = 'round'; g.lineWidth = 3; g.strokeStyle = BOOK_INK; g.fillStyle = '#fffef6';
   g.beginPath(); g.roundRect(x, y, bw, bh, size * .7); g.fill(); g.stroke();
-  const tx = Math.max(x + size, Math.min(x + bw - size, ax)); g.beginPath(); g.moveTo(tx - size * .42, y + bh - 1.5); g.lineTo(tx - size * .08, y + bh + size * .6); g.lineTo(tx + size * .42, y + bh - 1.5); g.fill(); g.beginPath(); g.moveTo(tx - size * .42, y + bh); g.lineTo(tx - size * .08, y + bh + size * .6); g.lineTo(tx + size * .42, y + bh); g.stroke();
+  const tx = Math.max(x + size, Math.min(x + bw - size, ax)), edge = under ? y : y + bh, dir = under ? -1 : 1; // the tail leaves the edge nearest the thing, toward it
+  g.beginPath(); g.moveTo(tx - size * .42, edge - dir * 1.5); g.lineTo(tx - size * .08, edge + dir * size * .6); g.lineTo(tx + size * .42, edge - dir * 1.5); g.fill(); g.beginPath(); g.moveTo(tx - size * .42, edge); g.lineTo(tx - size * .08, edge + dir * size * .6); g.lineTo(tx + size * .42, edge); g.stroke();
   g.fillStyle = '#2d2b33'; g.textAlign = 'center'; g.textBaseline = 'middle'; lines.forEach((l, i) => g.fillText(l, x + bw / 2, y + size * .95 + i * size * 1.14)); g.restore();
 }
 function bookPage() { // the blank page the loader sits on
@@ -509,6 +628,55 @@ function bookFlip(now) {
   const l = g.createLinearGradient(0, 0, W, 0); l.addColorStop(0, `rgba(20,15,30,${e * .55})`); l.addColorStop(1, `rgba(255,255,255,${e * .25})`); g.fillStyle = l; g.fillRect(0, 0, W, H); g.restore();
   g.fillStyle = 'rgba(30,25,45,.45)'; g.fillRect(W * c, 0, 3, H);
 }
+/* ---------- The map: a small icon for each world, the one you are in raised; tap one to ride there ---------- */
+const BOOK_MAP_ICONS = [
+  (x, y, r) => { bookMapPath([[x - r * .42, y - r * .02], [x, y - r * .42], [x + r * .42, y - r * .02]], false); g.strokeRect(x - r * .3, y - r * .04, r * .6, r * .42); g.fillRect(x - r * .07, y + r * .14, r * .14, r * .24); }, // a house
+  (x, y, r) => { g.beginPath(); g.arc(x, y - r * .04, r * .4, 0, Math.PI); g.closePath(); g.fill(); for (const d of [-.16, .04, .22]) bookMapPath([[x + r * d, y - r * .14], [x + r * (d - .06), y - r * .3], [x + r * (d + .02), y - r * .44]], false); }, // a bowl, steaming
+  (x, y, r) => { g.beginPath(); g.arc(x, y, r * .4, .6, Math.PI * 2 - .6, false); g.arc(x + r * .18, y - r * .04, r * .3, Math.PI * 2 - .9, .9, true); g.closePath(); g.fill(); }, // the moon
+  (x, y, r) => { g.beginPath(); g.moveTo(x - r * .44, y + r * .1); g.lineTo(x + r * .44, y + r * .1); g.lineTo(x + r * .28, y + r * .34); g.lineTo(x - r * .28, y + r * .34); g.closePath(); g.fill(); bookMapPath([[x, y + r * .1], [x, y - r * .42], [x + r * .3, y + r * .02], [x, y + r * .02]], false); }, // a boat
+  (x, y, r) => { g.beginPath(); g.moveTo(x - r * .44, y + r * .34); g.lineTo(x, y - r * .4); g.lineTo(x + r * .44, y + r * .34); g.closePath(); g.fill(); g.fillStyle = '#fffef6'; g.beginPath(); g.moveTo(x - r * .1, y + r * .34); g.lineTo(x, y + r * .08); g.lineTo(x + r * .1, y + r * .34); g.closePath(); g.fill(); }, // a tent
+];
+function bookMapPath(pts, closed) { g.beginPath(); pts.forEach(([a, b], i) => g[i ? 'lineTo' : 'moveTo'](a, b)); if (closed) g.closePath(); g.stroke(); }
+function bookMap(now) {
+  const n = BOOK_MAP_ICONS.length, tall = W < H, r = tall ? 19 : 21, gap = r * .75, total = n * r * 2 + (n - 1) * gap;
+  const x0 = (tall ? (W - total) / 2 : Math.max(28, W * .065)) + r, y = tall ? 98 : 70, a = Math.min(1, Math.max(0, (now - book.flipAt - BOOK_FLIP_MS) / 400));
+  if (a <= 0) return;
+  book.mapHot = [];
+  g.save(); g.globalAlpha = a; g.lineCap = g.lineJoin = 'round';
+  g.strokeStyle = 'rgba(38,37,43,.45)'; g.lineWidth = 2.5; g.setLineDash([4, 7]); g.beginPath(); g.moveTo(x0, y); g.lineTo(x0 + (n - 1) * (r * 2 + gap), y); g.stroke(); g.setLineDash([]); // the dotted road between them
+  for (let i = 0; i < n; i++) {
+    const on = i === book.world, hov = i === book.mapHover, cx = x0 + i * (r * 2 + gap), rr = r * (on ? 1.15 : hov ? 1.07 : 1), cy = y - (on ? 3 : 0);
+    g.fillStyle = 'rgba(30,25,45,.3)'; g.beginPath(); g.arc(cx + 2.5, cy + 3.5, rr, 0, 7); g.fill();
+    g.fillStyle = on ? '#ffd23f' : '#fffef6'; g.strokeStyle = BOOK_INK; g.lineWidth = 2.6; g.beginPath(); g.arc(cx, cy, rr, 0, 7); g.fill(); g.stroke();
+    g.fillStyle = BOOK_INK; g.strokeStyle = BOOK_INK; g.lineWidth = 2.2; BOOK_MAP_ICONS[i](cx, cy, rr);
+    if (on || hov) { g.font = `700 ${Math.round(r * .82)}px ${BOOK_FONT}`; g.textAlign = 'center'; g.textBaseline = 'top'; g.lineWidth = 5; g.strokeStyle = '#fffef6'; g.strokeText(BOOK_WORDS.worlds[i], cx, cy + rr + 5); g.fillStyle = BOOK_INK; g.fillText(BOOK_WORDS.worlds[i], cx, cy + rr + 5); }
+    book.mapHot.push({ x: cx, y: cy, r: Math.max(22, rr + 4), i });
+  }
+  g.restore();
+}
+/* ---------- Bits in the air: dust behind the wheels, splashes behind the boat, petals blowing past on the way downhill ---------- */
+function bookBits(dt, gx, ground, speed, onBoat, now) {
+  if (reduced) return;
+  const bits = book.bits || (book.bits = []), moving = Math.min(1, Math.abs(speed) / 3), side = book.side, back = gx - side * 1.1 * BOOK_CAT, rnd = Math.random;
+  book.bitAt = (book.bitAt || 0) + dt * (onBoat ? 10 + moving * 30 : moving * 34);
+  while (book.bitAt >= 1) {
+    book.bitAt -= 1;
+    if (onBoat) bits.push({ kind: 'splash', x: back - side * .4, y: -.15, z: 5, vx: -side * (.6 + rnd() * 1.6), vy: 1.4 + rnd() * 2, life: 0, max: .55 + rnd() * .3, r: .05 + rnd() * .07 });
+    else if (moving > .1) bits.push({ kind: 'dust', x: back, y: bookRide(back) + .08, z: 5.05, vx: -side * (.5 + rnd() * .9), vy: .35 + rnd() * .5, life: 0, max: .5 + rnd() * .35, r: .12 + rnd() * .14 });
+    if (!onBoat && moving > .3 && bookSlope(gx) * side < -.08 && rnd() < .35) bits.push({ kind: 'petal', x: gx + side * (2 + rnd() * 5), y: ground + 1 + rnd() * 3, z: 5.4, vx: -side * (2.4 + rnd() * 1.6), vy: -.25 - rnd() * .3, life: 0, max: 1.4 + rnd() * .6, r: .1 + rnd() * .06, spin: rnd() * 6, tone: rnd() < .6 ? '#f7a8c0' : '#fffef6' });
+  }
+  const v = new THREE.Vector3();
+  for (let i = bits.length - 1; i >= 0; i--) {
+    const b = bits[i]; b.life += dt; if (b.life >= b.max) { bits.splice(i, 1); continue; }
+    b.x += b.vx * dt; b.y += b.vy * dt; if (b.kind === 'splash') b.vy -= 7 * dt; if (b.kind === 'petal') { b.spin += dt * 5; b.vy = -.3 + Math.sin(now / 300 + b.x) * .4; }
+    v.set(b.x, b.y, b.z); const [sx, sy] = bookProject(v), k = 1 - b.life / b.max, px = b.r / book.unit;
+    g.save(); g.globalAlpha = b.kind === 'dust' ? k * .55 : k;
+    if (b.kind === 'dust') { g.fillStyle = '#e9dcc4'; g.beginPath(); g.arc(sx, sy, px * (1 + (1 - k) * 1.4), 0, 7); g.fill(); g.strokeStyle = 'rgba(38,37,43,.35)'; g.lineWidth = 1.2; g.stroke(); }
+    else if (b.kind === 'splash') { g.fillStyle = '#7cc3ee'; g.strokeStyle = BOOK_INK; g.lineWidth = 1.4; g.beginPath(); g.ellipse(sx, sy, px, px * 1.3, 0, 0, 7); g.fill(); g.stroke(); }
+    else { g.translate(sx, sy); g.rotate(b.spin); g.fillStyle = b.tone; g.strokeStyle = BOOK_INK; g.lineWidth = 1.3; g.beginPath(); g.ellipse(0, 0, px * 1.4, px * .7, 0, 0, 7); g.fill(); g.stroke(); }
+    g.restore();
+  }
+}
 function drawBook(now) {
   if (book.phase === 'build') {
     if (bookBuilder) { const r = bookBuilder.next(); if (r.done) bookBuilder = null; }
@@ -523,61 +691,95 @@ function drawBook(now) {
   const w = bookWorld, dt = Math.min(.05, (now - book.last) / 1000); book.last = now;
   const before = book.x; book.x += (book.tx - book.x) * (reduced ? 1 : 1 - Math.exp(-dt * 6));
   const x = book.x, speed = dt ? (x - before) / dt : 0, aspect = W / H, tan = Math.tan(BOOK_FOV / 2 * Math.PI / 180);
+  // The camera pulls back on climbs, drops, the jump and the bridge, and comes in close when Hoshi stops by something.
+  const lead = aspect < 1 ? 0 : (book.lead || 2.4), cx = x - lead, steep = Math.min(1, Math.abs(bookSlope(cx)) / .7), wild = bookIn(cx, BOOK_GAP) || bookIn(cx, BOOK_BRIDGE);
+  book.still = Math.abs(speed) < .15 ? (book.still || 0) + dt : 0;
+  const zoomTo = book.still > 1.4 && steep < .05 ? .86 : 1; book.zoom = reduced ? 1 : (book.zoom || 1) + (zoomTo - (book.zoom || 1)) * (1 - Math.exp(-dt * 1.6)); // in close when he stops on the flat; the slopes' zoom is in BOOK_CAM
+  // The camera rides its own curve (BOOK_CAM): turning to look along the land, tipping down over drops, sitting back on the wild parts.
   // A phone sees the same height of world, further back, so a whole note fits across it.
-  const dist = Math.max(23, 8.6 / (2 * tan * aspect)), span = 2 * tan * dist, half = span * aspect / 2, aim = Math.max(4.1, span * .5 - 2.6), time = now / 1000;
-  book.unit = half * 2 / W;
+  const key = bookCamAt(bookMod(cx)), ease = reduced ? 1 : 1 - Math.exp(-dt * 2.4), c = book.cam || (book.cam = { ...key });
+  for (const k of ['yaw', 'pitch', 'dist', 'lift']) c[k] += (key[k] - c[k]) * ease;
+  const dist = Math.max(22, 8.6 / (2 * tan * aspect)) * book.zoom * c.dist, span = 2 * tan * dist, half = span * aspect / 2, time = now / 1000;
+  book.unit = half * 2 / W; book.lead = half * .18;
   w.cam.aspect = aspect; w.cam.updateProjectionMatrix();
-  w.cam.position.set(x + look.x * .004, aim + 2.6 - look.y * .003, dist); w.cam.lookAt(x + look.x * .002, aim, 0); w.cam.updateMatrixWorld();
+  const camTo = bookRide(cx); book.camY = book.camY == null || reduced ? camTo : book.camY + (camTo - book.camY) * (1 - Math.exp(-dt * 4)); const rise = book.camY; // the view climbs with the land
+  const aimY = rise + 3.6 + c.lift + (aspect < 1 ? span * .12 : 0), yaw = c.yaw + look.x * .00012, pitch = c.pitch + look.y * .00008, tz = 2.6;
+  w.cam.position.set(x + Math.sin(yaw) * Math.cos(pitch) * dist, aimY + Math.sin(pitch) * dist, tz + Math.cos(yaw) * Math.cos(pitch) * dist); w.cam.lookAt(x, aimY, tz);
+  w.cam.updateMatrixWorld();
+  w.sun.position.set(x - 9, 16, 20); w.sun.target.position.set(x, 0, 2); w.sun.target.updateMatrixWorld(); w.wallShade.position.x = w.wall.position.x;
+  renderer.shadowMap.needsUpdate = true; // things move, so the shadows are drawn every frame
   w.wall.position.x = Math.round(x / 30) * 30;
-  for (const f of w.grounds) { const fx = f.x + BOOK_LOOP * Math.round((x - f.x) / BOOK_LOOP); f.top.position.x = f.drop.position.x = fx; }
+  { const n = BOOK_WORDS.worlds.length, c = Math.round(x / BOOK_SIZE), d = x - c * BOOK_SIZE, t = Math.max(0, Math.min(1, (d + BOOK_FADE_W) / (BOOK_FADE_W * 2))), at = i => ((i % n) + n) % n; // the page's tint, crossfading over the nearest hill
+    w.wall.material.color.lerpColors(w.sky[at(c - 1)], w.sky[at(c)], t * t * (3 - 2 * t)); }
+  for (const f of w.grounds) { const fx = f.x + BOOK_LOOP * Math.round((x - f.x) / BOOK_LOOP); for (const m of f.meshes) m.position.x = fx; }
+  const gx = x + Math.max(-half * .1, Math.min(half * .1, speed * .05)) - (aspect < 1 ? 0 : half * .18); // where Hoshi is
   // Things stand up out of the page as they come into view, and sink back on the way out.
   for (const p of w.props) {
-    const px = p.x + BOOK_LOOP * Math.round((x - p.x) / BOOK_LOOP), away = Math.abs(px - x), spread = half * (1 + p.z / dist * .4), shown = away < spread + Math.max(p.s.w, 2) + 2;
-    p.mesh.visible = shown; if (p.shade) p.shade.visible = shown; if (p.contact) p.contact.visible = shown;
+    const px = p.x + BOOK_LOOP * Math.round((x - p.x) / BOOK_LOOP), away = Math.abs(px - x), spread = half * (1.3 + p.z / dist * .4), shown = away < spread + Math.max(p.s.w, 2) + 2;
+    p.mesh.visible = shown; if (p.contact) p.contact.visible = shown;
+    if (shown && p.mesh.userData.beam && !reduced) p.mesh.userData.beam.rotation.y = time * p.mesh.userData.beam.userData.spin; // the lighthouse's light, sweeping
     if (!shown) continue;
     const raw = reduced || p.noPop ? 1 : Math.max(0, Math.min(1, (spread + p.s.w * .5 + .4 - away) / (half * .34))), k = raw === 1 ? 1 : 1 + 2.7 * (raw - 1) ** 3 + 1.7 * (raw - 1) ** 2; // overshoots a little
     const kickT = (now - p.kick) / 1000, wiggle = kickT < 1.4 ? Math.sin(kickT * 16) * Math.exp(-kickT * 3.6) * .13 : 0, idle = reduced ? 0 : Math.sin(time * 1.3 + p.phase);
     p.mesh.position.x = px + (p.slide ? Math.sin(time * .7 + p.z) * p.slide : 0);
-    p.mesh.position.y = p.y + idle * p.bob + (p.hang ? (1 - k) * 7 : 0) + (p.flat && aspect < 1 ? span * .14 : 0); // tall screens have room above, clear of the speech bubbles
-    p.mesh.rotation.z = p.tilt + wiggle + idle * p.sway;
+    // Hoshi passing by: things jump a little as he arrives, grass and flowers lean out of his way, the whale spouts.
+    const near = px - gx;
+    if (!p.flat && !p.noPop) { if (Math.abs(near) < 1.3 + p.s.w * .3) { if (!p.near) { p.near = true; if (!reduced) { p.kick = now; if (p.name === 'whale') for (let i = 0; i < 14; i++) (book.bits || (book.bits = [])).push({ kind: 'splash', x: px - .9 + Math.random() * .4, y: bookGround(px) + 2.6, z: p.z, vx: (Math.random() - .5) * 1.4, vy: 3 + Math.random() * 2.2, life: 0, max: .9, r: .06 + Math.random() * .06 }); } } } else if (Math.abs(near) > 3 + p.s.w * .3) p.near = false; }
+    const bend = p.bend && !reduced ? -Math.sign(near) * .4 * Math.max(0, 1 - Math.abs(near) / 1.6) : 0;
+    p.mesh.position.y = p.y + idle * p.bob + (p.hang ? (1 - k) * 7 : 0) + (p.flat && aspect < 1 ? span * .14 : 0) + (p.ground ? bookGround(px) : bookGround(p.x) - (p.noPop && !p.slide ? .35 : 0)); // tall screens have room above, clear of the speech bubbles; each world's things sit at its height
+    p.mesh.rotation.z = p.tilt + wiggle + idle * p.sway + bend;
+    if (p.twinkle && !reduced) p.mesh.scale.setScalar(1 + .12 * Math.sin(time * 3 + p.phase));
+    if (p.mesh.isGroup) p.mesh.position.z = p.z; // models keep their depth
     if (p.flat) p.mesh.scale.setScalar(Math.max(.001, k)); else if (!p.hang) p.mesh.rotation.x = -(1 - k) * 1.35;
     if (p.flick && !reduced) p.mesh.scale.set(1 + Math.sin(time * 19) * .035, 1 + Math.sin(time * 13) * .07, 1);
-    if (p.shade) { const off = .22 + p.z * .13; p.shade.position.set(p.mesh.position.x + off, p.mesh.position.y - p.z * .055 + (p.flat ? -.07 : 0), .03); p.shade.rotation.z = p.mesh.rotation.z; p.shade.scale.set(p.flat ? k : 1, Math.max(.001, p.flat ? k : k), 1); p.shade.material.uniforms.a.value = p.flat ? .3 : Math.max(.12, .32 - p.z * .03); }
-    if (p.contact) p.contact.position.set(px + .08, .012, p.z + .04);
+    if (p.contact) { p.contact.position.set(px + .08, bookGround(px + .08) + .012, p.z + .04); p.contact.rotation.z = Math.atan(bookSlope(px + .08, bookGround)); }
   }
   // The cat, in whatever this world calls for.
   const inWorld = Math.floor((((x + 2) % BOOK_LOOP) + BOOK_LOOP) % BOOK_LOOP / BOOK_SIZE);
   if (inWorld !== book.world) {
-    const first = book.world < 0; book.world = inWorld; book.spinAt = first || reduced ? -1e9 : now; if (first || reduced) book.costume = inWorld;
+    const first = book.world < 0; book.world = inWorld; book.spinAt = first || reduced ? -1e9 : now; if (first || reduced) book.costume = bookWear();
     book.say = { text: BOOK_WORDS.hello[inWorld], cat: true, at: now + (first ? BOOK_FLIP_MS + 250 : 500) };
     live.textContent = `${BOOK_WORDS.worlds[inWorld]}. ${BOOK_WORDS.hello[inWorld]}`;
   }
   if (Math.abs(speed) > .25) book.side = Math.sign(speed);
   const spin = Math.max(0, Math.min(1, (now - book.spinAt) / 460));
-  if (spin >= .5 && book.costume !== book.world) book.costume = book.world;
+  if (spin >= .5 && book.costume !== bookWear()) book.costume = bookWear();
   w.body.material = w.spr.cat[book.costume].mat;
-  const gx = x + Math.max(-half * .1, Math.min(half * .1, speed * .05)) - (aspect < 1 ? 0 : half * .18), hopping = book.costume === 4, onBoat = book.costume === 3, moving = Math.min(1, Math.abs(speed) / 3);
-  const lift = onBoat ? (reduced ? 0 : Math.sin(time * 1.6) * .13) - .3 : hopping ? Math.abs(Math.sin(gx * 1.6)) * .32 * moving : Math.abs(Math.sin(gx * 2.3)) * .05 * moving;
-  w.guide.position.set(gx, lift, 4.9); w.guide.scale.setScalar(BOOK_CAT);
+  const hopping = book.costume === 4, onBoat = book.costume === 3, moving = Math.min(1, Math.abs(speed) / 3);
+  let lift = onBoat ? (reduced ? 0 : Math.sin(time * 1.6) * .13) - .3 : hopping ? Math.abs(Math.sin(gx * 1.6)) * .32 * moving : Math.abs(Math.sin(gx * 2.3)) * .05 * moving;
+  // Over the land: along the slope; through the air over the chasm; on the bridge, which sags under him.
+  const inAir = bookIn(gx, [BOOK_GAP[0] + .2, BOOK_GAP[1] - .2]), onBridge = bookIn(gx, BOOK_BRIDGE);
+  const ground = bookRide(gx) - (onBridge ? .35 : 0), tilt = Math.max(-.75, Math.min(.75, Math.atan(bookSlope(gx))));
+  if (inAir) lift = 0;
+  if (!reduced) lift += Math.sin(time * 1.8 + 1.2) * .06; // held from below, never quite still
+  // Hoshi at work: pushing hard uphill, leaning back downhill, a wobble on landing.
+  const climb = bookSlope(gx) * book.side;
+  if (!onBoat && !inAir && climb > .12 && moving > .15 && !reduced) lift += Math.abs(Math.sin(time * 15)) * .08 * Math.min(1, climb * 2);
+  if (book.wasAir && !inAir) book.landAt = now; book.wasAir = inAir;
+  const landT = (now - (book.landAt || -1e9)) / 1000, wobble = !reduced && landT < .9 ? Math.sin(landT * 26) * Math.exp(-landT * 5) * .14 : 0;
+  w.guide.position.set(gx, lift + ground, 4.9); w.guide.scale.setScalar(BOOK_CAT);
+  w.stick.position.set(gx + .08, lift + ground + 1.6, 4.82); w.stick.rotation.z = tilt * .3;
   w.guide.rotation.y = (book.side < 0 ? Math.PI : 0) + (spin < 1 ? spin * Math.PI * 2 : 0);
-  w.guide.rotation.z = onBoat ? (reduced ? 0 : Math.sin(time * 1.1) * .045) : -Math.max(-.05, Math.min(.05, speed * .004)) * book.side;
+  w.guide.rotation.z = (onBoat ? (reduced ? 0 : Math.sin(time * 1.1) * .045) : -Math.max(-.05, Math.min(.05, speed * .004)) * book.side) + tilt * book.side + (climb < -.12 ? .08 : 0) + wobble; // facing left mirrors the turn, so the slope's sign follows the side
   const toX = u => (u - 220) / 100, toY = v => (427 - v) / 100; // from drawing units on the costume, whose sheet has a 7 unit margin
   const biking = book.costume <= 1, boarding = book.costume === 2;
   [[116, 342], [352, 342]].forEach(([u, v], i) => { const m = w.wheels[i]; m.visible = biking; m.position.set(toX(u), toY(v), i ? .01 : -.01); m.rotation.z = -gx / .67; });
   [[130, 392], [322, 392]].forEach(([u, v], i) => { const m = w.tiny[i]; m.visible = boarding; m.position.set(toX(u), toY(v), .01); m.rotation.z = -gx / .25; });
-  w.guideShadow.position.set(gx, .012, 4.95); w.guideShadow.scale.set(3.6 * BOOK_CAT, 1, .8); w.guideShadow.visible = !onBoat;
+  w.guideShadow.position.set(gx, ground + .012, 4.95); w.guideShadow.rotation.z = tilt; w.guideShadow.scale.set(3.6 * BOOK_CAT, 1, .8); w.guideShadow.visible = !onBoat && !inAir;
   w.scene.updateMatrixWorld();
   renderer.setRenderTarget(null); renderer.render(w.scene, w.cam);
   g.drawImage(renderer.domElement, 0, 0, W, H); // same task as the render, while its buffer is still valid
+  bookBits(dt, gx, ground, speed, onBoat, now);
+  bookMap(now);
   // Words on top of the world.
   if (book.say && now >= book.say.at) {
     const t = now - book.say.at, hold = book.say.cat ? 2200 : 3200, alpha = Math.min(1, t / 160) * (1 - Math.max(0, (t - hold) / 300));
     if (alpha <= 0) book.say = null;
     else {
       const v = new THREE.Vector3(), p = book.say.prop;
-      if (book.say.cat) v.set(gx + .05, 4.3 * BOOK_CAT + lift, 4.9); else if (p.hang) v.set(p.mesh.position.x, p.mesh.position.y - p.s.h - .1, p.z); else v.set(p.mesh.position.x, p.mesh.position.y + p.s.h + .05, p.z);
+      if (book.say.cat) v.set(gx + .05, 4.3 * BOOK_CAT + lift + ground, 4.9); else if (p.hang) v.set(p.mesh.position.x, p.mesh.position.y - p.s.h - .1, p.z); else v.set(p.mesh.position.x, p.mesh.position.y + p.s.h + .05, p.z);
       const [ax, ay] = bookProject(v);
-      if (ax > -40 && ax < W + 40) bookBubble(book.say.text, ax, p && p.hang ? ay + H * .17 : ay, alpha); else book.say = null;
+      if (ax > -40 && ax < W + 40) bookBubble(book.say.text, ax, ay, alpha, !!(p && p.hang)); else book.say = null;
     }
   }
   if (!book.moved) { // how to get going, until they do
