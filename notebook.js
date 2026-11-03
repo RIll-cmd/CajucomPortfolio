@@ -8,7 +8,7 @@ const BOOK_WORDS = {
   food: ['Things I eat', 'Forever meal: Katsu', 'Comfort food: French fries', 'Will never eat: Ginisang Ampalaya'],
   late: ['Up too late', 'On repeat: Mr. Incorrect', 'Favorite game: Black Myth: Wukong', 'Favorite show: Loki'],
   places: ['Places', 'Been to: Hong Kong, Baguio, La Union', 'Going next: Japan', 'Took my breath away: La Union', 'Most memories: Baguio'],
-  people: ['My people', 'My family, and the two cats who run the house.'],
+  people: ['My people', 'My family, and the two cats who run the house.', 'Dad: PNB bank manager.', 'Mom: Grade 11 chairperson.'],
   hi: ['Say hi!', 'cyrillgerardc@gmail.com', 'I reply faster than this cat.'],
 };
 // focus says where to look when a photo is cropped to fit: 0 is its top, 1 its bottom. No src leaves a sketch in the frame.
@@ -20,8 +20,8 @@ const BOOK_PHOTOS = [
   { id: 'photo-hk', src: 'photos/hongkong.jpg', cap: 'Hong Kong', tint: '#a5ddf2', focus: .7 },
   { id: 'photo-launion', src: 'photos/hut.jpg', cap: 'La Union', tint: '#a5ddf2', focus: .6 },
   { id: 'photo-baguio', src: 'photos/garden.jpg', cap: 'Baguio', tint: '#a5ddf2', focus: .6 },
-  { id: 'photo-clarissa', src: 'photos/clarissa.jpg', cap: 'Clarissa', tint: '#f4b6a5', focus: .1 },
-  { id: 'photo-erwin', src: 'photos/erwin.jpg', cap: 'Erwin', tint: '#f4b6a5', focus: .1 },
+  { id: 'photo-clarissa', src: 'photos/clarissa.jpg', cap: 'Mom, Clarissa', tint: '#f4b6a5', focus: .1 },
+  { id: 'photo-erwin', src: 'photos/erwin.jpg', cap: 'Dad, Erwin', tint: '#f4b6a5', focus: .1 },
   { id: 'photo-hoshi', src: 'photos/orange-face.jpg', cap: 'Hoshi', tint: '#ffd9a0', focus: .4 },
   { id: 'photo-off', src: 'photos/hoshi-floor.jpg', cap: 'Hoshi, off duty', tint: '#ffd9a0', focus: .5 },
   { id: 'photo-me', src: 'photos/me-view.jpg', cap: 'the human', tint: '#c7e6b4', focus: .3 },
@@ -383,7 +383,7 @@ function* buildBook() {
     ['lighthouse', 3.8, 10, bookArt.lighthouse], ['island', 7.4, 6.2, bookArt.island], ['whale', 6, 3.6, bookArt.whale], ['sun', 4.4, 4.4, bookArt.sun], ['gull', 1.8, .8, bookArt.gull], ['bottle', 1.4, 2.3, bookArt.bottle], ['waves', 36, 1.2, bookArt.waves, { scale: .7, edge: 0 }],
     ['places', 5.4, 4.7, bookNote(BOOK_WORDS.places.slice(1), { title: BOOK_WORDS.places[0], tape: '#a5ddf2' })],
     ['dusk', 35.4, 13, bookArt.dusk, { scale: .42, edge: 0 }], ['pine', 3.6, 7.4, bookArt.pine], ['tent', 6.4, 4.6, bookArt.tent], ['fire', 2.5, 2.7, bookArt.fire], ['owl', 1.7, 2.2, bookArt.owl], ['marshmallow', 2.2, 2.2, bookArt.marshmallow],
-    ['people', 5, 3.9, bookNote(BOOK_WORDS.people.slice(1), { title: BOOK_WORDS.people[0], tape: '#c7e6b4' })],
+    ['people', 5.4, 4.7, bookNote(BOOK_WORDS.people.slice(1), { title: BOOK_WORDS.people[0], tape: '#c7e6b4' })],
     ['fence', 2.8, 1.5, (x, w, h) => { for (const a of [14, w / 2, w - 14]) bookDraw(x, bookPoly([[a - 9, h], [a - 9, 18], [a, 6], [a + 9, 18], [a + 9, h]]), '#e9d3a8', 3.4); for (const y of [h * .38, h * .72]) bookDraw(x, bookPoly([[2, y - 9], [w - 2, y - 8], [w - 2, y + 9], [2, y + 8]]), '#e9d3a8', 3.4); }],
     ['lamp', 1.2, 4.8, (x, w, h) => { bookDraw(x, bookPoly([[w / 2 - 7, h], [w / 2 - 7, 70], [w / 2 + 7, 70], [w / 2 + 7, h]]), '#4b4e5c', 3.6); bookDraw(x, bookPoly([[w / 2 - 34, 72], [w / 2 + 34, 72], [w / 2 + 22, 20], [w / 2 - 22, 20]]), '#ffe29a', 4); bookDraw(x, bookPoly([[w / 2 - 40, 22], [w / 2 + 40, 22], [w / 2, 2]]), '#4b4e5c', 3.4); bookDraw(x, bookPoly([[w / 2 - 26, h], [w / 2 + 26, h], [w / 2 + 18, h - 14], [w / 2 - 18, h - 14]]), '#4b4e5c', 3); }],
     ['bunting', 9, 1.5, (x, w, h) => { bookLine(x, [[0, 10], [w * .25, 34], [w * .5, 42], [w * .75, 34], [w, 10]], 3); const cols = ['#e4584f', '#ffd24c', '#7dbf6a', '#4f7fd0', '#f2a7c3']; for (let i = 1; i < 14; i++) { const t = i / 14, ax = t * w, ay = 10 + 32 * Math.sin(t * Math.PI); bookDraw(x, bookPoly([[ax - 20, ay], [ax + 20, ay], [ax, ay + 62]]), cols[i % 5], 2.8); } }],
@@ -469,7 +469,7 @@ function* buildBook() {
   // My people
   put('dusk', at(4, 18), .05, { noPop: true, shadow: false, order: -2, y: -.2 });
   put('star', at(4, 5), 1, { hang: true, y: 11.4, sway: .08 }); put('star', at(4, 26), 1, { hang: true, y: 11.1, sway: .08 });
-  put('people', at(4, 7.6), .1, { y: 4.3, flat: true, tilt: -.03, say: 'my family, and two cats.' }); put('photo-clarissa', at(4, 12), .1, { y: 4.8, flat: true, tilt: .05, say: 'Clarissa Cajucom.' }); put('photo-erwin', at(4, 18.3), .1, { y: 4.9, flat: true, tilt: -.04, say: 'Erwin Cajucom.' }); put('photo-hoshi', at(4, 22), .1, { y: 4.7, flat: true, tilt: .05, say: 'Hoshi. orange. exotic. in charge.' }); put('photo-shiro', at(4, 26), .1, { y: 4.9, flat: true, tilt: -.05, say: 'Shiro. bow tie optional.' });
+  put('people', at(4, 7.6), .1, { y: 4.3, flat: true, tilt: -.03, say: 'my family, and two cats.' }); put('photo-clarissa', at(4, 12), .1, { y: 4.8, flat: true, tilt: .05, say: 'Mom. Grade 11 chairperson. her students fear her. i do not.' }); put('photo-erwin', at(4, 18.3), .1, { y: 4.9, flat: true, tilt: -.04, say: 'Dad. bank manager at PNB. he counts everything. even my treats.' }); put('photo-hoshi', at(4, 22), .1, { y: 4.7, flat: true, tilt: .05, say: 'Hoshi. orange. exotic. in charge.' }); put('photo-shiro', at(4, 26), .1, { y: 4.9, flat: true, tilt: -.05, say: 'Shiro. bow tie optional.' });
   put('pine', at(4, 6.2), 1.6); put('pine', at(4, 15.8), 1.1); put('tent', at(4, 21), .2, { model: true, mw: 6, mh: 4.5, say: 'Sleeps two. And one very large cat.' }); put('pine', at(4, 34.5), 1.4);
   put('owl', at(4, 15.8), 1.6, { y: 3.4, stick: false, say: 'who?', shadow: false }); put('fire', at(4, 15.8), 4.2, { flick: true, say: 'careful. the cat has already tried.' });
   put('marshmallow', at(4, 19.6), 5.1, { shadow: false, say: 'toasted, not burnt.' });
@@ -617,8 +617,16 @@ function bookWrapped(text, size, maxW) { g.font = `700 ${size}px ${BOOK_FONT}`; 
 // The outfit for where Hoshi is, except while the song from the desk plays: then the headphones (Up late's outfit) stay on everywhere.
 let bookSongOn = false;
 const bookWear = () => bookSongOn ? 2 : book.world;
-function bookBubble(text, ax, ay, alpha, below = false) { // below: the thing hangs from above, so the bubble sits under it and points up
+function bookBubble(text, ax, ay, alpha, below = false, side = false) { // below: the thing hangs from above, so the bubble sits under it and points up
   const size = Math.max(19, Math.min(28, H * .034)), lines = bookWrapped(text, size, Math.min(W * .62, 340)), bw = Math.max(...lines.map(l => g.measureText(l).width)) + size * 1.5, bh = lines.length * size * 1.14 + size * .95;
+  if (side && ax - bw - size * 1.1 > W * .03) { // beside, to the left, pointing right: clear of the notes and titles above
+    const x = ax - bw - size * 1.1, y = Math.max(H * .07, Math.min(H * .93 - bh, ay - bh * .2)), ty = Math.max(y + size * .8, Math.min(y + bh - size * .8, ay + size * .4)), edge = x + bw;
+    g.save(); g.globalAlpha = alpha; g.lineJoin = 'round'; g.lineWidth = 3; g.strokeStyle = BOOK_INK; g.fillStyle = '#fffef6';
+    g.beginPath(); g.roundRect(x, y, bw, bh, size * .7); g.fill(); g.stroke();
+    g.beginPath(); g.moveTo(edge - 1.5, ty - size * .42); g.lineTo(edge + size * .6, ty + size * .08); g.lineTo(edge - 1.5, ty + size * .42); g.fill(); g.beginPath(); g.moveTo(edge, ty - size * .42); g.lineTo(edge + size * .6, ty + size * .08); g.lineTo(edge, ty + size * .42); g.stroke();
+    g.fillStyle = '#2d2b33'; g.textAlign = 'center'; g.textBaseline = 'middle'; lines.forEach((l, i) => g.fillText(l, x + bw / 2, y + size * .95 + i * size * 1.14)); g.restore();
+    return;
+  }
   const under = below || ay - bh - size * .8 < H * .07; // no room above, so it goes under and points up
   const x = Math.max(W * .06, Math.min(W * .94 - bw, ax - bw / 2)), y = under ? Math.min(H * .93 - bh, ay + size * .8) : ay - bh - size * .8;
   g.save(); g.globalAlpha = alpha; g.lineJoin = 'round'; g.lineWidth = 3; g.strokeStyle = BOOK_INK; g.fillStyle = '#fffef6';
@@ -792,7 +800,7 @@ function drawBook(now) {
       const v = new THREE.Vector3(), p = book.say.prop;
       if (book.say.cat) v.set(gx + .05, 4.3 * BOOK_CAT + lift + ground, 4.9); else if (p.hang) v.set(p.mesh.position.x, p.mesh.position.y - p.s.h - .1, p.z); else v.set(p.mesh.position.x, p.mesh.position.y + p.s.h + .05, p.z);
       const [ax, ay] = bookProject(v);
-      if (ax > -40 && ax < W + 40) bookBubble(book.say.text, ax, ay, alpha, !!(p && p.hang)); else book.say = null;
+      if (ax > -40 && ax < W + 40) bookBubble(book.say.text, ax, ay, alpha, !!(p && p.hang), book.say.cat && W > H); // Hoshi talks sideways on a wide screen, so the bubble never covers a title else book.say = null;
     }
   }
   if (!book.moved) { // how to get going, until they do

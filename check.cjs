@@ -6,13 +6,14 @@ const fs = require('fs');
 const http = require('http');
 const path = require('path');
 
-const TYPES = { '.html': 'text/html', '.jpg': 'image/jpeg', '.png': 'image/png', '.js': 'text/javascript', '.json': 'application/json', '.wasm': 'application/wasm', '.webp': 'image/webp', '.mp3': 'audio/mpeg' };
+const TYPES = { '.html': 'text/html', '.jpg': 'image/jpeg', '.png': 'image/png', '.js': 'text/javascript', '.json': 'application/json', '.wasm': 'application/wasm', '.webp': 'image/webp', '.mp3': 'audio/mpeg', '.mp4': 'video/mp4' };
+const page = () => { const s = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8'); return /^<!doctype/i.test(s) ? s : wrapper(); }; // a full document is served as it is
 const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0;font:14px/1.4 system-ui,sans-serif}[hidden]{display:none!important}</style></head><body>${fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8')}</body></html>`; // same skeleton the Artifact host wraps around the file
 
 (async () => {
   const server = http.createServer((req, res) => {
     const url = decodeURIComponent(req.url.split('?')[0]);
-    if (url === '/') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end(wrapper()); }
+    if (url === '/') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end(page()); }
     const file = path.join(__dirname, url);
     if (!file.startsWith(__dirname) || !fs.existsSync(file)) { res.writeHead(404); return res.end(); }
     res.writeHead(200, { 'content-type': TYPES[path.extname(file)] || 'application/octet-stream' });
@@ -307,6 +308,17 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     await page.waitForFunction(() => view.c.shots.every(shot => shot.pics.length && shot.pics.every(pic => pic.naturalWidth > 0)), null, { timeout: 60000 });
     await page.waitForTimeout(800);
     await page.screenshot({ path: `${name}-p-case.png` });
+    // The demo video: its still has a play button, and clicking it plays the video big; Escape puts it away and the music comes back.
+    assert.ok(await page.evaluate(() => WORKS_WORDS.items.every(i => i.demo)), 'every project has a demo video');
+    await page.evaluate(() => { view.scroll = view.target = W > H * 1.05 && W >= 760 ? 0 : H; }); // tall screens show the words first
+    await page.waitForFunction(() => view.c.demo.pic.naturalWidth > 0 && view.zoomHot.some(q => q.video), null, { timeout: 60000 });
+    const play = await page.evaluate(() => { const z = view.zoomHot.find(q => q.video); return toClient(z.x + z.w / 2, z.y + z.h / 2); });
+    await page.mouse.click(...play);
+    assert.deepStrictEqual(await page.evaluate(() => [$('#zoom').open, $('#zoom').classList.contains('film'), $('#zoom video').src.endsWith(`${view.c.demo.video}.mp4`), videoOn]), [true, true, true, true], 'the demo plays big');
+    await page.screenshot({ path: `${name}-p2-demo.png` });
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(() => !$('#zoom').open && !videoOn, null, { timeout: 5000 }).catch(() => assert.fail('Escape stops the demo')); // the dialog's close event comes a moment later
+    await page.evaluate(() => { view.scroll = view.target = 0; }); await page.waitForTimeout(500);
     assert.ok(await page.evaluate(() => view.max > H), 'the gallery and features make the page scroll');
     await page.evaluate(() => { view.scroll = view.target = view.max * .3; });
     await page.waitForTimeout(800);

@@ -1,4 +1,18 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Cyrill Cajucom Portfolio</title>
+<meta name="description" content="Cyrill Gerard P. Cajucom, an aspiring software and AI engineer and 4th-year BS Computer Science student at FEU Tech. AI agents, computer vision and hardware projects.">
+<!-- Link previews. Some sites (LinkedIn, Facebook) only read og:image as a full https:// address: make it absolute once the site has its domain. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Cyrill Cajucom, aspiring software and AI engineer">
+<meta property="og:description" content="Projects, experience, résumé and contact, inside a retro TV.">
+<meta property="og:image" content="photos/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='16' rx='14' ry='11' fill='%23ffd23f' stroke='%23000' stroke-width='2'/%3E%3Ctext x='16' y='21' font-size='14' text-anchor='middle' font-family='Arial' font-weight='700'%3E%3F%3C/text%3E%3C/svg%3E">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@600;700&family=Kaushan+Script&family=Playfair+Display:ital,wght@0,400;0,500;1,500&family=JetBrains+Mono:wght@500;600&family=Poppins:wght@600;700&family=Righteous&family=Gaegu:wght@400;700&family=Instrument+Sans:wght@400;600&family=Lilita+One&family=VT323&display=swap">
@@ -16,7 +30,7 @@
   --mono: VT323, Consolas, monospace;
 }
 html, body { height: 100%; overflow: hidden; overscroll-behavior: none; -webkit-text-size-adjust: 100%; }
-body { background: #050404; color: var(--paper); font-family: var(--body); }
+body { margin: 0; background: #050404; color: var(--paper); font-family: var(--body); }
 [hidden] { display: none !important; }
 :focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
@@ -93,8 +107,17 @@ dialog::backdrop { background: rgba(6,12,28,.8); }
 #zoom:focus, #zoom:focus-visible { outline: none; }
 #zoom::backdrop { background: rgba(6,10,24,.86); backdrop-filter: blur(6px); }
 #zoom img { display: block; max-width: min(92vw, 1400px); max-height: 82vh; border-radius: 14px; border: 3px solid #f4ecd8; box-shadow: 0 0 0 6px rgba(20,40,75,.6), 0 24px 70px rgba(0,0,0,.7); animation: zoom-in .38s cubic-bezier(.2,.9,.25,1.15) both; transform-origin: var(--from, 50% 50%); }
-#zoom p { margin: 14px 0 0; font: 400 18px/1.3 Righteous, "Segoe UI", sans-serif; color: #f4ecd8; }
+#zoom p { margin: 14px auto 0; max-width: none; font: 400 18px/1.3 Righteous, "Segoe UI", sans-serif; color: #f4ecd8; }
 #zoom p:empty { display: none; }
+#about p.credits, body:not(.in-works) #about p.credits { margin: 18px 0 0; font-size: 12px; opacity: .7; }
+#zoom video { display: none; max-width: min(92vw, 1400px); max-height: 82vh; border-radius: 14px; border: 3px solid #f4ecd8; background: #000; box-shadow: 0 0 0 6px rgba(20,40,75,.6), 0 24px 70px rgba(0,0,0,.7); }
+#zoom.film video { display: block; } #zoom.film img { display: none; }
+#zoom img, #zoom video { margin-inline: auto; } /* blocks ignore text-align */
+#zoom .zoom-count { display: block; margin-top: 6px; font: 400 15px/1 Righteous, "Segoe UI", sans-serif; color: rgba(244,236,216,.6); }
+#zoom .zoom-nav { display: none; }
+#zoom.many .zoom-nav { display: grid; place-items: center; position: fixed; top: 50%; width: 52px; height: 52px; margin-top: -26px; padding: 0 0 4px; border: 2px solid #f4ecd8; border-radius: 50%; background: rgba(20,40,75,.85); color: #f4ecd8; font: 400 34px/1 Righteous, "Segoe UI", sans-serif; cursor: pointer; }
+#zoom.many .zoom-nav:hover { background: #f4ecd8; color: #14284b; }
+#zoom.many .prev { left: max(10px, 2vw); } #zoom.many .next { right: max(10px, 2vw); }
 @keyframes zoom-in { from { transform: scale(.25); opacity: 0; } }
 dialog .tape { margin: 0 0 16px; font: 400 clamp(38px, 7vw, 56px)/1.1 "Kaushan Script", Righteous, cursive; color: #ff8a5c; text-shadow: 2px 3px 0 #0b1730; transform: rotate(-1.5deg); transform-origin: left center; overflow-wrap: anywhere; }
 dialog p { margin: 0 0 14px; max-width: 58ch; font: 600 15px/1.6 Poppins, "Segoe UI", sans-serif; color: #f4ecd8; }
@@ -115,15 +138,15 @@ dialog :focus-visible { outline-color: #ff8a5c; }
 body:not(.in-works) dialog:not(#zoom):not(#guide) { background: #0d0d0e; color: var(--paper); border: 2px solid var(--paper); border-radius: 8px; box-shadow: 6px 7px 0 rgba(0,0,0,.6), 0 18px 60px rgba(0,0,0,.7); }
 body:not(.in-works) dialog:not(#zoom):not(#guide)::backdrop { background: rgba(0,0,0,.72); }
 body:not(.in-works) dialog .tape { display: inline-block; margin: 4px 0 18px; padding: 6px 16px 8px; font: 400 clamp(26px, 5vw, 40px)/1.05 var(--lettering, "Lilita One"), Impact, sans-serif; text-transform: uppercase; color: #000; text-shadow: none; background: var(--yellow); border: 3px solid #000; border-radius: 8px; box-shadow: 4px 5px 0 rgba(0,0,0,.6); transform: rotate(-2deg); }
-body:not(.in-works) dialog p { font: 500 15px/1.6 var(--body); color: var(--paper); }
+body:not(.in-works) dialog:not(#zoom) p { font: 500 15px/1.6 var(--body); color: var(--paper); }
 body:not(.in-works) dialog .address { font: 400 clamp(24px, 5vw, 32px)/1.1 var(--mono); color: var(--yellow); letter-spacing: .02em; }
 body:not(.in-works) dialog .topics li { background: var(--yellow); color: #000; font: 400 19px/1 var(--mono); border-radius: 4px; padding: 5px 10px; }
 body:not(.in-works) .keys dt { font: 400 21px/1 var(--mono); color: var(--yellow); }
 body:not(.in-works) .keys dd { font: 500 13px/1.45 var(--body); color: var(--paper); }
-body:not(.in-works) dialog:not(#guide) button, body:not(.in-works) dialog .socials a { border: 2px solid var(--paper); border-radius: 6px; background: #000; color: var(--paper); font: 400 20px/1 var(--mono); letter-spacing: .03em; }
-body:not(.in-works) dialog:not(#guide) button:hover, body:not(.in-works) dialog .socials a:hover { background: var(--paper); color: #000; }
-body:not(.in-works) dialog:not(#guide) button:not(.ghost) { background: var(--yellow); border-color: var(--yellow); color: #000; }
-body:not(.in-works) dialog:not(#guide) button:not(.ghost):hover { background: #fff36b; }
+body:not(.in-works) dialog:not(#guide):not(#zoom) button, body:not(.in-works) dialog .socials a { border: 2px solid var(--paper); border-radius: 6px; background: #000; color: var(--paper); font: 400 20px/1 var(--mono); letter-spacing: .03em; }
+body:not(.in-works) dialog:not(#guide):not(#zoom) button:hover, body:not(.in-works) dialog .socials a:hover { background: var(--paper); color: #000; }
+body:not(.in-works) dialog:not(#guide):not(#zoom) button:not(.ghost) { background: var(--yellow); border-color: var(--yellow); color: #000; }
+body:not(.in-works) dialog:not(#guide):not(#zoom) button:not(.ghost):hover { background: #fff36b; }
 body:not(.in-works) dialog :focus-visible { outline-color: var(--yellow); }
 
 @media (prefers-reduced-motion: reduce) {
@@ -195,10 +218,10 @@ body:not(.in-works) dialog :focus-visible { outline-color: var(--yellow); }
   <div class="sr-only" id="live" aria-live="polite"></div>
 </div>
 
-<dialog id="zoom" aria-label="Picture"><img alt=""><p></p></dialog>
+<dialog id="zoom" aria-label="Picture"><img alt=""><video controls playsinline preload="none"></video><p></p><span class="zoom-count"></span><button class="zoom-nav prev" type="button" aria-label="Previous picture">‹</button><button class="zoom-nav next" type="button" aria-label="Next picture">›</button></dialog>
 <dialog id="about" aria-labelledby="about-title">
   <h2 id="about-title" class="tape">Cyrill Gerard P. Cajucom</h2>
-  <p>Aspiring software and AI engineer from San Miguel, Bulacan, now based in Manila. I build my own tools solo, from orchestrating AI coding agents to computer vision on the desk. On my thesis, Wake&amp;Brake, I was the main debugger and researcher, and handled the hardware and the alert algorithms. I'm open to work and looking for companies to intern at.</p>
+  <p>Aspiring software and AI engineer from San Miguel, Bulacan, now based in Manila. I build my own tools solo, from orchestrating AI coding agents to computer vision on the desk. On my thesis, Wake&amp;Brake, I was the main debugger and researcher, and handled the hardware and the alert algorithms. I'm a 4th-year BS Computer Science student at FEU Tech, specializing in software engineering, and I'm looking for a 500-hour internship.</p>
   <ul class="topics" aria-label="What I work with"><li>AI</li><li>Orchestration</li><li>Computer Vision</li><li>Full-stack</li><li>Hardware</li></ul>
   <dl class="keys">
     <div><dt>Click</dt><dd>Look closer, click again to open</dd></div>
@@ -212,11 +235,12 @@ body:not(.in-works) dialog :focus-visible { outline-color: var(--yellow); }
     <div><dt>R</dt><dd>Random project</dd></div>
     <div><dt>?</dt><dd>This page</dd></div>
   </dl>
+  <p class="credits">Voice-overs in the project demos made with ElevenLabs.</p>
   <div class="row"><button type="button" data-close>Close</button></div>
 </dialog>
 <dialog id="contact" aria-labelledby="contact-title">
   <h2 id="contact-title" class="tape">Say hello</h2>
-  <p>Open to work, and looking for companies to intern at.</p>
+  <p>Open to work, and looking for a 500-hour internship.</p>
   <p class="address" id="address">cyrillgerardc@gmail.com</p>
   <p class="socials"><a href="https://www.linkedin.com/in/cyrill-gerard-cajucom-25553933a/" target="_blank" rel="noopener">LinkedIn</a><a href="https://github.com/RIll-cmd" target="_blank" rel="noopener">GitHub</a><a href="https://www.facebook.com/cyrillgerardcajucom10" target="_blank" rel="noopener">Facebook</a><a href="https://discord.com/users/700210477288128593" target="_blank" rel="noopener">Discord</a><a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=cyrillgerardc@gmail.com" target="_blank" rel="noopener">Gmail</a></p>
   <div class="row"><button type="button" id="copy">Copy address</button><button type="button" class="ghost" data-close>Close</button></div>
@@ -367,7 +391,7 @@ const pixelArt = {
     p.shape([['r', 64, 27, 6, 2]], fur, dark); p.shape([['r', 55, 28, 3, 3]], fur, dark); // arm to the bars, foot on the pedal
     p.rect(40, 40, 7, 1, '#b4c8ea'); p.rect(42, 37, 5, 1, '#b4c8ea'); // speed lines
   },
-  tome(p, w, h) { // the Chronicle book itself, closed on a wooden table: maroon leather, a double gold border, a star in a ring, brass corners
+  tome(p, w, h) { // the Experiences book itself, closed on a wooden table: maroon leather, a double gold border, a star in a ring, brass corners
     for (let y = 0; y < h; y++) p.rect(0, y, w, 1, ['#7a4a2a', '#83522f', '#76462a'][Math.floor(y / 8) % 3]); // planks
     for (let y = 7; y < h; y += 8) p.rect(0, y, w, 1, '#4a2a16');
     for (const [x, y, n] of [[6, 3, 7], [64, 2, 5], [72, 19, 8], [4, 21, 5], [76, 28, 4], [10, 35, 6], [70, 42, 7], [30, 51, 6], [66, 52, 4]]) p.rect(x, y, n, 1, '#9a6a42'); // grain
@@ -412,7 +436,7 @@ const photoStory = (name, src, focus = .5) => {
 };
 const STORIES = [photoStory('Cyrill', 'photos/me-jacket.jpg', .2), photoStory('Up in the mountains', 'photos/me-view.jpg', .55), photoStory('Sunset', 'photos/sunset.jpg', .64),photoStory('La Union at night', 'photos/moon.jpg', .28), photoStory('Baguio', 'photos/garden.jpg', .55), photoStory('La Union', 'photos/hut.jpg', .55), photoStory('Shiro', 'photos/tabby-chin.jpg', .2), photoStory('Hoshi', 'photos/hoshi-sleep.jpg', .2)];
 // wide and tall place each card on the one page as [x, y, scale], for landscape and portrait screens.
-const hero = { hero: true, t: 'Résumé', c: 'Hello', theme: 'ascii', sub: "Who I am, what I've built, where I've worked. Hold to connect.", w: 430, h: 500, depth: 1, wide: [0, -10, 1.25], tall: [0, -340, 1.15], draw: posterCard('photos/cards/hands.webp', (g, w, h) => { pixelWords(g, 'CYRILL', w / 2, h * .17, h * .15, 1); pixelWords(g, 'SOFTWARE / AI ENGINEER', w / 2, h * .26, h * .058, 1, 'center', '#ffffff'); }) };
+const hero = { hero: true, t: 'Résumé', c: 'Hello', theme: 'ascii', sub: "Who I am, what I've built, where I've worked. Hold to connect.", w: 430, h: 500, depth: 1, wide: [0, -10, 1.25], tall: [0, -340, 1.15], draw: posterCard('photos/cards/hands.webp', (g, w, h) => { pixelWords(g, 'CYRILL', w / 2, h * .17, h * .15, 1); pixelWords(g, 'ASPIRING SOFTWARE / AI ENGINEER', w / 2, h * .26, h * .045, 1, 'center', '#ffffff'); }) };
 const stories = { stories: true, t: 'Stories', c: 'Stories', theme: 'pop', w: 340, h: 225, depth: .9, wide: [520, 152, 1.335], tall: [197, 362, 1.1], draw: STORIES[0].draw };
 const projects = [
   { t: 'Projects', c: "What I've built", sub: "Everything I've made", theme: 'clouds', portal: true, w: 340, h: 225, depth: 1.15, wide: [-520, -172, 1.335], tall: [-197, 92, 1.1], draw: pixelCard(85, 56, 'PROJECTS', pixelArt.works) },
@@ -420,12 +444,12 @@ const projects = [
   { t: 'Experiences', c: 'Work, school, awards', theme: 'wood', sub: 'Experience, certifications, awards, education, skills', tome: true, copy: 'Experience, education, certifications, awards and skills.', w: 340, h: 225, depth: .9, wide: [-520, 152, 1.335], tall: [-197, 362, 1.1], draw: pixelCard(85, 56, 'EXPERIENCES', pixelArt.tome, (g, w, h, u) => { // the cover's title, set into its slant like the real book
     const [x, y] = bookAt(BOOK.D / 2, BOOK.L * .2, BOOK.T), k = u;
     g.save(); g.setTransform(g.getTransform().multiply(new DOMMatrix([BOOK.U[0] * k, BOOK.U[1] * k, BOOK.V[0] * k, BOOK.V[1] * k, x * u, y * u])));
-    g.font = '700 2.3px Cinzel, Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#2a1210'; g.fillText('CHRONICLE', .25, .3); g.fillStyle = '#e9c46a'; g.fillText('CHRONICLE', 0, 0);
+    g.font = '700 1.9px Cinzel, Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#2a1210'; g.fillText('EXPERIENCES', .25, .3); g.fillStyle = '#e9c46a'; g.fillText('EXPERIENCES', 0, 0);
     g.restore();
   }) },
 ];
 const items = [hero, stories, ...projects];
-const TICKER = 'OPEN TO WORK. FINDING COMPANIES TO INTERN AT.     ';
+const TICKER = 'OPEN TO WORK. LOOKING FOR A 500-HOUR INTERNSHIP.     ';
 const PAGE = { wide: { w: 1640, h: 1040 }, tall: { w: 830, h: 1700 } }; // world size that must fit the screen, with room for the tube's curved edge
 
 /* ---------- Scene state ---------- */
@@ -996,9 +1020,9 @@ function drawBoard(now) {
     const upClose = focus.stories && storyStage === 'row' ? rowFocus : 0; // a photo held up close has the screen to itself
     drawTag(focus.stories ? 'Stories' : focus.c, '', W / 2, py - h / 2, fade * (1 - upClose)); // the big lettering below already says the name
     if (popAt && upClose < .5) {
-      const ly = Math.min(H * .93, py + h / 2 + Math.max(38, H * (W < H ? .11 : .075)));
-      drawLettering(focus.stories ? STORIES[storyIndex].name : focus.t, ly, now);
-      const after = reduced ? 1 : Math.max(0, Math.min(1, (now - popAt - 1000) / 300)); // waits for the burst to clear
+      const ly = Math.min(H * .93, py + h / 2 + (focus.stories ? Math.max(38, H * (W < H ? .11 : .075)) : 0)); // no lettering: the words sit right under the card
+      if (focus.stories) drawLettering(STORIES[storyIndex].name, ly, now); // the other cards already have their name painted on
+      const after = reduced ? 1 : Math.max(0, Math.min(1, (now - popAt - (focus.stories ? 1000 : 250)) / 300)); // waits for the burst to clear
       let below = ly + Math.max(28, H * .055);
       if (focus.sub && H > 480) { // a sideways phone only has room for the hint
         g.globalAlpha = after; caption(focus.sub, below, Math.max(16, H * .024), BODY, onPaper); g.globalAlpha = 1;
@@ -1101,6 +1125,14 @@ function projectWords(c, x, y, w, size, split, draw) { // returns where the word
   const bottom = Math.max(y, split ? ty : 0);
   return { bottom, links: [x, bottom + size * .6] };
 }
+function projectMagnifier(x, y) { // a cream badge with a magnifying glass, at a screenshot's corner
+  g.fillStyle = 'rgba(20,40,75,.85)'; g.strokeStyle = WORKS_CREAM; g.lineWidth = 2; g.beginPath(); g.arc(x, y, 16, 0, 7); g.fill(); g.stroke();
+  g.lineWidth = 2.4; g.beginPath(); g.arc(x - 2, y - 2, 6, 0, 7); g.stroke(); g.lineCap = 'round'; g.beginPath(); g.moveTo(x + 2.5, y + 2.5); g.lineTo(x + 8, y + 8); g.stroke(); g.lineCap = 'butt';
+}
+function projectPlay(x, y, r) { // a round play button over a demo video's still
+  g.fillStyle = 'rgba(20,40,75,.82)'; g.strokeStyle = WORKS_CREAM; g.lineWidth = 3; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.stroke();
+  g.fillStyle = WORKS_CORAL; g.beginPath(); g.moveTo(x - r * .3, y - r * .45); g.lineTo(x + r * .5, y); g.lineTo(x - r * .3, y + r * .45); g.closePath(); g.fill();
+}
 function drawProject() {
   const { c, p } = view, now = performance.now(), t = reduced ? 0 : now / 1000, ease = 1 - (1 - p) ** 3, split = W > H * 1.05 && W >= 760;
   // The left side (all of it when tall), and the words' column.
@@ -1113,21 +1145,26 @@ function drawProject() {
   const groups = Math.ceil(feats.length / 6), each = Math.ceil(feats.length / Math.max(1, groups)), chunks = Array.from({ length: groups }, (_, i) => feats.slice(i * each, (i + 1) * each)); // a long list reads better over two parts
   const parts = []; // each draws itself centred on its own screen, given the top of its block
   if (!split) { const size = Math.max(15, Math.min(18, W * .042)), h = projectWords(c, colX, 0, colW, size, false, false).bottom; parts.push({ h: h + 70, words: true, draw: y => { const at = projectWords(c, colX, y, colW, size, false, true); view.linksAt = at.links; } }); }
-  const shotPart = (pic, cap) => { const ar = pic && pic.naturalWidth ? pic.naturalWidth / pic.naturalHeight : 16 / 10, pw = Math.min(cw, H * (split ? .66 : .6) * ar), ph = pw / ar;
+  const shotPart = (pic, cap, video) => { const ar = pic && pic.naturalWidth ? pic.naturalWidth / pic.naturalHeight : 16 / 10, pw = Math.min(cw, H * (split ? .66 : .6) * ar), ph = pw / ar;
     return { h: ph + caption * 3.2, draw: y => { // each picture as big as fits, framed, and under it what it shows on a frosted strip
       if (!pic || !pic.naturalWidth) return;
-      const px = mid - pw / 2; projectFrame(px, y, pw, ph, 14, () => g.drawImage(pic, px, y, pw, ph)); view.zoomHot.push({ x: px, y, w: pw, h: ph, pic, cap });
+      const px = mid - pw / 2; projectFrame(px, y, pw, ph, 14, () => g.drawImage(pic, px, y, pw, ph)); view.zoomHot.push({ x: px, y, w: pw, h: ph, pic, cap, video }); if (video) projectPlay(mid, y + ph / 2, Math.max(28, Math.min(pw, ph) * .12)); else projectMagnifier(px + pw - 26, y + 26);
       if (cap) { g.font = `400 ${caption}px ${WORKS_LABEL}`; const sw = Math.min(pw, g.measureText(cap).width + caption * 2.4), sh = caption * 2.1, sy = y + ph + caption * 1.1; g.fillStyle = 'rgba(8,26,92,.6)'; g.strokeStyle = 'rgba(244,236,216,.35)'; g.lineWidth = 1.2; g.beginPath(); g.roundRect(mid - sw / 2, sy, sw, sh, sh / 2); g.fill(); g.stroke(); worksWords(cap, mid, sy + sh / 2 + caption * .04, caption, WORKS_CREAM); }
     } }; };
   const shots = c.shots || [];
+  if (c.demo) parts.push(shotPart(c.demo.pic, c.demo.cap, c.demo)); // the demo video comes first
   if (shots.length) parts.push(shotPart(shots[0].pics[0], shots[0].cap));
-  chunks.forEach((list, ci) => { const panelH = list.reduce((n, l) => n + l.length * bodySize * 1.45 + bodySize * .55, 0) + pad * 1.4;
-    parts.push({ h: 50 + panelH, draw: y => {
-      worksWords(ci ? "And there's more" : 'What it does', mid, y, Math.max(24, Math.min(40, cw * .06)), WORKS_CREAM, { font: WORKS_SCRIPT }); y += 50;
+  const listPart = (title, list) => { const panelH = list.reduce((n, l) => n + l.length * bodySize * 1.45 + bodySize * .55, 0) + pad * 1.4;
+    return { h: 50 + panelH, draw: y => {
+      worksWords(title, mid, y, Math.max(24, Math.min(40, cw * .06)), WORKS_CREAM, { font: WORKS_SCRIPT }); y += 50;
       const left = mid - width / 2; g.fillStyle = 'rgba(8,26,92,.55)'; g.strokeStyle = 'rgba(244,236,216,.3)'; g.lineWidth = 1.5; g.beginPath(); g.roundRect(left, y, width, panelH, 20); g.fill(); g.stroke(); // a frosted panel, a coral star for each
       y += pad + bodySize * .5;
       list.forEach(ls => { worksStar(left + pad + bodySize * .3, y, bodySize * .42, WORKS_CORAL); ls.forEach(line => { text(g, line, left + pad + bodySize * 1.5, y, bodySize, WORKS_BODY, WORKS_CREAM, 'left'); y += bodySize * 1.45; }); y += bodySize * .55; });
-    } }); });
+    } }; };
+  chunks.forEach((list, ci) => parts.push(listPart(ci ? "And there's more" : 'What it does', list)));
+  const wrapAll = list => list.map(f => wrapLines(f, width - bodySize * 4.2));
+  if (c.results) parts.push(listPart('Results', wrapAll(c.results))); // the numbers, then the hardest problem it solved
+  if (c.hard) parts.push(listPart('The hardest part', wrapAll([c.hard])));
   for (const shot of shots.slice(1)) parts.push(shotPart(shot.pics[0], shot.cap));
   if (!c.shots) { parts.push({ h: c.heroBmp.height / maxPr, draw: y => g.drawImage(c.heroBmp, mid - c.heroBmp.width / maxPr / 2, y, c.heroBmp.width / maxPr, c.heroBmp.height / maxPr) }); parts.push({ h: Math.round(cw * .46), draw: y => g.drawImage(c.detailBmp, mid - cw / 2, y, cw, Math.round(cw * .46)) }); }
   parts.push({ h: 90, draw: y => { worksStar(mid - 110, y + 20, 7, WORKS_TEAL); worksStar(mid + 110, y + 20, 7, WORKS_TEAL); worksWords('End of case study', mid, y + 20, 20, 'rgba(244,236,216,.75)'); worksWords('Back to the surface with Escape or Back', mid, y + 62, 15, 'rgba(244,236,216,.5)'); } });
@@ -1163,14 +1200,14 @@ if (gl) {
   const prog = gl.createProgram();
   gl.attachShader(prog, shader(gl.VERTEX_SHADER, 'attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0.,1.);}'));
   gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, `precision highp float;
-    varying vec2 uv; uniform sampler2D tex; uniform vec2 res, vel; uniform float time, glitch, scan, calm;
+    varying vec2 uv; uniform sampler2D tex; uniform vec2 res, vel; uniform float time, glitch, scan, calm, clear;
     void main(){
       vec2 q = (uv*2.-1.)*${S.toFixed(3)}; vec2 o = q;
       q.x *= 1.+${K.toFixed(3)}*o.y*o.y; q.y *= 1.+${K.toFixed(3)}*o.x*o.x;
       float r2 = dot(q,q);
       vec2 st = q*.5+.5;
       st.x += glitch*.05*sin(st.y*70.+time*40.);
-      vec2 spread = q*(.0006+.0032*r2*r2)+vel; // colour fringing grows at the edges and while panning
+      vec2 spread = (q*(.0006+.0032*r2*r2)+vel)*(1.-.75*clear); // colour fringing grows at the edges and while panning; much less on the pages people read
       vec3 c = vec3(0.), sum = vec3(0.);
       for(int i=0;i<7;i++){
         float t = float(i)/6.;
@@ -1179,9 +1216,9 @@ if (gl) {
       }
       c /= sum;
       float n = fract(sin(dot(gl_FragCoord.xy+mod(time,10.)*91.,vec2(12.9898,78.233)))*43758.5453);
-      c += (n-.5)*(.035+glitch*.8);
-      c *= 1.-scan*.2*(.5+.5*sin(gl_FragCoord.y*2.094));
-      c *= 1.-scan*.05*step(2.,mod(gl_FragCoord.x,3.));
+      c += (n-.5)*(.035*(1.-.6*clear)+glitch*.8);
+      c *= 1.-scan*(1.-.6*clear)*.2*(.5+.5*sin(gl_FragCoord.y*2.094));
+      c *= 1.-scan*(1.-.6*clear)*.05*step(2.,mod(gl_FragCoord.x,3.));
       c *= 1.+calm*(.03*smoothstep(.09,0.,abs(fract(uv.y-time*.07)-.5))+.008*sin(time*50.));
       c *= 1.-.45*smoothstep(.7,2.1,r2);
       vec2 b = vec2(res.x/res.y,1.), a = abs(q)*b-b+.12;
@@ -1198,7 +1235,7 @@ if (gl) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
   const at = n => gl.getUniformLocation(prog, n);
-  uni = { res: at('res'), vel: at('vel'), time: at('time'), glitch: at('glitch'), scan: at('scan'), calm: at('calm') };
+  uni = { res: at('res'), vel: at('vel'), time: at('time'), glitch: at('glitch'), scan: at('scan'), calm: at('calm'), clear: at('clear') };
   gl.uniform1f(uni.calm, reduced ? 0 : 1);
   // shortcut: a lost WebGL context leaves the screen frozen until reload, add webglcontextrestored handling if this shows up in the wild.
 }
@@ -1575,7 +1612,7 @@ function step(dt) {
   shaderVx += (clampVel(vx * sc / W * 3) - shaderVx) * .25;
   shaderVy += (clampVel(-vy * sc / H * 3) - shaderVy) * .25;
 }
-let lastFrame = 0;
+let lastFrame = 0, clearK = 0; // clearK: how far the TV effect is turned down, for the pages made of reading (a project, the résumé, Experiences)
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = now - lastFrame; lastFrame = now;
@@ -1589,6 +1626,7 @@ function frame(now) {
     if (gl) {
       gl.uniform1f(uni.time, now / 1000 % 1000); gl.uniform1f(uni.glitch, glitch); gl.uniform1f(uni.scan, scan);
       gl.uniform2f(uni.vel, shaderVx, shaderVy);
+      clearK += ((view || resume || tome ? 1 : 0) - clearK) * Math.min(1, dt / 250); gl.uniform1f(uni.clear, clearK);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
   }
@@ -1689,7 +1727,7 @@ function openProject(c, viaKeyboard = false, passedGate = false) {
   view = { c, p: 0, scroll: 0, target: 0, max: 0, viaKeyboard };
   hover = null; focusCard = null; glitch = reduced ? 0 : 1; dirty = true;
   syncBack();
-  live.textContent = `${c.t}, ${c.c}. ${c.copy || COPY} ${(c.features || []).join('. ')}`;
+  live.textContent = `${c.t}, ${c.c}. ${c.copy || COPY} ${(c.features || []).join('. ')}. ${(c.results || []).join('. ')}. ${c.hard || ''}`;
   linksBox.replaceChildren(...(c.links || []).map(([label, href]) => { const a = document.createElement('a'); a.href = href; a.target = '_blank'; a.rel = 'noopener'; a.textContent = label; return a; }));
   linksBox.hidden = !c.links; linksBox.removeAttribute('style'); linksBox.style.visibility = 'hidden';
   crt.style.cursor = 'grab';
@@ -1730,6 +1768,7 @@ crt.addEventListener('pointermove', e => {
     else if (e.pointerType === 'mouse' && tome) { if (tome.phase === 'read') tomeHover(e.clientX, e.clientY); }
     else if (e.pointerType === 'mouse' && resume) resumeHover(e.clientX, e.clientY);
     else if (e.pointerType === 'mouse' && works && !view) worksHover(e.clientX, e.clientY);
+    else if (e.pointerType === 'mouse' && view && view.zoomHot) { const [sx, sy] = toScene(e.clientX, e.clientY); crt.style.cursor = view.zoomHot.some(q => sx > q.x && sx < q.x + q.w && sy > q.y && sy < q.y + q.h) ? 'zoom-in' : ''; }
     else if (e.pointerType === 'mouse' && !view && !gate) {
       const c = hit(e.clientX, e.clientY);
       if (c && c !== hover) c.shakeAt = performance.now();
@@ -1763,7 +1802,7 @@ function endDrag(e) {
   if (resume) { resumeRelease(clicked, e.clientX, e.clientY); return; }
   if (works && !view) { if (clicked) { works.pull = 0; worksClick(e.clientX, e.clientY); } else worksRelease(vy, at); if (e.pointerType === 'touch') works.hover = null; return; }
   if (slide) { if (storyStage === 'stack') stackRelease(e.clientX - startX); else rowSettle(); if (!clicked) return; }
-  if (clicked && view && view.zoomHot) { const [sx, sy] = toScene(e.clientX, e.clientY), z = view.zoomHot.find(q => sx > q.x && sx < q.x + q.w && sy > q.y && sy < q.y + q.h); if (z && z.pic) { zoomPicture(z.pic.src, z.cap, e.clientX, e.clientY); return; } }
+  if (clicked && view && view.zoomHot) { const [sx, sy] = toScene(e.clientX, e.clientY), z = view.zoomHot.find(q => sx > q.x && sx < q.x + q.w && sy > q.y && sy < q.y + q.h); if (z && z.video) { zoomVideo(`photos/works/${z.video.video}.mp4`, z.video.about, z.pic.src); return; } if (z && z.pic) { zoomPicture(z.pic.src, z.cap, e.clientX, e.clientY, (view.c.shots || []).filter(s => s.pics[0] && s.pics[0].naturalWidth).map(s => ({ src: s.pics[0].src, cap: s.cap }))); return; } }
   if (clicked && !view && focus === stories && zoomGoal && (storyStage === 'stack' ? stackHit(e.clientX, e.clientY) && (openRow(), true) : rowClick(e.clientX, e.clientY))) return;
   if (view && !clicked && e.type === 'pointerup') { const moved = (view.scroll - view.target) / H, flick = performance.now() - at < 80 && Math.abs(vy) > 5; viewStep(flick ? (vy < 0 ? 1 : -1) : Math.abs(moved) > .15 ? Math.sign(moved) : 0); return; } // a flick, or a drag past a sixth of the screen, moves one part
   if (clicked && !view) {
@@ -1867,15 +1906,33 @@ drawPeel(PEEL_REST);
 
 /* ---------- Pictures open large when clicked, anywhere on the site ---------- */
 // It grows out of the point that was clicked; a click anywhere, or Escape, puts it away.
-function zoomPicture(src, caption = '', clientX = innerWidth / 2, clientY = innerHeight / 2) {
+let zoomList = null, zoomAt = 0, zoomDownX = 0, videoOn = false; // a list of pictures to flip through with the arrows, when it was opened from one; videoOn hushes the site's music
+function zoomPicture(src, caption = '', clientX = innerWidth / 2, clientY = innerHeight / 2, list = null) {
   if (!src) return;
+  $('#zoom').classList.remove('film');
+  zoomList = list && list.length > 1 ? list : null; zoomAt = zoomList ? Math.max(0, zoomList.findIndex(q => q.src === src)) : 0;
+  $('#zoom').classList.toggle('many', !!zoomList); $('#zoom .zoom-count').textContent = zoomList ? `${zoomAt + 1} / ${zoomList.length}` : '';
   const z = $('#zoom'), img = z.querySelector('img');
   img.src = src; img.alt = caption || 'Picture'; z.querySelector('p').textContent = caption;
   img.style.setProperty('--from', `${(clientX / innerWidth * 100).toFixed(1)}% ${(clientY / innerHeight * 100).toFixed(1)}%`); // grows from about where it was clicked
   img.style.animation = 'none'; void img.offsetWidth; img.style.animation = '';
   if (!z.open) z.showModal();
 }
-$('#zoom').addEventListener('click', () => $('#zoom').close());
+function zoomStep(d) { if (!zoomList) return; zoomAt = (zoomAt + d + zoomList.length) % zoomList.length; const q = zoomList[zoomAt]; zoomPicture(q.src, q.cap, innerWidth / 2, innerHeight / 2, zoomList); }
+function zoomVideo(src, caption, poster) { // a demo, big, with its own controls and sound
+  const z = $('#zoom'), v = z.querySelector('video');
+  zoomList = null; z.classList.remove('many'); z.classList.add('film'); $('#zoom .zoom-count').textContent = ''; z.querySelector('p').textContent = caption;
+  v.poster = poster || ''; v.src = src; if (!z.open) z.showModal(); videoOn = true; v.play().catch(() => {});
+}
+$('#zoom').addEventListener('close', () => { const v = $('#zoom video'); v.pause(); v.removeAttribute('src'); v.load(); videoOn = false; $('#zoom').classList.remove('film'); });
+$('#zoom').addEventListener('pointerdown', e => { zoomDownX = e.clientX; });
+$('#zoom').addEventListener('click', e => { // a swipe flips; any other click puts it away
+  if (e.target.tagName === 'VIDEO') return; // the video's own controls
+  if (zoomList && Math.abs(e.clientX - zoomDownX) > 40) return zoomStep(e.clientX < zoomDownX ? 1 : -1);
+  $('#zoom').close();
+});
+for (const [sel, d] of [['.prev', -1], ['.next', 1]]) $(`#zoom ${sel}`).addEventListener('click', e => { e.stopPropagation(); zoomStep(d); });
+$('#zoom').addEventListener('keydown', e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); zoomStep(e.key === 'ArrowLeft' ? -1 : 1); } });
 
 /* ---------- Dialogs ---------- */
 $('#btn-about').addEventListener('click', () => $('#about').showModal());
@@ -1911,3 +1968,4 @@ initRoom().catch(err => {
 <script src="resume.js"></script>
 <script src="sound.js"></script>
 <script src="tour.js"></script>
+<script src="plain.js"></script>

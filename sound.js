@@ -152,8 +152,8 @@ function soundWatch() {
   soundHolding();
   soundWas = s;
   const place = soundPlace(), t = audioCtx.currentTime;
-  soundMusicTo(soundOn() && !soundMusicCorner() && !songOn ? SOUND_MUSIC[place] : null);
-  soundLoopsTo(!soundOn() ? [] : place === 'notebook' ? (book.world >= 0 ? SOUND_BOOK_AMB[book.world] : []) : SOUND_AMB[place] || []);
+  soundMusicTo(soundOn() && !soundMusicCorner() && !songOn && !videoOn ? SOUND_MUSIC[place] : null); // a demo video's voice-over plays alone
+  soundLoopsTo(!soundOn() || videoOn ? [] : place === 'notebook' ? (book.world >= 0 ? SOUND_BOOK_AMB[book.world] : []) : SOUND_AMB[place] || []);
   const inRoom = place === 'room', under = place === 'water'; // a small TV speaker in the room; the music muffled under the water
   soundTv.frequency.setTargetAtTime(inRoom ? 3800 : under ? 650 : 20000, t, .3); soundTvLow.frequency.setTargetAtTime(inRoom ? 320 : 20, t, .3);
   if (soundTrack && soundTrack.v) soundMusic.gain.setTargetAtTime(resume && resume.holding ? SOUND_MUSIC_LEVEL * .44 : SOUND_MUSIC_LEVEL, t, .3); // the hold's swell takes over

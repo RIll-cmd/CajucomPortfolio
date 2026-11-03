@@ -2,9 +2,9 @@
 
 /* ---------- Words: a chapter with parts takes a page for each part, all in the same world ---------- */
 const TOME_WORDS = {
-  cover: 'Chronicle',
+  cover: 'Experiences',
   chapters: [
-    { name: 'Summary', lead: "Backend AI engineering intern at FlyRank AI, building AI capstones, automations and agent skills. BS Computer Science at FEU Institute of Technology, Dean's Lister. 16 certifications, from SAP and PMI to seven Claude Academy courses.", pills: ['1 internship', '16 certifications', "Dean's Lister", 'Open to work'] },
+    { name: 'Summary', lead: "Backend AI engineering intern at FlyRank AI, building AI capstones, automations and agent skills. 4th-year BS Computer Science student at FEU Institute of Technology, specializing in software engineering, Dean's Lister, looking for a 500-hour internship. 16 certifications, from SAP and PMI to seven Claude Academy courses.", pills: ['1 internship', '16 certifications', "Dean's Lister", 'Open to internships'] },
     { name: 'Experience', entries: [{ h: 'Backend AI Engineering Intern', m: 'FlyRank AI, Sep 2026 to present. Manila, remote', d: 'AI capstones, automation and data-heavy apps, agent skills with documentation, and token and cost analysis.' }] },
     { name: 'Education', entries: [
       { h: 'BS Computer Science, Software Engineering', m: 'FEU Institute of Technology, 2023 to 2027', d: "Dean's Lister, 3rd Term, S.Y. 2024-2025" },
@@ -33,14 +33,16 @@ const TOME_WORDS = {
       { h: 'Academic Excellence Award', m: 'San Miguel National High School, Jun 2022', d: 'With High Honors, Grade 11 STEM', img: 'smnhs-academic-excellence', big: true },
     ] },
     { name: 'Skills', entries: [
-      { h: 'Languages', pills: ['TypeScript', 'JavaScript', 'Python', 'C++', 'C#', 'Java', 'Kotlin', 'MATLAB'] },
-      { h: 'AI', pills: ['AI Agents', 'Orchestration', 'MCP', 'RAG', 'LLMs', 'Prompt Engineering', 'Deep Learning', 'TensorFlow', 'Computer Vision'] },
-      { h: 'Software', pills: ['React', 'Full-stack', 'APIs', 'CI/CD', 'System Architecture', 'Android', 'Agile', 'Networking'] },
+      { h: 'Languages', pills: ['TypeScript', 'JavaScript', 'Python', 'C++', 'SQL', 'C#', 'Java', 'Kotlin', 'MATLAB'] },
+      { h: 'AI', pills: ['AI Agents', 'Orchestration', 'MCP', 'RAG', 'LLMs', 'Gemini API', 'Prompt Engineering', 'Deep Learning', 'TensorFlow'] },
+      { h: 'Vision and hardware', pills: ['Computer Vision', 'OpenCV', 'YOLO', 'MediaPipe', 'dlib', 'Raspberry Pi', 'Arduino'] },
+      { h: 'Web and backend', pills: ['React', 'Next.js', 'Node.js', 'FastAPI', 'Flask', 'PostgreSQL', 'Prisma', 'SQLite', 'Tailwind CSS', 'REST APIs', 'Full-stack'] },
+      { h: 'Tools and practice', pills: ['Git', 'Vitest', 'Playwright', 'CI/CD', 'System Architecture', 'Android', 'Agile', 'Networking'] },
     ] },
   ],
 };
 // Which projects show each skill (from what each project's page says it uses); a skill with none isn't a link.
-const TOME_SKILL_PROJECTS = { Python: ['Ascend Core', 'Ascend Vision', 'Wake&Brake'], JavaScript: ['Ascend Hub', 'Ascend Core'], 'C++': ['Wake&Brake'], 'AI Agents': ['Ascend Hub', 'Ascend Vision'], Orchestration: ['Ascend Hub'], LLMs: ['Ascend Hub', 'Ascend Core', 'Ascend Vision'], 'Prompt Engineering': ['Ascend Vision'], 'Computer Vision': ['Ascend Vision', 'Wake&Brake'], React: ['Ascend Hub', 'Ascend Core'], 'Full-stack': ['Ascend Core'], APIs: ['Ascend Core', 'Wake&Brake'] };
+const TOME_SKILL_PROJECTS = { TypeScript: ['Ascend Hub', 'Ascend Core'], JavaScript: ['Ascend Hub', 'Ascend Core'], Python: ['Ascend Core', 'Ascend Vision', 'Wake&Brake'], 'C++': ['Wake&Brake'], SQL: ['Ascend Core', 'Ascend Vision'], 'AI Agents': ['Ascend Hub', 'Ascend Vision'], Orchestration: ['Ascend Hub'], LLMs: ['Ascend Hub', 'Ascend Core', 'Ascend Vision'], 'Gemini API': ['Ascend Core', 'Ascend Vision'], 'Prompt Engineering': ['Ascend Vision'], 'Computer Vision': ['Ascend Vision', 'Wake&Brake'], OpenCV: ['Wake&Brake'], YOLO: ['Ascend Vision'], MediaPipe: ['Ascend Vision'], dlib: ['Wake&Brake'], 'Raspberry Pi': ['Wake&Brake'], Arduino: ['Wake&Brake'], React: ['Ascend Hub', 'Ascend Core', 'Ascend Vision'], 'Next.js': ['Ascend Core'], 'Node.js': ['Ascend Hub'], FastAPI: ['Ascend Core'], Flask: ['Wake&Brake'], PostgreSQL: ['Ascend Core'], Prisma: ['Ascend Core'], SQLite: ['Ascend Vision'], 'Tailwind CSS': ['Ascend Core'], 'REST APIs': ['Ascend Core', 'Wake&Brake'], 'Full-stack': ['Ascend Core'], Git: ['Ascend Hub'], Vitest: ['Ascend Core'], Playwright: ['Ascend Core'] };
 const TOME_CERTS = {}; // the certificate pictures, loaded when the book first opens
 function tomeCertsLoad() {
   for (const c of TOME_WORDS.chapters) for (const part of c.parts || [c]) for (const name of [...(part.entries || []).map(e => e.img), ...(part.badges || []).map(b => b[1])]) {
@@ -334,7 +336,7 @@ function tomeBuildBook(scene) {
   // The front cover's outside is only seen while the book is shut.
   const c = document.createElement('canvas'); c.width = 768; c.height = 1000; const x = c.getContext('2d');
   x.fillStyle = '#3a1c16'; x.fillRect(0, 0, 768, 1000); x.strokeStyle = TOME_GOLD; x.lineWidth = 8; x.strokeRect(46, 46, 676, 908); x.lineWidth = 3; x.strokeRect(66, 66, 636, 868);
-  x.fillStyle = TOME_GOLD; x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = `700 84px ${TOME_SERIF}`; x.fillText(TOME_WORDS.cover, 384, 300);
+  x.fillStyle = TOME_GOLD; x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = `700 72px ${TOME_SERIF}`; x.fillText(TOME_WORDS.cover, 384, 300);
   x.save(); x.translate(384, 600); x.lineWidth = 6; x.beginPath(); x.arc(0, 0, 118, 0, 7); x.stroke(); for (let i = 0; i < 8; i++) { x.rotate(Math.PI / 4); x.beginPath(); x.moveTo(0, -96); x.lineTo(20, -18); x.lineTo(-20, -18); x.closePath(); x.fill(); } x.restore();
   const coverTex = new THREE.CanvasTexture(c); coverTex.encoding = THREE.sRGBEncoding; coverTex.center.set(.5, .5); coverTex.rotation = Math.PI;
   const coverOut = new THREE.MeshStandardMaterial({ map: coverTex, roughness: .55, envMapIntensity: .5 });

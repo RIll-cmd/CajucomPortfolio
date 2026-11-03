@@ -3,10 +3,10 @@
 const RESUME_WORDS = {
   name: 'Cyrill', role: 'ASPIRING SOFTWARE / AI ENGINEER',
   full: 'Cyrill Gerard P. Cajucom',
-  intro: ['Aspiring software and AI engineer, based in Manila.', 'Backend AI engineering intern at FlyRank AI, and looking for companies to intern at.'],
+  intro: ['Aspiring software and AI engineer, based in Manila.', '4th-year BS Computer Science student at FEU Tech, specializing in software engineering. Looking for a 500-hour internship.'],
   experience: [{ h: 'Backend AI Engineering Intern', logo: 'flyrank', d: ['FlyRank AI, Sep 2026 to present. Remote.', 'AI capstones, automation and data-heavy apps, agent skills with documentation, and token and cost analysis.'] }],
-  education: [{ h: 'BS Computer Science', logo: 'feutech', d: ["FEU Institute of Technology, 2023 to 2027. Dean's Lister."] }, { h: 'Senior High, STEM', logo: 'spusm', d: ['St. Paul University at San Miguel, 2021 to 2023. With High Honors.'] }],
-  talk: "Let's talk", boxes: [['Have a role or an internship in mind?', 'Say hello', 'hello'], ['Everything I have made', 'See my works', 'works'], ['The full record, page by page', 'Open Chronicle', 'chronicle']],
+  education: [{ h: 'BS Computer Science, Software Engineering', logo: 'feutech', d: ["FEU Institute of Technology, 2023 to 2027. 4th year, Dean's Lister."] }, { h: 'Senior High, STEM', logo: 'spusm', d: ['St. Paul University at San Miguel, 2021 to 2023. With High Honors.'] }],
+  talk: "Let's talk", boxes: [['Have a role or an internship in mind?', 'Say hello', 'hello'], ['Everything I have made', 'See my works', 'works'], ['The full record, page by page', 'Open Experiences', 'experiences']],
   banner: 'Open to work', sections: ['About', 'Experience', 'Education', 'Works', 'Certifications', 'Awards', 'Skills', "Let's talk"],
 };
 // Where each hand sits in its render: the crop, and the index fingertip in each frame, as fractions of the 1120 x 800 stage.
@@ -300,7 +300,7 @@ function resumeGo(go) {
   if (go.startsWith('zoom:')) { const k = go.slice(5), im = k.startsWith('works') ? resumePics.works[+k.slice(5)] : resumePics[k]; if (im) zoomPicture(im.src, '', ...[resume.tx, resume.ty2].map((v, i) => v * (i ? innerHeight / H : innerWidth / W))); return; }
   if (go === 'menu') { r.menu = !r.menu; return; }
   if (go === 'skip') { resumeRead(); return; }
-  if (go === 'works' || go === 'chronicle') { closeResume(); openProject(projects[go === 'works' ? 0 : 2]); return; }
+  if (go === 'works' || go === 'experiences') { closeResume(); openProject(projects[go === 'works' ? 0 : 2]); return; }
   if (go.startsWith('sec:')) { r.menu = false; if (r.phase !== 'read') resumeRead(); r.jump = go.slice(4); return; }
   r.open[go] = !r.open[go]; live.textContent = `${go} ${r.open[go] ? 'opened' : 'closed'}.`;
 }
