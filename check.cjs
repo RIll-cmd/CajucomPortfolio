@@ -387,7 +387,7 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     await page.screenshot({ path: `${name}-u-intro.png` });
     assert.strictEqual(await page.evaluate(() => { for (let i = 0; i <= 44; i++) { const a = i / 44 * 6.6, r = Math.min(W, H) * .16; resumeHover(W / 2 + Math.cos(a) * r, H * .4 + Math.sin(a) * r); } return [resume.phase, resume.path.length].join(); }), 'intro,0', 'circling without holding the button draws nothing');
     assert.strictEqual(await page.evaluate(() => { for (let i = 0; i < 12; i++) resumeTrace(100 + i * 9, 200, 1000 + i * 20); return resume.phase; }), 'intro', 'a straight line is not a circle');
-    await page.evaluate(() => { resume.path = []; const t = performance.now(), r = Math.min(W, H) * .16; for (let i = 0; i <= 44; i++) { const a = i / 44 * 6.6; resumeTrace(W / 2 + Math.cos(a) * r, H * .4 + Math.sin(a) * r, t + i * 8); } });
+    await page.evaluate(() => { resume.path = []; const t = performance.now(), r = Math.min(W, H) * .16; for (let i = 0; i <= 44; i++) { const a = i / 44 * 6.6; resumeTrace(W / 2 + Math.cos(a) * r, H * .4 + Math.sin(a) * r, t + i * 20); } }); // at a hand's pace: a circle drawn in a blink no longer counts
     assert.strictEqual(await page.evaluate(() => resume.phase), 'title', 'a drawn circle wakes the page');
     await page.waitForTimeout(1500);
     await page.screenshot({ path: `${name}-v-title.png` });

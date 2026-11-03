@@ -221,9 +221,46 @@ function resumeTrace(x, y, now = performance.now()) { // following the finger ro
   if (r.path.length < 14) return;
   let cx = 0, cy = 0; for (const p of r.path) { cx += p[0]; cy += p[1]; } cx /= r.path.length; cy /= r.path.length;
   let turn = 0, radius = 0, prev = Math.atan2(r.path[0][1] - cy, r.path[0][0] - cx); for (const p of r.path) { const a = Math.atan2(p[1] - cy, p[0] - cx); let d = a - prev; if (d > Math.PI) d -= Math.PI * 2; if (d < -Math.PI) d += Math.PI * 2; turn += d; prev = a; radius += Math.hypot(p[0] - cx, p[1] - cy); } radius /= r.path.length;
-  if (Math.abs(turn) > 5.2 && radius > Math.min(W, H) * .05) resumeWake(cx, cy, now);
+  if (Math.abs(turn) > 5.95 && radius > Math.min(W, H) * .08 && now - r.path[0][2] > 650) resumeWake(cx, cy, now, radius); // nearly a full turn, not a flick
 }
-function resumeWake(x = W / 2, y = H * .42, now = performance.now()) { const r = resume; r.phase = 'title'; r.at = now; r.flood = { x, y, at: now }; r.y = r.ty = 0; r.path = []; if (!COARSE) crt.style.cursor = 'default'; live.textContent = `${RESUME_WORDS.name}. ${RESUME_WORDS.role}. Scroll to continue, or press Enter.`; }
+const RESUME_CRACK_S = .55, RESUME_FALL_S = 1.35; // the cracks spreading, then the pieces falling
+function resumeShards(x, y, ring) { // a web of cracks round the circle, cut into pieces: rings of points between spokes, a little crooked
+  const spokes = 15, R = Math.hypot(W, H), radii = [ring * .55, ring * 1.05, ring * 1.9, R * .32, R * .55, R * .85, R * 1.2], rnd = seeded(Math.floor(x * 7 + y * 13) + 1);
+  const angles = Array.from({ length: spokes }, (_, i) => (i + rnd() * .7 - .35) / spokes * Math.PI * 2);
+  const pt = (j, i) => { const a = angles[(i + spokes) % spokes] + (rnd() - .5) * .08, r = radii[j] * (.9 + rnd() * .2); return [x + Math.cos(a) * r, y + Math.sin(a) * r]; };
+  const grid = radii.map((_, j) => angles.map((_, i) => pt(j, i))), shards = [];
+  for (let i = 0; i < spokes; i++) shards.push({ pts: [[x, y], grid[0][i], grid[0][(i + 1) % spokes]], ring: 0 }); // the middle, round the circle
+  for (let j = 0; j < radii.length - 1; j++) for (let i = 0; i < spokes; i++) shards.push({ pts: [grid[j][i], grid[j + 1][i], grid[j + 1][(i + 1) % spokes], grid[j][(i + 1) % spokes]], ring: j + 1 });
+  for (const sh of shards) {
+    const cx = sh.pts.reduce((a, p) => a + p[0], 0) / sh.pts.length, cy = sh.pts.reduce((a, p) => a + p[1], 0) / sh.pts.length, d = Math.hypot(cx - x, cy - y) || 1;
+    Object.assign(sh, { cx, cy, vx: (cx - x) / d * (90 + rnd() * 160) + (rnd() - .5) * 60, vy: (cy - y) / d * 70 - 120 - rnd() * 120, spin: (rnd() - .5) * 3.2, delay: Math.min(.45, sh.ring * .07 + rnd() * .05) });
+  }
+  return { shards, grid, ring };
+}
+function resumeDrawShatter(sh, now) {
+  const t = (now - sh.at) / 1000, snap = sh.snap, path = pts => { g.beginPath(); pts.forEach((p, i) => g[i ? 'lineTo' : 'moveTo'](p[0], p[1])); g.closePath(); };
+  if (t < RESUME_CRACK_S) { // the circle seals into a ring of light, and cracks run out from it across the glass
+    const k = t / RESUME_CRACK_S, reach = Math.hypot(W, H) * resumeEase(k) * 1.1;
+    g.drawImage(snap, 0, 0, W, H);
+    g.save(); g.globalCompositeOperation = 'lighter'; const glow = g.createRadialGradient(sh.x, sh.y, sh.ring * .6, sh.x, sh.y, sh.ring * 1.6); glow.addColorStop(0, `rgba(200,255,240,${.15 + k * .35})`); glow.addColorStop(1, 'rgba(200,255,240,0)'); g.fillStyle = glow; g.fillRect(sh.x - sh.ring * 1.6, sh.y - sh.ring * 1.6, sh.ring * 3.2, sh.ring * 3.2);
+    g.strokeStyle = `rgba(235,255,250,${.6 + k * .4})`; g.lineWidth = 3 + k * 3; g.beginPath(); g.arc(sh.x, sh.y, sh.ring, 0, Math.PI * 2 * Math.min(1, k * 2.2)); g.stroke(); g.restore();
+    g.save(); g.lineCap = 'round';
+    for (const [w, c] of [[3.2, 'rgba(40,70,64,.35)'], [1.3, 'rgba(255,255,255,.95)']]) { g.strokeStyle = c; g.lineWidth = w; g.beginPath();
+      sh.grid.forEach((row, j) => row.forEach((p, i) => { const q = row[(i + 1) % row.length], o = j ? sh.grid[j - 1][i] : [sh.x, sh.y]; for (const [a, b] of [[o, p], [p, q]]) { if (Math.hypot(b[0] - sh.x, b[1] - sh.y) > reach) continue; g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); } }));
+      g.stroke(); }
+    g.restore(); return;
+  }
+  const u0 = t - RESUME_CRACK_S; if (u0 > RESUME_FALL_S + .5) { sh.snap = null; resume.shatter = null; return; }
+  if (u0 < .18) { g.fillStyle = `rgba(255,255,255,${.55 * (1 - u0 / .18)})`; g.fillRect(0, 0, W, H); } // the break: a flash
+  for (const p of sh.shards) { // each piece falls away, spinning, the inner ones first
+    const u = u0 - p.delay; if (u < 0) { g.save(); path(p.pts); g.clip(); g.drawImage(snap, 0, 0, W, H); g.restore(); continue; }
+    const k = u / RESUME_FALL_S; if (k >= 1) continue;
+    g.save(); g.globalAlpha = 1 - k * k; g.translate(p.cx + p.vx * u, p.cy + p.vy * u + 900 * u * u); g.rotate(p.spin * u); g.scale(1 - k * .25, 1 - k * .25); g.translate(-p.cx, -p.cy);
+    path(p.pts); g.save(); g.clip(); g.drawImage(snap, 0, 0, W, H); g.fillStyle = `rgba(255,255,255,${.1 + k * .2})`; g.fill(); g.restore();
+    g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 1.4; g.stroke(); g.restore();
+  }
+}
+function resumeWake(x = W / 2, y = H * .42, now = performance.now(), ring = Math.min(W, H) * .16) { const r = resume; r.phase = 'title'; r.at = now + (reduced ? 0 : RESUME_CRACK_S * 1000); r.flood = null; r.shatter = reduced ? null : { x, y, at: now, snap: resumeSnapshot(), ...resumeShards(x, y, ring) }; r.y = r.ty = 0; r.path = []; if (!COARSE) crt.style.cursor = 'default'; live.textContent = `${RESUME_WORDS.name}. ${RESUME_WORDS.role}. Scroll to continue, or press Enter.`; }
 function resumeRead(now = performance.now()) { const r = resume; r.phase = 'read'; r.y = r.ty = 0; r.pull = r.acc = r.lock = 0; r.holding = r.auto = false; r.fadeAt = now; r.wash = 1; resumeDone = true; if (!COARSE) crt.style.cursor = 'default'; }
 function resumeOnRuler(clientX, clientY) { const R = resume.L && resume.L.ruler; if (!R) return false; const [x, y] = toScene(clientX, clientY); return x > R.x && x < R.x + R.w && y > R.y && y < R.y + R.h; }
 function resumePress(clientX, clientY) {
@@ -543,9 +580,9 @@ function drawResume(now) {
       g.save(); g.globalAlpha = tA; g.beginPath(); g.rect(0, 0, tx + bw * (.12 + appear * .88), H); g.clip(); g.drawImage(L.titleBmp, tx, ty, bw, bh); g.restore();
       const rs = Math.max(12, Math.min(W * .032, 17)); g.save(); g.globalAlpha = tA * resumeEase(((now - r.at) / 1000 - RESUME_TITLE_S * .7) / .5); g.font = `500 ${rs}px ${RESUME_MONO}`; g.textAlign = 'center'; g.fillStyle = '#17514b'; g.fillText(RESUME_WORDS.role, W / 2, H * .44 + L.titleH * .34); g.restore(); g.textAlign = 'left';
     }
-    if (r.flood) { const t = (now - r.flood.at) / 1000 / RESUME_FLOOD_S; if (t >= 1) r.flood = null; else { const R = Math.hypot(W, H) * resumeEase(t); g.save(); g.beginPath(); g.rect(0, 0, W, H); g.arc(r.flood.x, r.flood.y, R, 0, 7, true); g.clip(); g.fillStyle = '#6f9a8a'; g.fillRect(0, 0, W, H); resumeCover(P.glass); g.restore(); } }
+    if (r.shatter) resumeDrawShatter(r.shatter, now);
     // Say scroll, until they do.
-    if (a < .06 && r.phase === 'title' && !r.flood) { const s = Math.max(13, Math.min(H * .022, 15)), hint = COARSE ? 'SWIPE UP' : 'SCROLL', bob = reduced ? 0 : Math.sin(time * 2.4) * 3; g.save(); g.globalAlpha = resumeEase(((now - r.at) / 1000 - RESUME_TITLE_S) / .5) * (1 - a / .06); g.font = `600 ${s}px ${RESUME_MONO}`; g.textAlign = 'center'; g.fillStyle = '#17514b'; g.fillText(hint, W / 2, H - 150 + bob); g.restore(); g.textAlign = 'left'; }
+    if (a < .06 && r.phase === 'title' && !r.shatter) { const s = Math.max(13, Math.min(H * .022, 15)), hint = COARSE ? 'SWIPE UP' : 'SCROLL', bob = reduced ? 0 : Math.sin(time * 2.4) * 3; g.save(); g.globalAlpha = resumeEase(((now - r.at) / 1000 - RESUME_TITLE_S) / .5) * (1 - a / .06); g.font = `600 ${s}px ${RESUME_MONO}`; g.textAlign = 'center'; g.fillStyle = '#17514b'; g.fillText(hint, W / 2, H - 150 + bob); g.restore(); g.textAlign = 'left'; }
     const fadeUi = resumeEase((now - r.at) / 1000 / 1.4 - .4); resumeDock(L, hot, fadeUi, dt); if (r.phase !== 'flash') resumeBanner(L, hot, H - 60 - Math.max(14, H * .022) - 52, fadeUi);
     resumeTop(L);
     // Touch: a spark at the fingertips, then light fills everything.

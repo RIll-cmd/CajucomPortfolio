@@ -23,14 +23,14 @@ const TOME_WORDS = {
         { h: 'AI Agent Fundamentals', m: 'Databricks, Sep 2026', img: 'databricks-ai-agents', big: true },
         { h: 'Intro to Deep Learning', m: 'Kaggle, Sep 2026', img: 'kaggle-deep-learning', big: false },
         { h: 'MATLAB Onramp', m: 'MathWorks, Nov 2025', img: 'matlab-onramp', big: true },
-        { h: 'CCNA: Introduction to Networks', m: 'Cisco, Sep 2025' },
+        { h: 'CCNA: Introduction to Networks', m: 'Cisco, Sep 2025', img: 'cisco-ccna-itn', big: false },
         { h: 'Android Development with Kotlin', m: 'LinkedIn Learning, Nov 2025', img: 'linkedin-kotlin', big: false },
         { h: 'Agile Software Development', m: 'LinkedIn Learning, Nov 2025', img: 'linkedin-agile', big: false },
       ] },
     ] },
     { name: 'Awards', entries: [
       { h: "Dean's Bronze Certificate", m: 'FEU Institute of Technology, Jul 2025', d: '3rd Term, S.Y. 2024-2025', img: 'feu-deans-bronze' },
-      { h: 'Academic Excellence Award', m: 'San Miguel National High School, Jun 2022', d: 'With High Honors, Grade 11 STEM' },
+      { h: 'Academic Excellence Award', m: 'San Miguel National High School, Jun 2022', d: 'With High Honors, Grade 11 STEM', img: 'smnhs-academic-excellence', big: true },
     ] },
     { name: 'Skills', entries: [
       { h: 'Languages', pills: ['TypeScript', 'JavaScript', 'Python', 'C++', 'C#', 'Java', 'Kotlin', 'MATLAB'] },
