@@ -112,6 +112,19 @@ dialog button:hover, dialog .socials a:hover { background: #27527a; }
 dialog button:not(.ghost) { background: #3fc1b0; color: #14284b; }
 dialog button:not(.ghost):hover { background: #62d8c8; }
 dialog :focus-visible { outline-color: #ff8a5c; }
+body:not(.in-works) dialog:not(#zoom):not(#guide) { background: #0d0d0e; color: var(--paper); border: 2px solid var(--paper); border-radius: 8px; box-shadow: 6px 7px 0 rgba(0,0,0,.6), 0 18px 60px rgba(0,0,0,.7); }
+body:not(.in-works) dialog:not(#zoom):not(#guide)::backdrop { background: rgba(0,0,0,.72); }
+body:not(.in-works) dialog .tape { display: inline-block; margin: 4px 0 18px; padding: 6px 16px 8px; font: 400 clamp(26px, 5vw, 40px)/1.05 var(--lettering, "Lilita One"), Impact, sans-serif; text-transform: uppercase; color: #000; text-shadow: none; background: var(--yellow); border: 3px solid #000; border-radius: 8px; box-shadow: 4px 5px 0 rgba(0,0,0,.6); transform: rotate(-2deg); }
+body:not(.in-works) dialog p { font: 500 15px/1.6 var(--body); color: var(--paper); }
+body:not(.in-works) dialog .address { font: 400 clamp(24px, 5vw, 32px)/1.1 var(--mono); color: var(--yellow); letter-spacing: .02em; }
+body:not(.in-works) dialog .topics li { background: var(--yellow); color: #000; font: 400 19px/1 var(--mono); border-radius: 4px; padding: 5px 10px; }
+body:not(.in-works) .keys dt { font: 400 21px/1 var(--mono); color: var(--yellow); }
+body:not(.in-works) .keys dd { font: 500 13px/1.45 var(--body); color: var(--paper); }
+body:not(.in-works) dialog:not(#guide) button, body:not(.in-works) dialog .socials a { border: 2px solid var(--paper); border-radius: 6px; background: #000; color: var(--paper); font: 400 20px/1 var(--mono); letter-spacing: .03em; }
+body:not(.in-works) dialog:not(#guide) button:hover, body:not(.in-works) dialog .socials a:hover { background: var(--paper); color: #000; }
+body:not(.in-works) dialog:not(#guide) button:not(.ghost) { background: var(--yellow); border-color: var(--yellow); color: #000; }
+body:not(.in-works) dialog:not(#guide) button:not(.ghost):hover { background: #fff36b; }
+body:not(.in-works) dialog :focus-visible { outline-color: var(--yellow); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -1519,7 +1532,7 @@ function step(dt) {
     tickerX += dt * .07;
     if (COARSE && !reduced) { const t = performance.now(); lookTarget.x = Math.sin(t / 2900) * 14; lookTarget.y = Math.cos(t / 3700) * 10; } // no mouse to look around with, so the board drifts by itself
     if (!storyAt) storyAt = performance.now();
-    if (!reduced && performance.now() - storyAt > STORY_MS && !(focus === stories && zoomGoal)) stepStory(1); // opened, the stack and the row wait for a hand; only the board's card turns by itself
+    if (!reduced && performance.now() - storyAt > STORY_MS && (!(focus === stories && zoomGoal) || storyStage === 'stack' && !stackDrag && !stackFly)) stepStory(1); // the board's card and the stack turn by themselves; the row waits for a hand
     dirty = true; // the ticker and the story border never stop moving
   }
   for (const c of items) {

@@ -191,30 +191,37 @@ document.head.insertAdjacentHTML('beforeend', `<style>
 #song .song-player { position: relative; }
 #song .song-player:empty { display: none; }
 #song iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 8px; margin-bottom: 8px; pointer-events: none; } /* YouTube's own hover controls never show; the card's buttons drive it */
+#song.loading .song-player iframe { opacity: 0; } /* no white box while it loads */
+#song.loading .song-player::after { content: 'loading the song...'; position: absolute; inset: 0; display: grid; place-items: center; font-size: 16px; color: #6a6670; }
 #song.away .song-player { display: none; } /* out of the corner it shrinks to its title and buttons, still playing */
 </style>`);
 document.body.append(songCard);
-let songOn = false, songFrame = null;
+let songOn = false, songFrame = null, songHeard = false;
+const SONG_WATCH = id => `https://www.youtube.com/watch?v=${id}`;
 const songSay = (func) => songFrame && songFrame.contentWindow && songFrame.contentWindow.postMessage(JSON.stringify({ event: 'command', func, args: [] }), 'https://www.youtube-nocookie.com');
 function songState(playing) { // the player said whether it's playing: the headphones follow it
-  songOn = playing; const b = songCard.querySelector('.song-play'); b.querySelector('.song-label').textContent = playing ? 'Pause' : 'Play'; b.classList.toggle('on', playing);
+  songOn = playing; const b = songCard.querySelector('.song-play'); b.querySelector('.song-label').textContent = playing ? 'Pause' : songCard.classList.contains('blocked') ? 'Play on YouTube ↗' : 'Play'; b.classList.toggle('on', playing);
   if (typeof bookSongOn !== 'undefined' && bookSongOn !== playing) { bookSongOn = playing; if (book) book.spinAt = performance.now(); } // a spin to change outfit
 }
 function songStop() { songFrame = null; songCard.querySelector('.song-player').innerHTML = ''; songCard.querySelector('.song-close').hidden = true; songState(false); }
 addEventListener('message', e => { // the YouTube player reports its state when asked to, through the same channel its own API uses
   if (!songFrame || e.source !== songFrame.contentWindow) return;
   let d; try { d = JSON.parse(e.data); } catch { return; }
+  songHeard = true; songCard.classList.remove('loading');
   const st = d.event === 'onStateChange' ? d.info : d.event === 'infoDelivery' && d.info && 'playerState' in d.info ? d.info.playerState : null;
   if (st !== null && st !== undefined) songState(st === 1 || st === 3); // playing or buffering
 });
 songCard.querySelector('.song-play').addEventListener('click', () => {
   if (!SOUND_SONG.id) { window.open(SOUND_SONG.search, '_blank', 'noopener'); return; }
   if (songFrame) { songSay(songOn ? 'pauseVideo' : 'playVideo'); songState(!songOn); return; }
-  const q = new URLSearchParams({ autoplay: 1, controls: 0, disablekb: 1, loop: 1, playlist: SOUND_SONG.id, rel: 0, iv_load_policy: 3, playsinline: 1, enablejsapi: 1, origin: location.origin }); // loop needs the playlist set to itself
+  if (songCard.classList.contains('blocked')) { window.open(SONG_WATCH(SOUND_SONG.id), '_blank', 'noopener'); return; }
+  const q = new URLSearchParams({ autoplay: 1, controls: 0, disablekb: 1, loop: 1, playlist: SOUND_SONG.id, rel: 0, iv_load_policy: 3, playsinline: 1, enablejsapi: 1, ...(location.origin && location.origin !== 'null' ? { origin: location.origin } : {}) }); // a sandboxed page has no origin to give // loop needs the playlist set to itself
   songCard.querySelector('.song-player').innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${SOUND_SONG.id}?${q}" title="${SOUND_SONG.title} by ${SOUND_SONG.artist}" allow="autoplay; encrypted-media"></iframe>`;
   songFrame = songCard.querySelector('iframe');
   songFrame.addEventListener('load', () => songFrame && songFrame.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }), 'https://www.youtube-nocookie.com'));
   songCard.querySelector('.song-close').hidden = false; songState(true);
+  songHeard = false; songCard.classList.add('loading'); const frame = songFrame;
+  setTimeout(() => { if (songFrame !== frame || songHeard) return; songStop(); songCard.classList.remove('loading'); songCard.classList.add('blocked'); const b = songCard.querySelector('.song-play'); b.querySelector('.song-label').textContent = 'Play on YouTube ↗'; window.open(SONG_WATCH(SOUND_SONG.id), '_blank', 'noopener'); }, 6000); // nothing heard from the player: this page can't show it
 });
 songCard.querySelector('.song-close').addEventListener('click', songStop);
 function songCardSync() { // in the corner it's a full card; while the song plays it rides along, small; leaving the notebook ends it

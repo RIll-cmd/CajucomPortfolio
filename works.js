@@ -277,6 +277,7 @@ const worksAbout = () => { $('#about').classList.add('no-keys'); $('#about').sho
 $('#about').addEventListener('close', () => $('#about').classList.remove('no-keys'));
 function openWorks(c, viaKeyboard) {
   const now = performance.now();
+  document.body.classList.add('in-works'); // dialogs opened from here wear Projects' look
   works = { c, viaKeyboard, y: 0, page: 0, pull: 0, acc: 0, lock: 0, arrive: now, last: now, at: now, filter: 'All', hot: [], hover: null, key: '', flash: 1 };
   worksPrepare();
   Promise.all(['600 30px Poppins', '700 30px Poppins', '400 30px Righteous', '400 80px "Kaushan Script"'].map(f => document.fonts.load(f))).catch(() => {}).finally(() => { if (works) { worksLayout(); worksBakeTitle(); } }); // letter widths change once the font arrives
@@ -286,6 +287,7 @@ function openWorks(c, viaKeyboard) {
   keyboardFocus(backBtn);
 }
 function closeWorks() {
+  document.body.classList.remove('in-works');
   works = null; glitch = reduced ? 0 : .6; dirty = true;
   $('#btn-about').hidden = $('#btn-talk').hidden = false;
   live.textContent = ''; crt.style.cursor = 'grab';
@@ -516,6 +518,10 @@ function drawWorks(now) {
   for (const m of works.motes) { const py = ((m.y * H - y * m.d) % H + H) % H, tw = reduced ? .8 : .55 + .45 * Math.sin(t * (1 + m.d * 3) + m.p); g.globalAlpha = tw * .9; worksStar(m.x * W, py, m.r + 1.5, m.gold ? WORKS_TEAL : WORKS_CREAM); } g.globalAlpha = 1;
   const waterY = H - y; // the second screen is where the water starts; it slides with the page
   if (waterY > -H * 1.45 && waterY < H) worksDrawWater(waterY, t);
+  // The clouds you sink through: solid over the sea's top edge the whole way, so no line ever shows; as the About screen settles they
+  // rise off the top instead of fading, and at the title screen they hand over to its own clouds.
+  const settle = worksClamp(waterY / (H * .35), 0, 1), fadeTop = worksClamp((H * 1.15 - waterY) / (H * .4), 0, 1);
+  if (fadeTop > .01 && waterY > -H * .1) { const hh = H * .95, cy = waterY - hh * .64 - (1 - settle) ** 2 * hh * .34; g.globalAlpha = fadeTop; works.clouds.forEach((c, i) => g.drawImage(c, -W * (.15 + i * .05), cy + i * H * .04, W * (1.3 + i * .1), hh)); g.globalAlpha = 1; }
   const join = waterY + H; // where the water gives way to the sky: bubbles keep rising through it, so the two read as one place
   if (join > -H * .3 && join < H * 1.3) works.bubbles.slice(0, 14).forEach((b, i) => {
     const rise = H * .7, travel = (reduced ? b.p * 40 : t * (30 + b.rate * 50) + b.p * 97) % rise, by = join + H * .25 - travel, bx = W * (.06 + ((b.x + i * .37) % 1) * .88) + (reduced ? 0 : Math.sin(t * 1.3 + b.p) * 10);

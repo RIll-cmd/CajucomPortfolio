@@ -506,6 +506,19 @@ function* buildBook() {
     let n = 0; for (let u = 1.5; u < 36; u += 4.2) put(smalls[j][n++ % 2], at(j, u), 6.3 + (n % 3) * .12);
   }
   BOOK_WORDS.worlds.forEach((name, i) => put(`sign${i}`, i * BOOK_SIZE + .6, .9, { say: `this way to ${name}. ${['downhill. finally.', 'all that climbing for a sign.', 'the view is better up here.', 'downhill to the sea. no.', 'last climb. promise.'][i]}` }));
+  // Keep the words and photos clear: anything decorative standing or hanging in front of a note, a photo or a signpost moves aside.
+  const MOVABLE = new Set(['tree', 'pine', 'lamp', 'kite', 'bush', 'fence', 'rock', 'mushroom', 'crate', 'bunting', 'lantern', 'star', 'gull', 'cloud', 'flower', 'grass', 'shell']);
+  const span = p => p.hang ? [p.y - p.s.h, p.y] : p.flat ? [p.y - p.s.h * .05, p.y + p.s.h * 1.05] : [0, p.s.h]; // heights above the ground there
+  const keep = props.filter(q => q.flat && !q.noPop || q.name.startsWith('sign'));
+  for (let pass = 0; pass < 3; pass++) for (const p of props) {
+    if (!MOVABLE.has(p.name) || p.flat) continue;
+    for (const q of keep) {
+      if (q === p || p.z <= q.z) continue;
+      const need = (p.s.w + q.s.w) / 2 * .92, dx = p.x - q.x, [a0, a1] = span(p), [b0, b1] = span(q);
+      if (Math.abs(dx) >= need || a1 <= b0 || b1 <= a0) continue;
+      p.x = q.x + (dx >= 0 ? 1 : -1) * need; p.phase = p.x * 1.3; p.mesh.position.x = p.x;
+    }
+  }
   // The skies of Up late and My people fade out at their edges, over the hills, instead of stopping in a straight line.
   for (const name of ['night', 'dusk']) {
     const old = spr[name].canvas, c = document.createElement('canvas'), o = c.getContext('2d'), fw = old.width * .13; c.width = old.width; c.height = old.height; o.drawImage(old, 0, 0); // a fresh sheet: the drawing's own context still carries its scale and clip
