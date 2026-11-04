@@ -4,7 +4,7 @@
 const TOME_WORDS = {
   cover: 'Experiences',
   chapters: [
-    { name: 'Summary', lead: "Backend AI engineering intern at FlyRank AI, building AI capstones, automations and agent skills. 4th-year BS Computer Science student at FEU Institute of Technology, specializing in software engineering, Dean's Lister, looking for a 500-hour internship. 16 certifications, from SAP and PMI to seven Claude Academy courses.", pills: ['1 internship', '16 certifications', "Dean's Lister", 'Open to internships'] },
+    { name: 'Summary', lead: "Backend AI engineering intern at FlyRank AI, building AI capstones, automations and agent skills. 4th-year BS Computer Science student at FEU Institute of Technology, specializing in software engineering, Dean's Lister, looking for a 500-hour internship. 19 certifications, from SAP and PMI to seven Claude Academy courses.", pills: ['1 internship', '19 certifications', "Dean's Lister", 'Open to internships'] },
     { name: 'Experience', entries: [{ h: 'Backend AI Engineering Intern', m: 'FlyRank AI, Sep 2026 to present. Manila, remote', d: 'AI capstones, automation and data-heavy apps, agent skills with documentation, and token and cost analysis.' }] },
     { name: 'Education', entries: [
       { h: 'BS Computer Science, Software Engineering', m: 'FEU Institute of Technology, 2023 to 2027', d: "Dean's Lister, 3rd Term, S.Y. 2024-2025" },
@@ -14,22 +14,25 @@ const TOME_WORDS = {
     ] },
     { name: 'Certifications', parts: [
       { label: 'Professional', entries: [
+        { h: 'SAP Certified: SAP Generative AI Developer', m: 'SAP, Nov 2026', img: 'sap-generative-ai-developer', big: false, verify: ['Verify', 'https://www.credly.com/badges/3318fc34-2d85-41db-85e4-ef2c0fc727b9'] },
         { h: 'SAP Certified: Positioning the Autonomous Enterprise', m: 'SAP, Jul 2026', img: 'sap-autonomous-enterprise', big: true, verify: ['Verify', 'https://www.credly.com/badges/a696c2ef-883c-4170-b81c-14a42787a711'] },
-        { h: 'PMI Project Management Ready', m: 'Project Management Institute, Mar 2026', img: 'pmi-project-management-ready', big: true, d: 'Certiport code wYUQy-2FaU', verify: ['Verify', 'https://verify.certiport.com'] },
-        { h: 'IT Specialist: Python', m: 'Pearson, Jul 2025', img: 'it-specialist-python', big: true, d: 'Certiport code bhzD-s4NA', verify: ['Verify', 'https://verify.certiport.com'] },
+        { h: 'PMI Project Management Ready', m: 'Project Management Institute, Mar 2026', img: 'pmi-project-management-ready', big: true, d: 'Certiport code wYUQy-2FaU', verify: ['Verify', 'https://www.credly.com/badges/a522925b-00e3-404d-aa83-9a972fb3a8dd'] },
+        { h: 'IT Specialist: Python', m: 'Pearson, Jul 2025', img: 'it-specialist-python', big: true, d: 'Certiport code bhzD-s4NA', verify: ['Verify', 'https://www.credly.com/badges/e733f033-0bf7-428b-b41a-354c50ad4899'] },
       ] },
-      { label: 'Claude Academy', lead: 'Seven courses from Anthropic, September 2026.', badges: [['Building effective human-agent teams', 'claude-human-agent-teams'], ['Claude Platform 101', 'claude-platform-101'], ['Claude Code 101', 'claude-code-101'], ['Claude Code in action', 'claude-code-in-action'], ['AI capabilities and limitations', 'claude-ai-capabilities', true, 'https://academy.claude.com/verify/00df819cd8f793402ac8a521e5a422d3'], ['Introduction to Model Context Protocol', 'claude-mcp-intro'], ['Model Context Protocol: Advanced topics', 'claude-mcp-advanced']] },
+      { label: 'Claude Academy', lead: 'Seven courses from Anthropic, September 2026.', badges: [['Building effective human-agent teams', 'claude-human-agent-teams', false, 'https://academy.claude.com/verify/33af33deadedcfdbc288fd5403658dd8'], ['Claude Platform 101', 'claude-platform-101', false, 'https://academy.claude.com/verify/10c579e002b4ca58eb0bc792bf832c27'], ['Claude Code 101', 'claude-code-101', false, 'https://academy.claude.com/verify/8e77273ffb4eb4771031a1b06928f692'], ['Claude Code in action', 'claude-code-in-action', false, 'https://academy.claude.com/verify/121239664057fa35d83db490eaffde23'], ['AI capabilities and limitations', 'claude-ai-capabilities', true, 'https://academy.claude.com/verify/00df819cd8f793402ac8a521e5a422d3'], ['Introduction to Model Context Protocol', 'claude-mcp-intro', false, 'https://academy.claude.com/verify/b55a1681bcb6bd5c4901f64fcea3e033'], ['Model Context Protocol: Advanced topics', 'claude-mcp-advanced', false, 'https://academy.claude.com/verify/74a03fa1630f1b817b67898315cf045e']] },
       { label: 'Courses', dense: true, entries: [
+        { h: 'Introduction to ESG', m: 'LinkedIn Learning, Nov 2026', img: 'linkedin-esg-intro', big: true, verify: ['Verify', 'https://www.linkedin.com/learning/certificates/3064eb85292f8849f8300b5b72d39011c33a77bea995cf6ddd8f7d6157b1880d'] },
+        { h: 'Driving Sustainability at Your Organization', m: 'LinkedIn Learning, Nov 2026', img: 'linkedin-driving-sustainability', big: true, verify: ['Verify', 'https://www.linkedin.com/learning/certificates/b8f1aadc9227306f89f7288fde0d37574bef4c190d1789182859d30a53fdc61e'] },
         { h: 'AI Agent Fundamentals', m: 'Databricks, Sep 2026', img: 'databricks-ai-agents', big: true },
-        { h: 'Intro to Deep Learning', m: 'Kaggle, Sep 2026', img: 'kaggle-deep-learning', big: false },
-        { h: 'MATLAB Onramp', m: 'MathWorks, Nov 2025', img: 'matlab-onramp', big: true },
+        { h: 'Intro to Deep Learning', m: 'Kaggle, Sep 2026', img: 'kaggle-deep-learning', big: false, verify: ['Verify', 'https://www.kaggle.com/learn/certification/cyrillgerardcajucom/intro-to-deep-learning'] },
+        { h: 'MATLAB Onramp', m: 'MathWorks, Nov 2025', img: 'matlab-onramp', big: true, verify: ['Verify', 'https://matlabacademy.mathworks.com/progress/share/certificate.html?id=4f37ec58-fd34-45e3-92fb-649652efded7'] },
         { h: 'CCNA: Introduction to Networks', m: 'Cisco, Sep 2025', img: 'cisco-ccna-itn', big: false },
-        { h: 'Android Development with Kotlin', m: 'LinkedIn Learning, Nov 2025', img: 'linkedin-kotlin', big: false },
-        { h: 'Agile Software Development', m: 'LinkedIn Learning, Nov 2025', img: 'linkedin-agile', big: false },
+        { h: 'Android Development with Kotlin', m: 'LinkedIn Learning, Nov 2025', img: 'linkedin-kotlin', big: false, verify: ['Verify', 'https://www.linkedin.com/learning/certificates/8eb3d916ea590ae8a1d07f910ac21602b64e59b5c914ddf699c899637890adc4'] },
+        { h: 'Agile Software Development', m: 'LinkedIn Learning, Nov 2025', img: 'linkedin-agile', big: false, verify: ['Verify', 'https://www.linkedin.com/learning/certificates/5bc8460a0b9d56e77d4fdc51f4e20cb016fb940a99df59edb9f2166f122a7395'] },
       ] },
     ] },
     { name: 'Awards', entries: [
-      { h: "Dean's Bronze Certificate", m: 'FEU Institute of Technology, Jul 2025', d: '3rd Term, S.Y. 2024-2025', img: 'feu-deans-bronze' },
+      { h: "Dean's Bronze Certificate", m: 'FEU Institute of Technology, Jul 2025', d: '3rd Term, S.Y. 2024-2025', img: 'feu-deans-bronze', verify: ['Verify', 'https://paraverse.feutech.edu.ph/credentials/download/EDITH-2509-1014-3932-55DE'] },
       { h: 'Academic Excellence Award', m: 'San Miguel National High School, Jun 2022', d: 'With High Honors, Grade 11 STEM', img: 'smnhs-academic-excellence', big: true },
     ] },
     { name: 'Skills', entries: [
@@ -514,7 +517,7 @@ function tomeInk(x, i, w, l) { // draws chapter i's words. Returns the height th
   x.fillStyle = TOME_GOLD; x.beginPath(); x.moveTo(w / 2, y - s * .34); x.lineTo(w / 2 + s * .34, y); x.lineTo(w / 2, y + s * .34); x.lineTo(w / 2 - s * .34, y); x.fill(); y += s * 1.1;
   if (c.lead) { x.fillStyle = TOME_INK; x.font = `600 ${s}px ${TOME_SANS}`; x.textAlign = 'center'; for (const line of tomeWrap(x, c.lead, Math.min(w - pad * 2, s * 40))) { x.fillText(line, w / 2, y + s * .6); y += s * 1.45; } y += s * .55; }
   if (c.pills) y = tomePills(x, c.pills, w / 2, y, w - pad * 2, s * .88, 'center') + s * .3;
-  if (c.badges) { // each badge's picture with its name under it; the ones big enough open large, and one can be verified
+  if (c.badges) { // each badge's picture with its name under it; the ones big enough open large, and each can be verified
     const fit = Math.max(2, Math.min(c.badges.length, Math.floor((w - pad * 2 + s) / (s * 7.2)))), per = Math.ceil(c.badges.length / Math.ceil(c.badges.length / fit)), gap = s * .8, bw = (w - pad * 2 - gap * (per - 1)) / per, bh = bw / 1.45;
     let rowTop = y, bottom = y;
     c.badges.forEach(([name, img, big, url], n) => {
