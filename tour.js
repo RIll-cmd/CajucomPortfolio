@@ -113,16 +113,16 @@ document.head.insertAdjacentHTML('beforeend', `<style>
 #coach .arrow { position: absolute; width: 0; height: 0; transform-origin: 0 0; }
 #coach .arrow svg { position: absolute; right: 0; top: -22px; width: 96px; height: 44px; animation: nudge .9s ease-in-out infinite; filter: drop-shadow(0 4px 4px rgba(0,0,0,.55)); }
 @keyframes nudge { 50% { transform: translateX(-14px); } }
-#coach .card, #guide[data-look] { box-sizing: border-box; padding: var(--pad); background: var(--lines), var(--bg); color: var(--ink); border: var(--edge); border-radius: var(--radius); box-shadow: var(--shadow); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); transform: rotate(var(--tilt)); }
+#coach .card, #guide[data-look], #leave { box-sizing: border-box; padding: var(--pad); background: var(--lines), var(--bg); color: var(--ink); border: var(--edge); border-radius: var(--radius); box-shadow: var(--shadow); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); transform: rotate(var(--tilt)); }
 #coach .card { position: absolute; width: min(360px, calc(100vw - 32px)); pointer-events: auto; animation: card-in .35s cubic-bezier(.2,.9,.25,1.2) both; }
 @keyframes card-in { from { translate: 0 10px; scale: .96; opacity: 0; } }
 #coach .count { margin: 0 0 6px; font: var(--count-font); color: var(--count-ink); letter-spacing: .08em; text-transform: var(--count-tf); }
-#coach h2, #guide[data-look] h2 { display: inline-block; margin: 0 0 10px; padding: var(--title-pad); font: var(--title-font); color: var(--title-ink); text-shadow: var(--title-glow); text-transform: var(--title-tf); background: var(--title-bg); border: var(--title-edge); border-radius: 8px; transform: rotate(var(--title-rot)); }
+#coach h2, #guide[data-look] h2, #leave h2 { display: inline-block; margin: 0 0 10px; padding: var(--title-pad); font: var(--title-font); color: var(--title-ink); text-shadow: var(--title-glow); text-transform: var(--title-tf); background: var(--title-bg); border: var(--title-edge); border-radius: 8px; transform: rotate(var(--title-rot)); }
 #coach p.text { margin: 0 0 10px; font: var(--body-font); color: var(--soft); }
-#coach .row, #guide[data-look] .row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
-#coach button, #guide[data-look] button { display: inline-flex; align-items: center; min-height: 44px; box-sizing: border-box; padding: 9px 18px; border: var(--btn-edge); border-radius: var(--btn-radius); background: var(--btn-bg); color: var(--btn-ink); font: var(--btn-font); cursor: pointer; touch-action: manipulation; }
-#coach button:hover, #guide[data-look] button:hover { filter: brightness(1.1); }
-#coach button.ghost { background: var(--ghost-bg); color: var(--ghost-ink); border-color: currentColor; }
+#coach .row, #guide[data-look] .row, #leave .row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+#coach button, #guide[data-look] button, #leave button { display: inline-flex; align-items: center; min-height: 44px; box-sizing: border-box; padding: 9px 18px; border: var(--btn-edge); border-radius: var(--btn-radius); background: var(--btn-bg); color: var(--btn-ink); font: var(--btn-font); cursor: pointer; touch-action: manipulation; }
+#coach button:hover, #guide[data-look] button:hover, #leave button:hover { filter: brightness(1.1); }
+#coach button.ghost, #leave button.ghost { background: var(--ghost-bg); color: var(--ghost-ink); border-color: currentColor; }
 #coach .bubble { position: absolute; padding: 10px 14px; max-width: min(260px, calc(100vw - 32px)); box-sizing: border-box; pointer-events: auto; cursor: pointer; background: var(--b-bg); color: var(--b-ink); border: 2px solid var(--b-edge); border-radius: 14px; font: var(--body-font); box-shadow: 0 8px 18px rgba(0,0,0,.45); backdrop-filter: var(--blur); animation: card-in .35s both, bob 1.6s .35s ease-in-out infinite; }
 #coach .bubble::before { content: ''; position: absolute; top: -9px; right: var(--tail, 22px); width: 14px; height: 14px; background: var(--b-bg); border: 2px solid var(--b-edge); border-right: 0; border-bottom: 0; transform: rotate(45deg); }
 @keyframes bob { 50% { transform: translateY(4px); } }
@@ -133,9 +133,10 @@ document.head.insertAdjacentHTML('beforeend', `<style>
 #help:hover { background: var(--paper); color: #000; }
 #help.new { animation: help-pulse 1.2s ease-in-out infinite; }
 @keyframes help-pulse { 50% { box-shadow: 0 0 0 7px rgba(255,230,0,.55); border-color: #ffe600; } }
-#guide[data-look] { width: min(520px, calc(100vw - 32px)); }
-#guide[data-look]::backdrop { background: rgba(6,10,20,.55); }
+#guide[data-look], #leave { width: min(520px, calc(100vw - 32px)); }
+#guide[data-look]::backdrop, #leave::backdrop { background: rgba(6,10,20,.55); }
 #guide .moves { gap: 14px; margin: 4px 0 0; }
+#leave p { margin: 0; max-width: none; font: var(--body-font); color: var(--soft); }
 </style>`);
 
 const coach = document.createElement('div'); coach.id = 'coach'; coach.hidden = true; document.body.append(coach);

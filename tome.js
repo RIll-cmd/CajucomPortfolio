@@ -37,7 +37,7 @@ const TOME_WORDS = {
     ] },
     { name: 'Skills', entries: [
       { h: 'Languages', pills: ['TypeScript', 'JavaScript', 'Python', 'C++', 'SQL', 'C#', 'Java', 'Kotlin', 'MATLAB'] },
-      { h: 'AI', pills: ['AI Agents', 'Orchestration', 'MCP', 'RAG', 'LLMs', 'Gemini API', 'Prompt Engineering', 'Deep Learning', 'TensorFlow'] },
+      { h: 'AI', pills: ['AI Agents', 'Orchestration', 'n8n', 'Workflow Automation', 'MCP', 'RAG', 'LLMs', 'Gemini API', 'Prompt Engineering', 'Deep Learning', 'TensorFlow'] },
       { h: 'Vision and hardware', pills: ['Computer Vision', 'OpenCV', 'YOLO', 'MediaPipe', 'dlib', 'Raspberry Pi', 'Arduino'] },
       { h: 'Web and backend', pills: ['React', 'Next.js', 'Node.js', 'FastAPI', 'Flask', 'PostgreSQL', 'Prisma', 'SQLite', 'Tailwind CSS', 'REST APIs', 'Full-stack'] },
       { h: 'Tools and practice', pills: ['Git', 'Vitest', 'Playwright', 'CI/CD', 'System Architecture', 'Android', 'Agile', 'Networking'] },
@@ -45,7 +45,7 @@ const TOME_WORDS = {
   ],
 };
 // Which projects show each skill (from what each project's page says it uses); a skill with none isn't a link.
-const TOME_SKILL_PROJECTS = { TypeScript: ['Ascend Hub', 'Ascend Core'], JavaScript: ['Ascend Hub', 'Ascend Core'], Python: ['Ascend Core', 'Ascend Vision', 'Wake&Brake'], 'C++': ['Wake&Brake'], SQL: ['Ascend Core', 'Ascend Vision'], 'AI Agents': ['Ascend Hub', 'Ascend Vision'], Orchestration: ['Ascend Hub'], LLMs: ['Ascend Hub', 'Ascend Core', 'Ascend Vision'], 'Gemini API': ['Ascend Core', 'Ascend Vision'], 'Prompt Engineering': ['Ascend Vision'], 'Computer Vision': ['Ascend Vision', 'Wake&Brake'], OpenCV: ['Wake&Brake'], YOLO: ['Ascend Vision'], MediaPipe: ['Ascend Vision'], dlib: ['Wake&Brake'], 'Raspberry Pi': ['Wake&Brake'], Arduino: ['Wake&Brake'], React: ['Ascend Hub', 'Ascend Core', 'Ascend Vision'], 'Next.js': ['Ascend Core'], 'Node.js': ['Ascend Hub'], FastAPI: ['Ascend Core'], Flask: ['Wake&Brake'], PostgreSQL: ['Ascend Core'], Prisma: ['Ascend Core'], SQLite: ['Ascend Vision'], 'Tailwind CSS': ['Ascend Core'], 'REST APIs': ['Ascend Core', 'Wake&Brake'], 'Full-stack': ['Ascend Core'], Git: ['Ascend Hub'], Vitest: ['Ascend Core'], Playwright: ['Ascend Core'] };
+const TOME_SKILL_PROJECTS = { TypeScript: ['Ascend Hub', 'Ascend Core'], JavaScript: ['Ascend Hub', 'Ascend Core', 'Kinsenas'], Python: ['Ascend Core', 'Ascend Vision', 'Wake&Brake'], 'C++': ['Wake&Brake'], SQL: ['Ascend Core', 'Ascend Vision'], 'AI Agents': ['Kinsenas', 'Ascend Hub', 'Ascend Vision'], Orchestration: ['Ascend Hub'], n8n: ['Kinsenas'], 'Workflow Automation': ['Kinsenas'], LLMs: ['Kinsenas', 'Ascend Hub', 'Ascend Core', 'Ascend Vision'], 'Gemini API': ['Kinsenas', 'Ascend Core', 'Ascend Vision'], 'Prompt Engineering': ['Kinsenas', 'Ascend Vision'], 'Computer Vision': ['Ascend Vision', 'Wake&Brake'], OpenCV: ['Wake&Brake'], YOLO: ['Ascend Vision'], MediaPipe: ['Ascend Vision'], dlib: ['Wake&Brake'], 'Raspberry Pi': ['Wake&Brake'], Arduino: ['Wake&Brake'], React: ['Ascend Hub', 'Ascend Core', 'Ascend Vision'], 'Next.js': ['Ascend Core'], 'Node.js': ['Ascend Hub'], FastAPI: ['Ascend Core'], Flask: ['Wake&Brake'], PostgreSQL: ['Ascend Core'], Prisma: ['Ascend Core'], SQLite: ['Ascend Vision'], 'Tailwind CSS': ['Ascend Core'], 'REST APIs': ['Ascend Core', 'Wake&Brake'], 'Full-stack': ['Ascend Core'], Git: ['Ascend Hub'], Vitest: ['Ascend Core'], Playwright: ['Ascend Core'] };
 const TOME_CERTS = {}; // the certificate pictures, loaded when the book first opens
 function tomeCertsLoad() {
   for (const c of TOME_WORDS.chapters) for (const part of c.parts || [c]) for (const name of [...(part.entries || []).map(e => e.img), ...(part.badges || []).map(b => b[1])]) {
@@ -519,20 +519,22 @@ function tomeInk(x, i, w, l) { // draws chapter i's words. Returns the height th
   if (c.pills) y = tomePills(x, c.pills, w / 2, y, w - pad * 2, s * .88, 'center') + s * .3;
   if (c.badges) { // each badge's picture with its name under it; the ones big enough open large, and each can be verified
     const fit = Math.max(2, Math.min(c.badges.length, Math.floor((w - pad * 2 + s) / (s * 7.2)))), per = Math.ceil(c.badges.length / Math.ceil(c.badges.length / fit)), gap = s * .8, bw = (w - pad * 2 - gap * (per - 1)) / per, bh = bw / 1.45;
-    let rowTop = y, bottom = y;
+    let rowTop = y, bottom = y, row = []; // a row's Verify buttons wait for its longest name, so they line up
+    const flush = () => { const at = Math.max(...row.map(q => q.by)); for (const q of row) bottom = Math.max(bottom, tomeButton(x, 'Verify ↗', q.bx + bw / 2 - s * 3, at + s * .2, s * .7, hot, () => tomeOpen(q.url))); row = []; };
     c.badges.forEach(([name, img, big, url], n) => {
-      const col = n % per; if (n && !col) rowTop = bottom + s * .7; const inRow = Math.min(per, c.badges.length - (n - col)), bx = (w - (inRow * bw + (inRow - 1) * gap)) / 2 + col * (bw + gap); let by = rowTop; // each row centred
+      const col = n % per; if (n && !col) { flush(); rowTop = bottom + s * .7; } const inRow = Math.min(per, c.badges.length - (n - col)), bx = (w - (inRow * bw + (inRow - 1) * gap)) / 2 + col * (bw + gap); let by = rowTop; // each row centred
       tomeThumb(x, img, bx, by, bw, bh); if (big && hot) hot.push({ x: bx, y: by, w: bw, h: bh, act: zoom(img, name), label: name }); by += bh + s * .55;
       x.fillStyle = TOME_INK; x.font = `600 ${s * .74}px ${TOME_SANS}`; x.textAlign = 'center'; x.textBaseline = 'middle'; for (const line of tomeWrap(x, name, bw)) { x.fillText(line, bx + bw / 2, by + s * .4); by += s * 1.02; }
-      if (url) by = tomeButton(x, 'Verify ↗', bx + bw / 2 - s * 3, by + s * .2, s * .7, hot, () => tomeOpen(url));
+      if (url) row.push({ bx, by, url });
       bottom = Math.max(bottom, by);
     });
-    y = bottom + s * .3;
+    flush(); y = bottom + s * .3;
   }
   if (c.entries) {
-    const cols = Math.min(l.cols === 1 ? (c.dense ? 2 : 1) : c.entries.length === 4 ? 2 : l.cols, c.entries.length), gap = s * 1.6, colW = (w - pad * 2 - gap * (cols - 1)) / cols; let rowTop = y, bottom = y;
+    const cols = Math.min(l.cols === 1 ? (c.dense ? 2 : 1) : c.entries.length === 4 ? 2 : l.cols, c.entries.length), gap = s * 1.6, colW = (w - pad * 2 - gap * (cols - 1)) / cols; let rowTop = y, bottom = y, row = [], rowText = 0;
+    const flush = () => { for (const q of row) bottom = Math.max(bottom, tomeButton(x, `${q.e.verify[0]}  ↗`, q.cx, rowText + s * .35, s * .72, hot, () => tomeOpen(q.e.verify[1]))); row = []; rowText = 0; }; // Verify buttons line up across a row
     c.entries.forEach((e, n) => {
-      const col = n % cols; if (n && !col) rowTop = bottom + s * .75; let ey = rowTop;
+      const col = n % cols; if (n && !col) { flush(); rowTop = bottom + s * .75; } let ey = rowTop;
       // a certificate's picture sits to the left of its words
       const tw = e.img ? Math.min(colW * .34, s * 5.4) : 0, th = tw / 1.42, cx = pad + col * (colW + gap) + (tw ? tw + s * .7 : 0), tx = colW - (tw ? tw + s * .7 : 0);
       if (e.img) { const bx = pad + col * (colW + gap); tomeThumb(x, e.img, bx, rowTop + s * .2, tw, th); if (e.big && hot) hot.push({ x: bx, y: rowTop + s * .2, w: tw, h: th, act: zoom(e.img, `${e.h}. ${e.m || ''}`), label: e.h }); }
@@ -540,12 +542,12 @@ function tomeInk(x, i, w, l) { // draws chapter i's words. Returns the height th
       x.fillStyle = TOME_INK; x.font = `700 ${s * 1.1}px ${TOME_SERIF}`; for (const line of tomeWrap(x, e.h, tx)) { x.fillText(line, cx, ey + s * .68); ey += s * 1.38; }
       if (e.m) { x.fillStyle = '#7a5a2e'; x.font = `600 ${s * .86}px ${TOME_SANS}`; for (const line of tomeWrap(x, e.m, tx)) { x.fillText(line, cx, ey + s * .6); ey += s * 1.26; } }
       if (e.d) { x.fillStyle = TOME_INK; x.font = `600 ${s * .86}px ${TOME_SANS}`; for (const line of tomeWrap(x, e.d, tx)) { x.fillText(line, cx, ey + s * .6); ey += s * 1.26; } }
-      if (e.verify) ey = tomeButton(x, `${e.verify[0]}  ↗`, cx, ey + s * .35, s * .72, hot, () => tomeOpen(e.verify[1]));
+      rowText = Math.max(rowText, ey); if (e.verify) row.push({ e, cx });
       const skill = c.name === 'Skills' ? p => TOME_SKILL_PROJECTS[p] && (() => { tome.skill = tome.skill === p ? null : p; if (tome.layout) tome.layout.cards[i] = null; dirty = true; }) : null;
       if (e.pills) ey = tomePills(x, e.pills, cx, ey + s * .3, tx, s * .8, 'left', { hot, link: skill });
       bottom = Math.max(bottom, ey, e.img ? rowTop + s * .2 + th : 0);
     });
-    y = bottom;
+    flush(); y = bottom;
   }
   // A skill picked: the projects that show it, each one a way there.
   if (c.name === 'Skills' && x !== l.measure && tome && tome.skill && TOME_SKILL_PROJECTS[tome.skill]) {
@@ -621,7 +623,7 @@ function drawTome(now) {
   let openK = 1;
   if (tome.phase === 'open') {
     const t = (now - tome.openAt - 300) / TOME_OPEN_MS; openK = Math.max(0, Math.min(1, t));
-    if (t >= 1 || reduced) { tome.phase = 'read'; openK = 1; const c = w.chapters[0]; c.root.visible = true; c.popAt = now; tome.cardInAt = now; tomeSay(0); }
+    if (t >= 1 || reduced) { tome.phase = 'read'; openK = 1; const c = w.chapters[0]; c.root.visible = true; c.popAt = now; tome.cardInAt = now; tomeSay(0); if (tome.goTo) { const to = tome.goTo; tome.goTo = 0; tomeGo(to); } } // goTo: a chapter the résumé asked for
     tome.shadow = true;
   }
   const opened = openK * openK * (3 - 2 * openK);

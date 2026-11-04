@@ -1,14 +1,14 @@
 /* Box 2's notebook: everything that isn't a project. Hoshi, a yellow Exotic Persian, rides through a pop-up book on lined paper.
    Every drawing is made here in code, and the photos are in photos/. The words are kept together below so they're easy to change. */
 const BOOK_WORDS = {
-  worlds: ['Home', 'Food', 'Up late', 'Places', 'My people'],
+  worlds: ['Home', 'Food', 'Up late', 'Places', 'My cats'],
   hello: ['i am Hoshi. this is the notebook. no projects allowed.', 'is it dinner yet?', 'one more episode. then bed.', 'i do not like water. we go anyway.', 'everyone here is nicer than me.'],
   welcome: ["Hi, it's me!", "Cyrill's notebook", 'p.s. Hoshi the cat is in charge'],
   about: ['About me', 'From San Miguel, Bulacan, now in Manila. Aspiring software and AI engineer.', 'No projects past this page.'],
   food: ['Things I eat', 'Forever meal: Katsu', 'Comfort food: French fries', 'Will never eat: Ginisang Ampalaya'],
   late: ['Up too late', 'On repeat: Mr. Incorrect', 'Favorite game: Black Myth: Wukong', 'Favorite show: Loki'],
   places: ['Places', 'Been to: Hong Kong, Baguio, La Union', 'Going next: Japan', 'Took my breath away: La Union', 'Most memories: Baguio'],
-  people: ['My people', 'My family, and the two cats who run the house.', 'Dad: PNB bank manager.', 'Mom: Grade 11 chairperson.'],
+  people: ['My cats', 'The two cats who run the house.', 'Hoshi: orange, exotic, in charge.', 'Shiro: grey tabby, blue eyes.'],
   hi: ['Say hi!', 'cyrillgerardc@gmail.com', 'I reply faster than this cat.'],
 };
 // focus says where to look when a photo is cropped to fit: 0 is its top, 1 its bottom. No src leaves a sketch in the frame.
@@ -20,8 +20,10 @@ const BOOK_PHOTOS = [
   { id: 'photo-hk', src: 'photos/hongkong.jpg', cap: 'Hong Kong', tint: '#a5ddf2', focus: .7 },
   { id: 'photo-launion', src: 'photos/hut.jpg', cap: 'La Union', tint: '#a5ddf2', focus: .6 },
   { id: 'photo-baguio', src: 'photos/garden.jpg', cap: 'Baguio', tint: '#a5ddf2', focus: .6 },
-  { id: 'photo-clarissa', src: 'photos/clarissa.jpg', cap: 'Mom, Clarissa', tint: '#f4b6a5', focus: .1 },
-  { id: 'photo-erwin', src: 'photos/erwin.jpg', cap: 'Dad, Erwin', tint: '#f4b6a5', focus: .1 },
+  { id: 'photo-shiro-chin', src: 'photos/tabby-chin.jpg', cap: 'Shiro, chin scratch', tint: '#a9dcf0', focus: .2 },
+  { id: 'photo-shiro-wide', src: 'photos/shiro-wide.jpg', cap: 'Shiro, surprised', tint: '#a9dcf0', focus: .4 },
+  { id: 'photo-shiro-pat', src: 'photos/shiro-scratch.jpg', cap: 'Shiro, head pats', tint: '#a9dcf0', focus: .3 },
+  { id: 'photo-shiro-up', src: 'photos/shiro-up.jpg', cap: 'Shiro, waiting', tint: '#a9dcf0', focus: .25 },
   { id: 'photo-hoshi', src: 'photos/orange-face.jpg', cap: 'Hoshi', tint: '#ffd9a0', focus: .4 },
   { id: 'photo-off', src: 'photos/hoshi-floor.jpg', cap: 'Hoshi, off duty', tint: '#ffd9a0', focus: .5 },
   { id: 'photo-me', src: 'photos/me-view.jpg', cap: 'the human', tint: '#c7e6b4', focus: .3 },
@@ -33,7 +35,7 @@ const BOOK_PX = COARSE ? .75 : 1.25, BOOK_FOV = 36, BOOK_CAT = 1.22;
 const BOOK_INK = '#26252b', BOOK_FONT = 'Gaegu, "Comic Sans MS", cursive';
 /* ---------- The land: never quite flat, and a different way across at every crossing ----------
    Home to Food: a steep hump. Food to Up late: a cliff climbed straight up. Up late to Places: a lip, a jump over a chasm, a landing at the sea.
-   Places to My people: a rope bridge over a river. My people back to Home: one long ride down. Each world sits at its own height. */
+   Places to My cats: a rope bridge over a river. My cats back to Home: one long ride down. Each world sits at its own height. */
 const BOOK_BASE = [0, 0, 0, 0, 0], BOOK_GAP = [-2, -1], BOOK_BRIDGE = [-2, -1], BOOK_FADE_W = 16; // no chasm or bridge in this layout
 const BOOK_PEAK = 6, BOOK_TOP = 2; // how high each crossing climbs, and half the width of the flat top the signpost stands on
 const bookMod = x => ((x % BOOK_LOOP) + BOOK_LOOP) % BOOK_LOOP;
@@ -332,6 +334,37 @@ const bookArt = {
   },
   owl(x, w, h) { bookDraw(x, bookCurve([[w * .16, h * .22], [w * .14, h * .02], [w * .36, h * .12], [w * .64, h * .12], [w * .86, h * .02], [w * .84, h * .22], [w * .96, h * .6], [w * .78, h], [w * .22, h], [w * .04, h * .6]]), '#a17748', 4.2); for (const k of [.33, .67]) { bookDraw(x, bookOval(w * k, h * .34, w * .17), '#fff6e0', 2.8); x.fillStyle = BOOK_INK; x.beginPath(); x.arc(w * k, h * .35, w * .07, 0, 7); x.fill(); } bookDraw(x, bookPoly([[w * .44, h * .42], [w * .56, h * .42], [w * .5, h * .54]], true, .4), '#f4b02a', 2.2); for (let i = 0; i < 6; i++) bookLine(x, [[w * (.3 + (i % 3) * .2), h * (.62 + (i > 2 ? .14 : 0))], [w * (.34 + (i % 3) * .2), h * (.67 + (i > 2 ? .14 : 0))], [w * (.38 + (i % 3) * .2), h * (.62 + (i > 2 ? .14 : 0))]], 2); },
   marshmallow(x, w, h) { bookLine(x, [[0, h * .94], [w * .8, h * .2]], 6, '#7c5230'); bookDraw(x, bookOval(w * .82, h * .16, w * .17, h * .15), '#fff4dd', 3.4); },
+  shiro(x, w, h) { // Shiro, sitting up by the fire: a silver lynx-point tabby with tall ears and round blue eyes, lit from the fire on his right
+    const cx = w * .5, cy = h * .3, s = w * .26, fur = '#bdbabb', dark = '#5f5c68', cream = '#efebe6';
+    bookDraw(x, bookFluff(cx, h * .68, w * .3, h * .27, 22, .05), fur);
+    for (const k of [-1, 1]) for (const t of [.6, .71, .82]) bookLine(x, [[cx + k * w * .29, h * t], [cx + k * w * .19, h * (t + .035)]], 2.4, dark); // stripes down his sides
+    bookDraw(x, bookCurve([[cx - w * .15, h * .58], [cx + w * .15, h * .58], [cx + w * .16, h * .93], [cx - w * .16, h * .93]], true, .5), cream, 3.2); // chest and front legs
+    bookLine(x, [[cx, h * .72], [cx, h * .93]], 2.4);
+    for (const k of [-1, 1]) bookDraw(x, bookOval(cx + k * w * .085, h * .93, w * .085, h * .035), cream, 3);
+    const tail = bookCurve([[w * .86, h * .72], [w * .93, h * .88], [w * .66, h * .995], [w * .26, h * .995], [w * .16, h * .95], [w * .26, h * .925], [w * .6, h * .945], [w * .78, h * .87], [w * .78, h * .74]]); // curled round his paws
+    bookDraw(x, tail, fur, 3.6); for (const a of [.32, .46, .6, .74]) bookLine(x, [[w * a, h * (.935 + (a > .6 ? -.02 : 0))], [w * (a + .025), h * .99]], 2.4, dark);
+    for (const k of [-1, 1]) { // ears: tall and pointed
+      bookDraw(x, bookCurve([[cx + k * s * .22, cy - s * .78], [cx + k * s * .8, cy - s * 1.6], [cx + k * s * 1.02, cy - s * .42]], true, .5), fur);
+      bookPencil(x, bookCurve([[cx + k * s * .4, cy - s * .8], [cx + k * s * .76, cy - s * 1.3], [cx + k * s * .88, cy - s * .6]], true, .4), '#f1b3b0');
+    }
+    bookDraw(x, bookFluff(cx, cy, s * 1.1, s * .96, 26, .05), fur);
+    for (const k of [-.32, -.11, .11, .32]) bookLine(x, [[cx + k * s, cy - s * .9], [cx + k * s * .7, cy - s * .46]], 2.8, dark); // forehead stripes
+    for (const k of [-1, 1]) for (const t of [0, .17]) bookLine(x, [[cx + k * s * .66, cy + s * (.14 + t)], [cx + k * s * 1.02, cy + s * (.05 + t)]], 2.2, dark); // cheek stripes
+    bookPencil(x, bookFluff(cx, cy + s * .44, s * .48, s * .34, 12, .06), cream);
+    for (const k of [-1, 1]) {
+      const ex = cx + k * s * .43, ey = cy - s * .02, r = s * .28;
+      bookDraw(x, bookOval(ex, ey, r, r * 1.04), '#8ec3ea', 3.6, .4);
+      x.fillStyle = '#1c1720'; x.beginPath(); x.arc(ex, ey + r * .06, r * .52, 0, 7); x.fill();
+      x.fillStyle = '#fff'; x.beginPath(); x.arc(ex - r * .28, ey - r * .3, r * .22, 0, 7); x.fill(); x.beginPath(); x.arc(ex + r * .3, ey + r * .3, r * .1, 0, 7); x.fill();
+      for (const t of [-.06, .08, .22]) bookLine(x, [[cx + k * s * .5, cy + s * (.44 + t * .4)], [cx + k * s * 1.3, cy + s * (.38 + t * 1.1)]], 1.6);
+    }
+    bookDraw(x, bookCurve([[cx - s * .12, cy + s * .2], [cx + s * .12, cy + s * .2], [cx, cy + s * .33]], true, .3), '#ef9ca6', 2.4);
+    bookLine(x, [[cx, cy + s * .33], [cx, cy + s * .42]], 2.4);
+    bookLine(x, [[cx - s * .22, cy + s * .48], [cx - s * .1, cy + s * .41], [cx, cy + s * .42], [cx + s * .1, cy + s * .41], [cx + s * .22, cy + s * .48]], 2.6);
+    x.save(); x.globalCompositeOperation = 'source-atop'; // firelight
+    const glow = x.createRadialGradient(w * 1.15, h * .78, 0, w * 1.15, h * .78, w * .95); glow.addColorStop(0, 'rgba(255,150,60,.38)'); glow.addColorStop(1, 'rgba(255,150,60,0)');
+    x.fillStyle = glow; x.fillRect(-20, -20, w + 40, h + 40); x.restore();
+  },
 };
 const bookNote = (lines, { paper = '#fffef6', tape = '#f7c3cf', title = null } = {}) => (x, w, h) => {
   const pts = []; for (let i = 0; i <= 12; i++) pts.push([w * i / 12, i % 2 ? 2 : 6]); for (let i = 1; i <= 12; i++) pts.push([w + (i % 2 ? -2 : -5), h * i / 12]); for (let i = 12; i >= 0; i--) pts.push([w * i / 12, h - (i % 2 ? 2 : 6)]); for (let i = 11; i >= 1; i--) pts.push([i % 2 ? 2 : 5, h * i / 12]);
@@ -368,7 +401,7 @@ function* buildBook() {
   Promise.race([Promise.all(['400 40px Gaegu', '700 40px Gaegu'].map(f => document.fonts.load(f))), new Promise(r => setTimeout(r, 2500))]).catch(() => {}).finally(() => { fonts = true; });
   while (!fonts) yield;
   const spr = {};
-  const make = function* (list) { for (const [name, w, h, draw, opts] of list) { bookCatStyle = name === 'wheel' || name === 'smallWheel'; spr[name] = bookSprite(w, h, draw, opts); bookCatStyle = false; bookBuilt += .9 / 58; yield; } };
+  const make = function* (list) { for (const [name, w, h, draw, opts] of list) { bookCatStyle = name === 'wheel' || name === 'smallWheel' || name === 'shiro'; spr[name] = bookSprite(w, h, draw, opts); bookCatStyle = false; bookBuilt += .9 / 58; yield; } };
   bookCatStyle = true; spr.cat = BOOK_COSTUMES.map((draw, i) => bookSprite(4.4, 4.2, draw, { edge: 5 })); bookCatStyle = false; bookBuilt = .1; yield;
   yield* make([
     ['wheel', 1.34, 1.34, (x, w) => { bookDraw(x, bookOval(w / 2, w / 2, w * .47), '#fbf7ec', 7); for (let i = 0; i < 8; i++) { const a = i / 8 * 6.2832; bookLine(x, [[w / 2, w / 2], [w / 2 + Math.cos(a) * w * .44, w / 2 + Math.sin(a) * w * .44]], 1.8, '#74727f'); } bookDraw(x, bookOval(w / 2, w / 2, 8), '#d8d3c6', 2.4); }, { edge: 2 }],
@@ -382,7 +415,7 @@ function* buildBook() {
     ['late', 5.4, 4.7, bookNote(BOOK_WORDS.late.slice(1), { title: BOOK_WORDS.late[0], tape: '#b9b8f0' })],
     ['lighthouse', 3.8, 10, bookArt.lighthouse], ['island', 7.4, 6.2, bookArt.island], ['whale', 6, 3.6, bookArt.whale], ['sun', 4.4, 4.4, bookArt.sun], ['gull', 1.8, .8, bookArt.gull], ['bottle', 1.4, 2.3, bookArt.bottle], ['waves', 36, 1.2, bookArt.waves, { scale: .7, edge: 0 }],
     ['places', 5.4, 4.7, bookNote(BOOK_WORDS.places.slice(1), { title: BOOK_WORDS.places[0], tape: '#a5ddf2' })],
-    ['dusk', 35.4, 13, bookArt.dusk, { scale: .42, edge: 0 }], ['pine', 3.6, 7.4, bookArt.pine], ['tent', 6.4, 4.6, bookArt.tent], ['fire', 2.5, 2.7, bookArt.fire], ['owl', 1.7, 2.2, bookArt.owl], ['marshmallow', 2.2, 2.2, bookArt.marshmallow],
+    ['dusk', 35.4, 13, bookArt.dusk, { scale: .42, edge: 0 }], ['pine', 3.6, 7.4, bookArt.pine], ['tent', 6.4, 4.6, bookArt.tent], ['fire', 2.5, 2.7, bookArt.fire], ['owl', 1.7, 2.2, bookArt.owl], ['marshmallow', 2.2, 2.2, bookArt.marshmallow], ['shiro', 2.6, 3.4, bookArt.shiro],
     ['people', 5.4, 4.7, bookNote(BOOK_WORDS.people.slice(1), { title: BOOK_WORDS.people[0], tape: '#c7e6b4' })],
     ['fence', 2.8, 1.5, (x, w, h) => { for (const a of [14, w / 2, w - 14]) bookDraw(x, bookPoly([[a - 9, h], [a - 9, 18], [a, 6], [a + 9, 18], [a + 9, h]]), '#e9d3a8', 3.4); for (const y of [h * .38, h * .72]) bookDraw(x, bookPoly([[2, y - 9], [w - 2, y - 8], [w - 2, y + 9], [2, y + 8]]), '#e9d3a8', 3.4); }],
     ['lamp', 1.2, 4.8, (x, w, h) => { bookDraw(x, bookPoly([[w / 2 - 7, h], [w / 2 - 7, 70], [w / 2 + 7, 70], [w / 2 + 7, h]]), '#4b4e5c', 3.6); bookDraw(x, bookPoly([[w / 2 - 34, 72], [w / 2 + 34, 72], [w / 2 + 22, 20], [w / 2 - 22, 20]]), '#ffe29a', 4); bookDraw(x, bookPoly([[w / 2 - 40, 22], [w / 2 + 40, 22], [w / 2, 2]]), '#4b4e5c', 3.4); bookDraw(x, bookPoly([[w / 2 - 26, h], [w / 2 + 26, h], [w / 2 + 18, h - 14], [w / 2 - 18, h - 14]]), '#4b4e5c', 3); }],
@@ -466,14 +499,16 @@ function* buildBook() {
   put('places', at(3, 8.5), .1, { y: 3.9, flat: true, tilt: .03, say: 'where I have been.' });
   put('lighthouse', at(3, 3.4), .2, { model: true, mw: 2.6, mh: 9.6, say: 'Hong Kong. Baguio. La Union.' }); put('island', at(3, 18), 1.8, { say: 'Japan is next.' }); put('whale', at(3, 28), 3, { bob: .22, say: 'wooooo.' }); put('bottle', at(3, 13), 4.5, { bob: .2, sway: .09, say: 'a memory, in a bottle.' }); put('photo-view', at(3, 22.5), .1, { y: 4.7, flat: true, tilt: -.04, say: 'good view. no cats.' }); put('photo-falls', at(3, 33.2), .1, { y: 4.6, flat: true, tilt: -.06, say: 'a good day out.' }); put('photo-hk', at(3, 13.4), .1, { y: 4.8, flat: true, tilt: .05, say: 'Hong Kong. been there.' }); put('photo-baguio', at(3, 17.4), .1, { y: 5.5, flat: true, tilt: -.04, say: 'Baguio. the most memories.' }); put('photo-launion', at(3, 27.6), .1, { y: 4.9, flat: true, tilt: .05, say: 'La Union. took my breath away.' });
   for (const [z, off] of [[1.1, 0], [3.7, 11], [5.9, 23]]) put('waves', at(3, 18) + off * .05, z, { noPop: true, shadow: false, slide: .32, bob: .05 });
-  // My people
+  // My cats
   put('dusk', at(4, 18), .05, { noPop: true, shadow: false, order: -2, y: -.2 });
-  put('star', at(4, 5), 1, { hang: true, y: 11.4, sway: .08 }); put('star', at(4, 26), 1, { hang: true, y: 11.1, sway: .08 });
-  put('people', at(4, 7.6), .1, { y: 4.3, flat: true, tilt: -.03, say: 'my family, and two cats.' }); put('photo-clarissa', at(4, 12), .1, { y: 4.8, flat: true, tilt: .05, say: 'Mom. Grade 11 chairperson. her students fear her. i do not.' }); put('photo-erwin', at(4, 18.3), .1, { y: 4.9, flat: true, tilt: -.04, say: 'Dad. bank manager at PNB. he counts everything. even my treats.' }); put('photo-hoshi', at(4, 22), .1, { y: 4.7, flat: true, tilt: .05, say: 'Hoshi. orange. exotic. in charge.' }); put('photo-shiro', at(4, 26), .1, { y: 4.9, flat: true, tilt: -.05, say: 'Shiro. bow tie optional.' });
-  put('pine', at(4, 6.2), 1.6); put('pine', at(4, 15.8), 1.1); put('tent', at(4, 21), .2, { model: true, mw: 6, mh: 4.5, say: 'Sleeps two. And one very large cat.' }); put('pine', at(4, 34.5), 1.4);
-  put('owl', at(4, 15.8), 1.6, { y: 3.4, stick: false, say: 'who?', shadow: false }); put('fire', at(4, 15.8), 4.2, { flick: true, say: 'careful. the cat has already tried.' });
+  put('star', at(4, 5), 1, { hang: true, y: 11.4, sway: .08 }); put('star', at(4, 27.55), 1, { hang: true, y: 11.1, sway: .08 });
+  put('people', at(4, 7.6), .1, { y: 4.3, flat: true, tilt: -.03, say: 'me and Shiro. mostly me.' });
+  for (const [id, u, y, tilt, say] of [['photo-shiro-chin', 12.3, 4.8, .05, 'Shiro. chin scratches only. he decides when.'], ['photo-shiro-pat', 15.35, 5.2, -.05, 'head pats. Shiro allows it.'], ['photo-shiro-wide', 18.4, 4.8, .04, 'Shiro, surprised. he is always surprised.'], ['photo-hoshi', 21.45, 5.1, -.04, 'Hoshi. orange. exotic. in charge.'], ['photo-shiro-up', 24.5, 4.8, .05, 'Shiro, looking up. he wants something.'], ['photo-shiro', 27.55, 5.1, -.05, 'Shiro. bow tie optional.']]) put(id, at(4, u), .1, { y, flat: true, tilt, say });
+  put('shiro', at(4, 13.9), 3.4, { say: 'Shiro. the warm side of the fire. always.' });
+  put('pine', at(4, 6.2), 1.6); put('pine', at(4, 15.8), .08); put('tent', at(4, 21), .2, { model: true, mw: 6, mh: 4.5, say: 'Sleeps two. And one very large cat.' }); put('pine', at(4, 34.5), 1.4); // the middle pine stands behind the photos, so they stay clear
+  put('owl', at(4, 15.8), 1.6, { y: 2.4, stick: false, say: 'who?', shadow: false }); put('fire', at(4, 15.8), 4.2, { flick: true, say: 'careful. the cat has already tried.' });
   put('marshmallow', at(4, 19.6), 5.1, { shadow: false, say: 'toasted, not burnt.' });
-  put('hi', at(4, 31), .1, { y: 4.6, flat: true, tilt: .03, say: 'open to work. come say hi.' });
+  put('hi', at(4, 32.1), .1, { y: 4.6, flat: true, tilt: .03, say: 'open to work. come say hi.' });
   // Each slope gets things for the world it leads to (j): on the ground either side of the top, hanging above it, and a note on the page.
   const slopes = [
     { ground: [['tree', -17, 1.6], ['flower', -12, 5.4], ['fence', -7, 2.8], ['bush', -4.5, 5.1], ['bush', 6, 5], ['fence', 10, 2.8], ['flower', 14, 5.3], ['grass', 18, 5.8]], hang: [['kite', -11, 9.8, 1], ['cloud', 12, 10.8, .9]] },
@@ -519,7 +554,7 @@ function* buildBook() {
       p.x = q.x + (dx >= 0 ? 1 : -1) * need; p.phase = p.x * 1.3; p.mesh.position.x = p.x;
     }
   }
-  // The skies of Up late and My people fade out at their edges, over the hills, instead of stopping in a straight line.
+  // The skies of Up late and My cats fade out at their edges, over the hills, instead of stopping in a straight line.
   for (const name of ['night', 'dusk']) {
     const old = spr[name].canvas, c = document.createElement('canvas'), o = c.getContext('2d'), fw = old.width * .13; c.width = old.width; c.height = old.height; o.drawImage(old, 0, 0); // a fresh sheet: the drawing's own context still carries its scale and clip
     o.globalCompositeOperation = 'destination-out';

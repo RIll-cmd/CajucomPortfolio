@@ -3,10 +3,12 @@
 const RESUME_WORDS = {
   name: 'Cyrill', role: 'ASPIRING SOFTWARE / AI ENGINEER',
   full: 'Cyrill Gerard P. Cajucom',
-  intro: ['Aspiring software and AI engineer, based in Manila.', '4th-year BS Computer Science student at FEU Tech, specializing in software engineering. Looking for a 500-hour internship.'],
+  intro: ['Aspiring software and AI engineer, based in Manila.', '4th-year BS Computer Science student at FEU Tech, specializing in software engineering.'],
   experience: [{ h: 'Backend AI Engineering Intern', logo: 'flyrank', d: ['FlyRank AI, Sep 2026 to present. Remote.', 'AI capstones, automation and data-heavy apps, agent skills with documentation, and token and cost analysis.'] }],
   education: [{ h: 'BS Computer Science, Software Engineering', logo: 'feutech', d: ["FEU Institute of Technology, 2023 to 2027. 4th year, Dean's Lister."] }, { h: 'Senior High, STEM', logo: 'spusm', d: ['St. Paul University at San Miguel, 2021 to 2023. With High Honors.'] }],
   talk: "Let's talk", boxes: [['Have a role or an internship in mind?', 'Say hello', 'hello'], ['Everything I have made', 'See my works', 'works'], ['The full record, page by page', 'Open Experiences', 'experiences']],
+  more: { Experience: ['Open Experience', 'exp:Experience'], Education: ['Open Education', 'exp:Education'], Works: ['Visit Projects', 'works'], Certifications: ['Open Certifications', 'exp:Certifications'], Awards: ['Open Awards', 'exp:Awards'], Skills: ['Open Skills', 'exp:Skills'] }, // a button at the end of these parts, to the page with more
+  hints: { Works: "Click a project's name to open its page.", Certifications: "Open a group, then click a certificate's name to see it in Experiences." },
   banner: 'Open to work', sections: ['About', 'Experience', 'Education', 'Works', 'Certifications', 'Awards', 'Skills', "Let's talk"],
 };
 // Where each hand sits in its render: the crop, and the index fingertip in each frame, as fractions of the 1120 x 800 stage.
@@ -93,6 +95,15 @@ function resumeLayout() {
   const add = b => { L.blocks.push(Object.assign({ items: [], pics: [] }, b)); return L.blocks[L.blocks.length - 1]; };
   const mark = name => add({ kind: 'mark', name, h: 0 }), gap = h => add({ kind: 'gap', h }), panelOn = () => add({ kind: 'on', h: pad * .7 }), panelOff = () => add({ kind: 'off', h: pad * .7 });
   const heading = name => { mark(name); const b = add({ kind: 'title', h: title * 1.4 }); put(b.items, name, left, 0, serif(title, 500), title, RESUME_INK, true); };
+  const link = (list, from, go) => { for (const it of list.slice(from)) { g.font = it.font; it.w = g.measureText(it.t).width; it.go = go; } }; // these lines open somewhere else
+  const hint = name => { const b = add({ kind: 'plain', h: 0 }); b.h = para(b.items, RESUME_WORDS.hints[name], left, 0, inner, `italic ${sans(note)}`, note, RESUME_TEAL, 1.4) + note * .7; };
+  const box = ([label, button, go], rule) => {
+    const b = add({ kind: 'box', go, button, rule }); g.font = sans(16, 600); b.bw = g.measureText(button).width + 44;
+    if (!label) { b.bx = left + inner - b.bw; b.by = row * .5; b.h = 50 + row; return; } // a button alone sits on the right
+    const lw = narrow ? inner : inner - b.bw - pad; let y = row * .6; y = para(b.items, label, left, y, lw, serif(row * .92, 500), row * .92, RESUME_INK, 1.3);
+    b.bx = narrow ? left : left + inner - b.bw; b.by = narrow ? y + row * .2 : Math.max(row * .5, (y + row * .6 - 50) / 2); b.h = narrow ? b.by + 50 + row * .6 : Math.max(y + row * .6, 50 + row);
+  };
+  const more = name => box([null, ...RESUME_WORDS.more[name]], true);
   // About.
   mark('About');
   {
@@ -102,7 +113,7 @@ function resumeLayout() {
     for (const l of RESUME_WORDS.intro) y = para(a.items, l, tall ? left : x0, y, textW, sans(row * .92), row * .92, RESUME_SOFT, 1.5) + row * .35;
     a.h = Math.max(y, tall ? 0 : photoH);
   }
-  const entries = (list, photo) => {
+  const entries = (list, photo, name) => {
     panelOn();
     const pw = photo ? (tall ? colW * .48 : Math.min(inner * .22, H * .25)) : 0, b = add({ kind: 'plain', h: 0 }), w = photo && !tall ? inner - pw - pad : inner; let y = 0;
     if (photo) { const ph = pw * 1418 / 941; b.pics.push({ img: photo, x: tall ? (W - pw) / 2 : left + inner - pw, y: 0, w: pw, h: ph, r: 12 }); if (tall) y = ph + pad * .7; b.minH = ph; }
@@ -114,45 +125,43 @@ function resumeLayout() {
       if (e.logo) { const eh = y - ey, ly = ey + Math.max(0, (eh - ls) * .35); b.pics.push({ img: e.logo, x: left, y: ly, w: ls, h: ls, r: e.logo === 'flyrank' ? 14 : 0, contain: e.logo !== 'flyrank' }); y = Math.max(y, ey + ls); }
       if (i < list.length - 1) y += row * .65;
     });
-    b.h = Math.max(y, b.minH || 0); panelOff();
+    b.h = Math.max(y, b.minH || 0); if (name) more(name); panelOff();
   };
-  heading('Experience'); entries(RESUME_WORDS.experience);
-  heading('Education'); entries(RESUME_WORDS.education, 'barong');
-  heading('Works');
+  heading('Experience'); entries(RESUME_WORDS.experience, null, 'Experience');
+  heading('Education'); entries(RESUME_WORDS.education, 'barong', 'Education');
+  heading('Works'); hint('Works');
   if (tall) {
     WORKS_WORDS.items.forEach((it, n) => {
       add({ kind: 'on', h: pad * .55 });
       const b = add({ kind: 'plain', h: 0 }), iw = inner, ih = Math.min(iw * .4, H * .16); b.pics.push({ works: n, x: left, y: 0, w: iw, h: ih, r: 10 });
       let y = ih + pad * .45;
-      y = para(b.items, it.t, left, y, inner, serif(row * 1.02, 500), row * 1.02, RESUME_INK, 1.2) + row * .12; y = para(b.items, it.copy.replace(/ Solo project\.$/, ''), left, y, inner, sans(note * .95), note * .95, RESUME_SOFT, 1.38) + note * .28; y = para(b.items, it.topics.join('  ·  '), left, y, inner, mono(note * .8), note * .8, RESUME_TEAL, 1.35);
-      b.h = y; add({ kind: 'off', h: pad * .55 }); if (n < WORKS_WORDS.items.length - 1) gap(10);
+      y = para(b.items, it.t, left, y, inner, serif(row * 1.02, 500), row * 1.02, RESUME_INK, 1.2) + row * .12; link(b.items, 0, `work:${n}`); y = para(b.items, it.copy.replace(/ Solo project\.$/, ''), left, y, inner, sans(note * .95), note * .95, RESUME_SOFT, 1.38) + note * .28; y = para(b.items, it.topics.join('  ·  '), left, y, inner, mono(note * .8), note * .8, RESUME_TEAL, 1.35);
+      b.h = y; add({ kind: 'off', h: pad * .55 }); gap(10);
     });
+    panelOn(); box([null, ...RESUME_WORDS.more.Works], false); panelOff();
   } else {
     panelOn();
     WORKS_WORDS.items.forEach((it, n) => {
       const b = add({ kind: 'plain', h: 0, rule: n > 0 }), iw = Math.min(inner * .22, H * .25), ih = iw * .56, padY = n ? row * .45 : 0; b.pics.push({ works: n, x: left, y: padY, w: iw, h: ih, r: 10 });
       let y = padY; const x = left + iw + pad * .85, w = inner - iw - pad * .85;
-      y = para(b.items, it.t, x, y, w, serif(row * 1.04, 500), row * 1.04, RESUME_INK, 1.22) + row * .14; y = para(b.items, it.copy.replace(/ Solo project\.$/, ''), x, y, w, sans(note * .96), note * .96, RESUME_SOFT, 1.42) + note * .32; y = para(b.items, it.topics.join('  ·  '), x, y, w, mono(note * .8), note * .8, RESUME_TEAL, 1.4);
+      y = para(b.items, it.t, x, y, w, serif(row * 1.04, 500), row * 1.04, RESUME_INK, 1.22) + row * .14; link(b.items, 0, `work:${n}`); y = para(b.items, it.copy.replace(/ Solo project\.$/, ''), x, y, w, sans(note * .96), note * .96, RESUME_SOFT, 1.42) + note * .32; y = para(b.items, it.topics.join('  ·  '), x, y, w, mono(note * .8), note * .8, RESUME_TEAL, 1.4);
       b.h = Math.max(y, padY + ih) + (n < WORKS_WORDS.items.length - 1 ? row * .45 : 0);
     });
-    panelOff();
+    more('Works'); panelOff();
   }
   const chapter = name => TOME_WORDS.chapters.find(c => c.name === name);
-  heading('Certifications'); panelOn();
+  heading('Certifications'); hint('Certifications'); panelOn();
   chapter('Certifications').parts.forEach((p, n) => {
     const key = p.label, b = add({ kind: 'open', key, rule: n > 0 }); let y = row * .55; y = para(b.items, key, left, y, inner * .7, serif(row, 500), row, RESUME_INK, 1.3); if (p.lead) y = para(b.items, p.lead, left, y, inner * .7, sans(note), note, RESUME_SOFT, 1.5);
-    b.h = y + row * .55; b.body = []; let by = 0; for (const e of p.entries || (p.pills || p.badges.map(b => b[0])).map(h => ({ h }))) /* the Claude courses are badges in the book now */ { const start = by; by = para(b.body, e.h, left, by, tall ? inner : inner * .56, serif(row * .8, 400), row * .8, RESUME_INK, 1.3); if (e.m) { if (tall) by = para(b.body, e.m, left, by, inner, sans(note), note, RESUME_SOFT, 1.5); else by = Math.max(by, para(b.body, e.m, left + inner * .6, start + (row * .8 - note) * .35, inner * .4, sans(note), note, RESUME_SOFT, 1.5)); } by += row * .42; }
+    b.h = y + row * .55; b.body = []; let by = 0; for (const e of p.entries || (p.pills || p.badges.map(b => b[0])).map(h => ({ h }))) /* the Claude courses are badges in the book now */ { const start = by, from = b.body.length; by = para(b.body, e.h, left, by, tall ? inner : inner * .56, serif(row * .8, 400), row * .8, RESUME_INK, 1.3); link(b.body, from, `exp:Certifications|${key}`); if (e.m) { if (tall) by = para(b.body, e.m, left, by, inner, sans(note), note, RESUME_SOFT, 1.5); else by = Math.max(by, para(b.body, e.m, left + inner * .6, start + (row * .8 - note) * .35, inner * .4, sans(note), note, RESUME_SOFT, 1.5)); } by += row * .42; }
     b.bodyH = by + row * .35; b.linkX = left + inner;
   });
-  panelOff();
-  const twoCol = list => { panelOn(); list.forEach((e, n) => { const b = add({ kind: 'row', rule: n > 0 }); let hy = row * .55, ry = hy; hy = para(b.items, e.h, left, hy, narrow ? inner : inner * .42, serif(row, 500), row, RESUME_INK, 1.3); if (narrow) ry = hy + row * .1; for (const r of e.right) ry = para(b.items, r, narrow ? left : mid, ry, narrow ? inner : midW, e.mono ? mono(note * .86) : sans(note), e.mono ? note * .86 : note, e.mono ? RESUME_TEAL : RESUME_SOFT, 1.55); b.h = Math.max(hy, ry) + row * .55; }); panelOff(); };
-  heading('Awards'); twoCol(chapter('Awards').entries.map(e => ({ h: e.h, right: [e.m, e.d].filter(Boolean) })));
-  heading('Skills'); twoCol(chapter('Skills').entries.map(e => ({ h: e.h, right: [e.pills.join('  ·  ')], mono: true })));
+  more('Certifications'); panelOff();
+  const twoCol = (list, name) => { panelOn(); list.forEach((e, n) => { const b = add({ kind: 'row', rule: n > 0 }); let hy = row * .55, ry = hy; hy = para(b.items, e.h, left, hy, narrow ? inner : inner * .42, serif(row, 500), row, RESUME_INK, 1.3); if (narrow) ry = hy + row * .1; for (const r of e.right) ry = para(b.items, r, narrow ? left : mid, ry, narrow ? inner : midW, e.mono ? mono(note * .86) : sans(note), e.mono ? note * .86 : note, e.mono ? RESUME_TEAL : RESUME_SOFT, 1.55); b.h = Math.max(hy, ry) + row * .55; }); if (name) more(name); panelOff(); };
+  heading('Awards'); twoCol(chapter('Awards').entries.map(e => ({ h: e.h, right: [e.m, e.d].filter(Boolean) })), 'Awards');
+  heading('Skills'); twoCol(chapter('Skills').entries.map(e => ({ h: e.h, right: [e.pills.join('  ·  ')], mono: true })), 'Skills');
   heading(RESUME_WORDS.talk); panelOn();
-  RESUME_WORDS.boxes.forEach(([label, button, go], n) => {
-    const b = add({ kind: 'box', go, button, rule: n > 0 }); g.font = sans(16, 600); b.bw = g.measureText(button).width + 44; const lw = narrow ? inner : inner - b.bw - pad; let y = row * .6; y = para(b.items, label, left, y, lw, serif(row * .92, 500), row * .92, RESUME_INK, 1.3);
-    b.bx = narrow ? left : left + inner - b.bw; b.by = narrow ? y + row * .2 : Math.max(row * .5, (y + row * .6 - 50) / 2); b.h = narrow ? b.by + 50 + row * .6 : Math.max(y + row * .6, 50 + row);
-  });
+  RESUME_WORDS.boxes.forEach((b, n) => box(b, n > 0));
   panelOff();
   L.colX = x0; L.colW = colW; L.left = left; L.inner = inner;
   // Baked once: light coming through, and mist low down.
@@ -300,10 +309,20 @@ function resumeGo(go) {
   if (go.startsWith('zoom:')) { const k = go.slice(5), im = k.startsWith('works') ? resumePics.works[+k.slice(5)] : resumePics[k]; if (im) zoomPicture(im.src, '', ...[resume.tx, resume.ty2].map((v, i) => v * (i ? innerHeight / H : innerWidth / W))); return; }
   if (go === 'menu') { r.menu = !r.menu; return; }
   if (go === 'skip') { resumeRead(); return; }
-  if (go === 'works' || go === 'experiences') { closeResume(); openProject(projects[go === 'works' ? 0 : 2]); return; }
+  if (/^(works|experiences|work:|exp:)/.test(go)) { resumeLeave(go); return; }
   if (go.startsWith('sec:')) { r.menu = false; if (r.phase !== 'read') resumeRead(); r.jump = go.slice(4); return; }
   r.open[go] = !r.open[go]; live.textContent = `${go} ${r.open[go] ? 'opened' : 'closed'}.`;
 }
+let resumeLeaving = null;
+function resumeLeave(go) { // every way out of the résumé asks first, and says where it leads
+  const [kind, arg = ''] = go.split(':'), [name, label] = arg.split('|'), it = kind === 'work' ? WORKS_WORDS.items[+arg] : null;
+  const page = kind === 'exp' ? TOME_PAGES.findIndex(p => p.name === name && (!label || p.label === label)) : -1;
+  const where = it ? `${it.t}'s page in Projects` : kind === 'works' ? 'the Projects page' : page >= 0 ? `the ${label ? `${label} page of the ${name}` : name} chapter in my Experiences book` : 'my Experiences book';
+  resumeLeaving = () => { closeResume(); if (it) { openWorks(projects[0]); worksOpenItem(it); } else if (kind === 'works') openProject(projects[0]); else { openProject(projects[2]); if (tome && page > 0) tome.goTo = page; } };
+  $('#leave-text').textContent = `This leaves the résumé and opens ${where}. You can come back to the résumé from the board.`;
+  $('#leave').showModal();
+}
+$('#leave-go').addEventListener('click', () => { $('#leave').close(); const run = resumeLeaving; resumeLeaving = null; if (run && resume) run(); });
 function resumeHover(clientX, clientY) { resumePointer(clientX, clientY); const h = resumeSpot(clientX, clientY) || (resumeOnRuler(clientX, clientY) ? { go: 'ruler' } : null); resume.hover = h; crt.style.cursor = h && h.go === 'ruler' ? 'grab' : h ? 'pointer' : resume.phase === 'intro' ? 'none' : 'default'; }
 function resumeKey(e) {
   const r = resume, L = r.L || { hot: [] }; // keys can arrive before the first frame is laid out
@@ -376,7 +395,8 @@ function resumeAsciiDraw(time, alpha) {
   g.globalCompositeOperation = 'source-over'; g.globalAlpha = alpha; g.drawImage(A.finish, 0, 0, W, H); g.restore();
 }
 const resumeCover = (img, x = 0, y = 0, over = 1.08) => { if (!img.naturalWidth) return; const k = Math.max(W / img.naturalWidth, H / img.naturalHeight) * over, dw = img.naturalWidth * k, dh = img.naturalHeight * k; g.drawImage(img, (W - dw) / 2 + x, (H - dh) / 2 + y, dw, dh); };
-const resumeWrite = (it, y) => { g.font = it.font; if (it.grad) { const w = g.measureText(it.t).width, l = g.createLinearGradient(it.x, y, it.x + w, y + it.size); l.addColorStop(0, '#0fa58e'); l.addColorStop(.55, '#0d5f66'); l.addColorStop(1, '#128e8c'); g.fillStyle = l; } else g.fillStyle = it.color; g.fillText(it.t, it.x, y + it.size * .86); };
+const resumeWrite = (it, y, on = false) => { g.font = it.font; if (it.grad) { const w = g.measureText(it.t).width, l = g.createLinearGradient(it.x, y, it.x + w, y + it.size); l.addColorStop(0, '#0fa58e'); l.addColorStop(.55, '#0d5f66'); l.addColorStop(1, '#128e8c'); g.fillStyle = l; } else g.fillStyle = on ? RESUME_TEAL : it.color; g.fillText(it.t, it.x, y + it.size * .86); };
+const resumeLinkAt = (hot, it, y, doc) => { const on = !!resume.hover && resume.hover.it === it; hot.push({ x: it.x - 4, y, w: it.w + 8, h: it.size * 1.2, go: it.go, doc, it }); g.fillStyle = on ? RESUME_TEAL : 'rgba(15,143,127,.38)'; g.fillRect(it.x, y + it.size * 1.1, it.w, on ? 2 : 1); return on; }; // a line that opens somewhere else: underlined, teal under the pointer
 function resumeAir(time, alpha, lift) {
   const S = resumeSprites; g.globalCompositeOperation = 'lighter';
   for (const p of S.list) {
@@ -607,16 +627,16 @@ function drawResume(now) {
     L.blocks.forEach((b, i) => {
       const top = tops[i] - s;
       if (b.kind === 'open') hot.push({ x: L.colX, y: top, w: L.colW, h: b.h, go: b.key, doc: tops[i] });
-      if (b.kind === 'box') hot.push({ x: b.bx, y: top + b.by, w: b.bw, h: 50, go: b.go, doc: tops[i] });
+      if (b.kind === 'box') hot.push({ x: b.bx, y: top + b.by, w: b.bw, h: 50, go: b.go, doc: tops[i], b });
       if (top > H + 40 || top + b.hNow < -40 || !b.h) return;
       if (b.rule) { g.fillStyle = RESUME_RULE; g.fillRect(L.left, top, L.inner, 1); }
       for (const q of b.pics) { const im = q.img ? P[q.img] : P.works[q.works]; if (!im || !im.naturalWidth) continue; if (!q.contain) hot.push({ x: q.x, y: top + q.y, w: q.w, h: q.h, go: `zoom:${q.img || 'works' + q.works}`, doc: tops[i] }); /* photos open large; logos don't */ g.save(); if (q.r) { g.beginPath(); g.roundRect(q.x, top + q.y, q.w, q.h, q.r); g.clip(); } const k = (q.contain ? Math.min : Math.max)(q.w / im.naturalWidth, q.h / im.naturalHeight), dw = im.naturalWidth * k, dh = im.naturalHeight * k; g.drawImage(im, q.x + (q.w - dw) / 2, top + q.y + (q.h - dh) * (q.contain ? .5 : q.img === 'barong' ? .08 : .3), dw, dh); g.restore(); }
-      for (const it of b.items) { const yy = top + it.y; if (yy < H + 40 && yy > -60) resumeWrite(it, yy); }
+      for (const it of b.items) { const yy = top + it.y, on = it.go ? resumeLinkAt(hot, it, yy, tops[i]) : false; if (yy < H + 40 && yy > -60) resumeWrite(it, yy, on); }
       if (b.kind === 'open') {
         const label = r.open[b.key] ? 'Close' : 'View', on = r.hover && r.hover.go === b.key; g.font = `600 15.5px ${RESUME_SANS}`; g.fillStyle = RESUME_INK; const lw = g.measureText(label).width, lx = b.linkX - lw, ly = top + b.h * .5 + 5; g.fillText(label, lx, ly); g.fillRect(lx, ly + 6, on ? lw * .4 : lw, 1);
-        if (b.kNow > .002) { g.save(); g.beginPath(); g.rect(0, top + b.h - 2, W, b.bodyH * resumeEase(b.kNow) + 2); g.clip(); g.globalAlpha = resumeEase(b.kNow * 1.4); for (const it of b.body) { const yy = top + b.h + it.y; if (yy < H + 40) resumeWrite(it, yy); } g.restore(); }
+        if (b.kNow > .002) { g.save(); g.beginPath(); g.rect(0, top + b.h - 2, W, b.bodyH * resumeEase(b.kNow) + 2); g.clip(); g.globalAlpha = resumeEase(b.kNow * 1.4); for (const it of b.body) { const yy = top + b.h + it.y, on = it.go && b.kNow > .9 ? resumeLinkAt(hot, it, yy, tops[i]) : false; if (yy < H + 40) resumeWrite(it, yy, on); } g.restore(); }
       }
-      if (b.kind === 'box') { const on = r.hover && r.hover.go === b.go, by = top + b.by; g.fillStyle = on ? RESUME_TEAL : '#1a2422'; g.beginPath(); g.roundRect(b.bx, by, b.bw, 50, 25); g.fill(); g.fillStyle = '#f7fbf9'; g.font = `600 16px ${RESUME_SANS}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(b.button, b.bx + b.bw / 2, by + 26); g.textAlign = 'left'; g.textBaseline = 'alphabetic'; }
+      if (b.kind === 'box') { const on = r.hover && r.hover.b === b, by = top + b.by; g.fillStyle = on ? RESUME_TEAL : '#1a2422'; g.beginPath(); g.roundRect(b.bx, by, b.bw, 50, 25); g.fill(); g.fillStyle = '#f7fbf9'; g.font = `600 16px ${RESUME_SANS}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(b.button, b.bx + b.bw / 2, by + 26); g.textAlign = 'left'; g.textBaseline = 'alphabetic'; }
     });
     const focused = r.kb >= 0 && L.hot[r.kb]; if (focused) { g.strokeStyle = RESUME_TEAL; g.lineWidth = 2; g.strokeRect(focused.x - 3, focused.y - 3, focused.w + 6, focused.h + 6); }
     if (r.melt) { // moving between parts, the old view melts like wax: thin strips slide off at their own speeds, the way it was scrolling, as they fade

@@ -7,7 +7,7 @@ const SOUND_FX = ['tv_on', 'tv_off', 'channel', 'dial', 'dive_in', 'arrive', 'di
 // Music per place. Projects has three: the gate, the night sky, and the water (the sky's music, heard from under the surface).
 const SOUND_MUSIC_LEVEL = .55; // raised from .32 at Cyrill's request
 const SOUND_MUSIC = { room: 'board', board: 'board', gate: 'gate', sky: 'sky', water: 'sky', notebook: 'notebook', tome: 'tome', resume: 'resume' }; // the room hears the board's music through the TV's speaker
-// Background sound per place, up to two loops at once. The notebook's depends on its world: Home, Food, Up late, Places, My people.
+// Background sound per place, up to two loops at once. The notebook's depends on its world: Home, Food, Up late, Places, My cats.
 const SOUND_AMB = { gate: ['amb_gate'], sky: ['amb_gate'], water: ['amb_water'], tome: ['amb_tavern', 'amb_candle'], resume: ['amb_server'] };
 const SOUND_BOOK_AMB = [['amb_forest'], ['amb_food'], [], ['amb_sea'], ['amb_camp']];
 const SOUND_PAGES = { Summary: 'pg_windmill', Experience: 'pg_work', Education: 'pg_school', Certifications: 'pg_cert', Awards: 'pg_award', Skills: 'pg_skills' }; // Experiences: each chapter's own sound as its page turns
