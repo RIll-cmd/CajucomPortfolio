@@ -10,8 +10,8 @@ const WORKS_WORDS = {
   highlight: { agents: 0, see: 1, hardware: 2 }, // words that sit on a coloured chip, by which colour
   portfolioLabel: 'PORTFOLIO',
   portfolioTitle: 'Works',
-  portfolio: 'Four solo projects and my thesis: AI agents, automation, computer vision, and hardware for the road.',
-  filters: ['All', 'Solo', 'Thesis'],
+  portfolio: 'Four solo projects, my thesis and my internship capstone: AI agents, automation, computer vision, and hardware for the road.',
+  filters: ['All', 'Solo', 'Thesis', 'Capstone'],
   ask: 'Have a role or an internship in mind?',
   talk: "Let's talk",
   email: 'cyrillgerardc@gmail.com',
@@ -51,6 +51,13 @@ const WORKS_WORDS = {
       hard: 'Alerts that wake you without wearing off: a non-blocking state machine on the Arduino escalates from vibration to buzzer to scent, and a 90-second lockout keeps the scent from spraying so often your nose stops noticing it.',
       demo: { video: 'wake-avp', poster: 'wake-poster', cap: 'Watch our AVP, 3 min', about: 'Wake&Brake, our thesis AVP.' },
       shots: [['wake-exploded5_0372', 'The whole system, wired together'], [['1.0', '0.7', '0.45', '0.25', '0.1', '0.0'].map(n => `wake-eye-${n}`), 'What it watches for: eyes drifting shut'], ['wake-app-states', 'The app, from safe to severe'], ['wake-pi_hero', 'The Raspberry Pi 4 running detection'], ['wake-squad_0096', 'The alert hardware: vibration, buzzer and scent'], ['wake-demo_console_0825', 'The buzzer at the console'], ['wake-demo_seat_0695', 'Vibration in the seat'], ['wake-diffuser_mist', 'The scent diffuser'], ['wake-lab2_0210', 'The driving simulator setup'], ['wake-drive_wide', 'The night drive it was built for']] },
+    { t: 'Image Relevance Engine', tags: ['Capstone'], topics: ['AI', 'Computer Vision', 'FastAPI'], links: [['View on GitHub', 'https://github.com/RIll-cmd/flyrank-capstone-image-relevance-rebuild']],
+      copy: 'My capstone for the FlyRank AI Backend AI Engineering internship: an API that picks the right photo for an article, and refuses the wrong ones. A local vision model describes each image, embeddings rank them, and a guard says no when nothing fits.',
+      features: ['A local vision model (qwen3-vl, through Ollama) describes each image: subject, category, attributes and a confidence', 'Articles and images are compared as embeddings (nomic-embed-text) and ranked by similarity', 'A guard checks the subject, the confidence and the similarity, and explains every rejection', 'Answers "no confident match" instead of guessing when no image fits', 'Reviewers approve or reject suggestions through the API, and an unsafe one can\'t be approved', 'Background batch jobs with retries, a daily model-call budget, and an alert when an image fails three times', 'A separate database per tenant, versioned SQL migrations, and no paid cloud services'],
+      results: ['Picked the exact labeled image for 7 of 10 articles; 9 of 10 picks were judged relevant on human review. They\'re two different measures, and neither is 10 of 10', 'Refused a wolf forced onto a fox article, and returned no match for a story about a submarine', '40 licensed images, and 21 passing tests'],
+      hard: 'Telling the right picture from a merely similar one: a wolf and a fox sit close together as embeddings, so ranking alone isn\'t enough. The guard also checks the subject the vision model saw, and refuses when the two disagree.',
+      demo: { video: 'capstone-demo', poster: 'capstone-poster', cap: 'Watch the demo, 35 s', about: 'The Image Relevance Engine in 35 seconds, on its own API.' },
+      shots: [['capstone-match', 'Ranked photos for a brown bear article, each with a reason'], ['capstone-mismatch', 'A wolf forced onto a fox article, refused'], ['capstone-refuse', 'No right photo for a submarine story, so no guess'], ['capstone-eval', 'Measured on 10 labeled articles'], ['capstone-docs', 'The API, in its own docs'], ['capstone-tests', 'The test suite: 21 passed']] },
   ],
 };
 const WORKS_NAVY = '#14284b', WORKS_DUSK = '#27527a', WORKS_TEAL = '#3fc1b0', WORKS_CORAL = '#ff8a5c', WORKS_CREAM = '#f4ecd8', WORKS_BODY = 'Poppins, "Segoe UI", sans-serif', WORKS_LABEL = 'Righteous, "Segoe UI", sans-serif', WORKS_SCRIPT = '"Kaushan Script", Righteous, cursive';

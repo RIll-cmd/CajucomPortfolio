@@ -4,7 +4,7 @@ const RESUME_WORDS = {
   name: 'Cyrill', role: 'ASPIRING SOFTWARE / AI ENGINEER',
   full: 'Cyrill Gerard P. Cajucom',
   intro: ['Aspiring software and AI engineer, based in Manila.', '4th-year BS Computer Science student at FEU Tech, specializing in software engineering.'],
-  experience: [{ h: 'Backend AI Engineering Intern', logo: 'flyrank', d: ['FlyRank AI, Sep 2026 to present. Remote.', 'AI capstones, automation and data-heavy apps, agent skills with documentation, and token and cost analysis.'] }],
+  experience: [{ h: 'Backend AI Engineering Intern', logo: 'flyrank', d: ['FlyRank AI, Jul 2026 to Nov 2026. Remote.', 'Nine backend builds (FastAPI, PostgreSQL, Supabase auth, Inngest jobs, an LLM API) and an AI image-matching capstone. Completed with a certificate.'] }],
   education: [{ h: 'BS Computer Science, Software Engineering', logo: 'feutech', d: ["FEU Institute of Technology, 2023 to 2027. 4th year, Dean's Lister."] }, { h: 'Senior High, STEM', logo: 'spusm', d: ['St. Paul University at San Miguel, 2021 to 2023. With High Honors.'] }],
   talk: "Let's talk", boxes: [['Have a role or an internship in mind?', 'Say hello', 'hello'], ['Everything I have made', 'See my works', 'works'], ['The full record, page by page', 'Open Experiences', 'experiences']],
   more: { Experience: ['Open Experience', 'exp:Experience'], Education: ['Open Education', 'exp:Education'], Works: ['Visit Projects', 'works'], Certifications: ['Open Certifications', 'exp:Certifications'], Awards: ['Open Awards', 'exp:Awards'], Skills: ['Open Skills', 'exp:Skills'] }, // a button at the end of these parts, to the page with more
