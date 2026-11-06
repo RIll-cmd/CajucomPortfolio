@@ -5,7 +5,7 @@ const RESUME_WORDS = {
   full: 'Cyrill Gerard P. Cajucom',
   intro: ['Aspiring software and AI engineer, based in Manila.', '4th-year BS Computer Science student at FEU Tech, specializing in software engineering.'],
   experience: [{ h: 'Backend AI Engineering Intern', logo: 'flyrank', d: ['FlyRank AI, Jul 2026 to Nov 2026. Remote.', 'Nine backend builds (FastAPI, PostgreSQL, Supabase auth, Inngest jobs, an LLM API) and an AI image-matching capstone. Completed with a certificate.'] }],
-  education: [{ h: 'BS Computer Science, Software Engineering', logo: 'feutech', d: ["FEU Institute of Technology, 2023 to 2027. 4th year, Dean's Lister."] }, { h: 'Senior High, STEM', logo: 'spusm', d: ['St. Paul University at San Miguel, 2021 to 2023. With High Honors.'] }],
+  education: [{ h: 'BS Computer Science, Software Engineering', logo: 'feutech', d: ["FEU Institute of Technology, 2023 to 2027. 4th year, Dean's Lister."] }, { h: 'Senior High, STEM (Grade 12)', logo: 'spusm', d: ['St. Paul University at San Miguel, 2022 to 2023. Graduated.'] }, { h: 'Senior High, STEM (Grade 11)', logo: 'smnhs', d: ['San Miguel National High School, 2021 to 2022. With High Honors.'] }],
   talk: "Let's talk", boxes: [['Have a role or an internship in mind?', 'Say hello', 'hello'], ['Everything I have made', 'See my works', 'works'], ['The full record, page by page', 'Open Experiences', 'experiences']],
   more: { Experience: ['Open Experience', 'exp:Experience'], Education: ['Open Education', 'exp:Education'], Works: ['Visit Projects', 'works'], Certifications: ['Open Certifications', 'exp:Certifications'], Awards: ['Open Awards', 'exp:Awards'], Skills: ['Open Skills', 'exp:Skills'] }, // a button at the end of these parts, to the page with more
   hints: { Works: "Click a project's name to open its page.", Certifications: "Open a group, then click a certificate's name to see it in Experiences." },
@@ -28,7 +28,7 @@ const resumeEase = t => { t = resumeClamp(t); return t * t * (3 - 2 * t); };
 function resumeLoad() {
   if (resumePics) return resumePics;
   const pic = src => { const i = new Image(); i.onload = () => { dirty = true; }; i.src = src; return i; }, frames = n => Array.from({ length: RESUME_HANDS[n].tips.length }, (_, k) => pic(`photos/hands/${n}-${String(k).padStart(2, '0')}.webp`));
-  return resumePics = { world: pic('photos/hands/world.webp'), veil: pic('photos/hands/veil.webp'), glass: pic('photos/hands/glass.webp'), tie: pic('photos/me-tie.jpg'), barong: pic('photos/me-barong.jpg'), flyrank: pic('photos/flyrank.webp'), feutech: pic('photos/feutech.webp'), spusm: pic('photos/spusm.webp'), robot: frames('robot'), human: frames('human'), point: frames('point'), works: WORKS_WORDS.items.map(it => pic(`photos/works/${it.shots[0].names[0]}.jpg`)) };
+  return resumePics = { world: pic('photos/hands/world.webp'), veil: pic('photos/hands/veil.webp'), glass: pic('photos/hands/glass.webp'), tie: pic('photos/me-tie.jpg'), barong: pic('photos/me-barong.jpg'), flyrank: pic('photos/flyrank.webp'), feutech: pic('photos/feutech.webp'), spusm: pic('photos/spusm.webp'), smnhs: pic('photos/smnhs.webp'), robot: frames('robot'), human: frames('human'), point: frames('point'), works: WORKS_WORDS.items.map(it => pic(`photos/works/${it.shots[0].names[0]}.jpg`)) };
 }
 function resumeSpritesMake() { // data and blossom petals drifting through the air: soft lights, near and far, petals, and bits
   if (resumeSprites) return resumeSprites;
@@ -159,7 +159,7 @@ function resumeLayout() {
   more('Certifications'); panelOff();
   const twoCol = (list, name) => { panelOn(); list.forEach((e, n) => { const b = add({ kind: 'row', rule: n > 0 }); let hy = row * .55, ry = hy; hy = para(b.items, e.h, left, hy, narrow ? inner : inner * .42, serif(row, 500), row, RESUME_INK, 1.3); if (narrow) ry = hy + row * .1; for (const r of e.right) ry = para(b.items, r, narrow ? left : mid, ry, narrow ? inner : midW, e.mono ? mono(note * .86) : sans(note), e.mono ? note * .86 : note, e.mono ? RESUME_TEAL : RESUME_SOFT, 1.55); b.h = Math.max(hy, ry) + row * .55; }); if (name) more(name); panelOff(); };
   heading('Awards'); twoCol(chapter('Awards').entries.map(e => ({ h: e.h, right: [e.m, e.d].filter(Boolean) })), 'Awards');
-  heading('Skills'); twoCol(chapter('Skills').entries.map(e => ({ h: e.h, right: [e.pills.join('  ·  ')], mono: true })), 'Skills');
+  heading('Skills'); twoCol(chapter('Skills').parts.flatMap(p => p.entries).map(e => ({ h: e.h, right: [e.pills.join('  ·  ')], mono: true })), 'Skills');
   heading(RESUME_WORDS.talk); panelOn();
   RESUME_WORDS.boxes.forEach((b, n) => box(b, n > 0));
   panelOff();
@@ -189,7 +189,7 @@ function openResume(c, viaKeyboard) {
   $('#btn-about').hidden = $('#btn-talk').hidden = true; // the dock has Say hello, and Tab reaches it
   if (!COARSE) crt.style.cursor = resume.phase === 'intro' ? 'none' : 'default';
   Promise.all(['500 40px "Playfair Display"', 'italic 500 40px "Playfair Display"', '400 30px "Playfair Display"', '500 16px "Instrument Sans"', '600 16px "Instrument Sans"', '500 14px "JetBrains Mono"'].map(f => document.fonts.load(f))).catch(() => {}).finally(() => { if (resume) { resume.L = null; resumeSprites = null; resumeSpritesMake(); } }); // letter widths change once the font arrives
-  const facts = TOME_WORDS.chapters.flatMap(ch => (ch.parts || [ch]).flatMap(p => [p.label, p.lead, ...(p.pills || []), ...(p.badges || []).map(b => b[0]), ...(p.entries || []).flatMap(e => [e.h, e.m, e.d, ...(e.pills || [])])]).filter(Boolean)), about = `Resume: ${RESUME_WORDS.full}. ${RESUME_WORDS.intro.join(' ')} ${facts.join('. ')}. Works: ${WORKS_WORDS.items.map(i => i.t).join(', ')}.`;
+  const facts = TOME_WORDS.chapters.flatMap(ch => (ch.parts || [ch]).flatMap(p => [p.label, p.lead, ...(p.pills || []), ...(p.badges || []).map(b => b[0]), ...(p.entries || []).flatMap(e => [e.h, e.m, ...[].concat(e.d), ...(e.pills || [])])]).filter(Boolean)), about = `Resume: ${RESUME_WORDS.full}. ${RESUME_WORDS.intro.join(' ')} ${facts.join('. ')}. Works: ${WORKS_WORDS.items.map(i => i.t).join(', ')}.`;
   live.textContent = resume.phase === 'read' ? about : `Hold the mouse button or a finger down and draw a circle to begin, or press Enter. ${about}`;
   if (document.activeElement) document.activeElement.blur(); // Enter moves this page along, so it mustn't land on Back. Tab still reaches it
 }

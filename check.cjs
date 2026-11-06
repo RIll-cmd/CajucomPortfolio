@@ -38,7 +38,7 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     return;
   }
 
-  const PHONE = { deviceScaleFactor: 3, hasTouch: true, isMobile: true }, TOMES = 8;
+  const PHONE = { deviceScaleFactor: 3, hasTouch: true, isMobile: true }, TOMES = 9;
   for (const [name, viewport, device] of [['desktop', { width: 1440, height: 860 }], ['phone', { width: 390, height: 844 }, PHONE], ['small', { width: 360, height: 640 }, PHONE], ['landscape', { width: 844, height: 390 }, PHONE]].filter(([n]) => !process.argv[2] || n === process.argv[2])) { // `node check.cjs landscape` runs one size
     const context = await browser.newContext({ viewport, ...device });
     const page = await context.newPage();
@@ -74,7 +74,7 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     await page.waitForTimeout(700);
     await page.screenshot({ path: `${name}-2-bars.png` });
     await click(await page.evaluate(() => DIALS.volume));
-    assert.strictEqual(await page.evaluate(() => vol.value), '20', 'volume dial');
+    assert.strictEqual(await page.evaluate(() => vol.value), '80', 'volume dial');
     await click(await page.evaluate(() => DIALS.power));
     await page.waitForTimeout(900);
     assert.strictEqual(await page.evaluate(() => tvOn), false, 'power button');

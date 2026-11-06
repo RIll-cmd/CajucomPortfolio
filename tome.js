@@ -5,7 +5,17 @@ const TOME_WORDS = {
   cover: 'Experiences',
   chapters: [
     { name: 'Summary', lead: "Completed FlyRank AI's Backend AI Engineering internship: nine backend builds and an AI image-matching capstone. 4th-year BS Computer Science student at FEU Institute of Technology, specializing in software engineering, Dean's Lister, looking for a 500-hour internship. 20 certifications, from SAP and PMI to seven Claude Academy courses.", pills: ['1 internship', '20 certifications', "Dean's Lister", 'Open to internships'] },
-    { name: 'Experience', entries: [{ h: 'Backend AI Engineering Intern', m: 'FlyRank AI, Jul 2026 to Nov 2026. Manila, remote', d: 'Nine backend builds: FastAPI services on SQLite and PostgreSQL, Supabase auth, Inngest background jobs, a PDF report API and an LLM API. Capstone: an AI image-matching engine with local vision models. Completed with a certificate.' }] },
+    { name: 'Experience', entries: [{ h: 'Backend AI Engineering Intern', m: 'FlyRank AI, Jul 2026 to Nov 2026. Manila, remote', d: [
+      'Backend AI Engineering track: nine builds plus a capstone, each a public GitHub repo built in staged, tested commits.',
+      'REST APIs in Python and FastAPI: a CRUD task API with data validation and Swagger docs, moved from SQLite to PostgreSQL in Docker Compose with a persistent volume.',
+      'Supabase auth: signup, login, bearer-token protected routes and logout, with secrets kept out of the repo.',
+      'A polite web scraper with rate limiting and caching, and Inngest background jobs with retries and scheduled runs.',
+      'A PDF report API that reuses finished reports and blocks duplicates under concurrent requests.',
+      'An LLM behind an API: a versioned prompt, validated structured output with one repair try, usage logs, a kill switch and bounded retries.',
+      'An AI decision flow: a React Flow editor whose YES and NO branches run as Inngest steps on the LLM’s answer.',
+      'Capstone: an image-matching engine with local vision models, semantic ranking and a guard that refuses mismatched or uncertain images. 9 of 10 picks judged relevant on human review.',
+      'General AI Fluency track: audited my weekly workflow for what to hand to AI, iterated prompts, and planned and shipped a portfolio site with AI, disclosing its use.',
+      'Completed with a certificate.'] }] },
     { name: 'Education', entries: [
       { h: 'BS Computer Science, Software Engineering', m: 'FEU Institute of Technology, 2023 to 2027', d: "Dean's Lister, 3rd Term, S.Y. 2024-2025" },
       { h: 'Senior High School, STEM', m: 'St. Paul University at San Miguel, 2022 to 2023' },
@@ -36,17 +46,18 @@ const TOME_WORDS = {
       { h: "Dean's Bronze Certificate", m: 'FEU Institute of Technology, Jul 2025', d: '3rd Term, S.Y. 2024-2025', img: 'feu-deans-bronze', verify: ['Verify', 'https://paraverse.feutech.edu.ph/credentials/download/EDITH-2509-1014-3932-55DE'] },
       { h: 'Academic Excellence Award', m: 'San Miguel National High School, Jun 2022', d: 'With High Honors, Grade 11 STEM', img: 'smnhs-academic-excellence', big: true },
     ] },
-    { name: 'Skills', entries: [
+    { name: 'Skills', parts: [{ label: 'Languages and AI', entries: [ // two pages, so the fullest page doesn't shrink every page's words
       { h: 'Languages', pills: ['TypeScript', 'JavaScript', 'Python', 'C++', 'SQL', 'C#', 'Java', 'Kotlin', 'MATLAB'] },
-      { h: 'AI', pills: ['AI Agents', 'Orchestration', 'n8n', 'Workflow Automation', 'MCP', 'RAG', 'LLMs', 'Gemini API', 'Prompt Engineering', 'Deep Learning', 'TensorFlow'] },
+      { h: 'AI', pills: ['AI Agents', 'Orchestration', 'n8n', 'Workflow Automation', 'MCP', 'RAG', 'LLMs', 'Gemini API', 'OpenAI API', 'Prompt Engineering', 'Deep Learning', 'TensorFlow'] },
       { h: 'Vision and hardware', pills: ['Computer Vision', 'OpenCV', 'YOLO', 'MediaPipe', 'dlib', 'Raspberry Pi', 'Arduino'] },
-      { h: 'Web and backend', pills: ['React', 'Next.js', 'Node.js', 'FastAPI', 'Flask', 'PostgreSQL', 'Prisma', 'SQLite', 'Tailwind CSS', 'REST APIs', 'Full-stack'] },
+    ] }, { label: 'Web and tools', entries: [
+      { h: 'Web and backend', pills: ['React', 'Next.js', 'Node.js', 'FastAPI', 'Flask', 'PostgreSQL', 'Prisma', 'SQLite', 'Tailwind CSS', 'REST APIs', 'Docker', 'Supabase', 'Inngest', 'Background Jobs', 'Web Scraping', 'API Security', 'Data Validation', 'Full-stack'] },
       { h: 'Tools and practice', pills: ['Git', 'Vitest', 'Playwright', 'CI/CD', 'System Architecture', 'Android', 'Agile', 'Networking'] },
-    ] },
+    ] }] },
   ],
 };
 // Which projects show each skill (from what each project's page says it uses); a skill with none isn't a link.
-const TOME_SKILL_PROJECTS = { TypeScript: ['Ascend Hub', 'Ascend Core'], JavaScript: ['Ascend Hub', 'Ascend Core', 'Kinsenas'], Python: ['Ascend Core', 'Ascend Vision', 'Wake&Brake', 'Image Relevance Engine'], 'C++': ['Wake&Brake'], SQL: ['Ascend Core', 'Ascend Vision', 'Image Relevance Engine'], 'AI Agents': ['Kinsenas', 'Ascend Hub', 'Ascend Vision'], Orchestration: ['Ascend Hub'], n8n: ['Kinsenas'], 'Workflow Automation': ['Kinsenas'], LLMs: ['Kinsenas', 'Ascend Hub', 'Ascend Core', 'Ascend Vision'], 'Gemini API': ['Kinsenas', 'Ascend Core', 'Ascend Vision'], 'Prompt Engineering': ['Kinsenas', 'Ascend Vision'], 'Computer Vision': ['Ascend Vision', 'Wake&Brake', 'Image Relevance Engine'], OpenCV: ['Wake&Brake'], YOLO: ['Ascend Vision'], MediaPipe: ['Ascend Vision'], dlib: ['Wake&Brake'], 'Raspberry Pi': ['Wake&Brake'], Arduino: ['Wake&Brake'], React: ['Ascend Hub', 'Ascend Core', 'Ascend Vision'], 'Next.js': ['Ascend Core'], 'Node.js': ['Ascend Hub'], FastAPI: ['Ascend Core', 'Image Relevance Engine'], Flask: ['Wake&Brake'], PostgreSQL: ['Ascend Core'], Prisma: ['Ascend Core'], SQLite: ['Ascend Vision', 'Image Relevance Engine'], 'Tailwind CSS': ['Ascend Core'], 'REST APIs': ['Ascend Core', 'Wake&Brake', 'Image Relevance Engine'], 'Full-stack': ['Ascend Core'], Git: ['Ascend Hub'], Vitest: ['Ascend Core'], Playwright: ['Ascend Core'] };
+const TOME_SKILL_PROJECTS = { 'Background Jobs': ['Image Relevance Engine'], 'Data Validation': ['Image Relevance Engine'], TypeScript: ['Ascend Hub', 'Ascend Core'], JavaScript: ['Ascend Hub', 'Ascend Core', 'Kinsenas'], Python: ['Ascend Core', 'Ascend Vision', 'Wake&Brake', 'Image Relevance Engine'], 'C++': ['Wake&Brake'], SQL: ['Ascend Core', 'Ascend Vision', 'Image Relevance Engine'], 'AI Agents': ['Kinsenas', 'Ascend Hub', 'Ascend Vision'], Orchestration: ['Ascend Hub'], n8n: ['Kinsenas'], 'Workflow Automation': ['Kinsenas'], LLMs: ['Kinsenas', 'Ascend Hub', 'Ascend Core', 'Ascend Vision'], 'Gemini API': ['Kinsenas', 'Ascend Core', 'Ascend Vision'], 'Prompt Engineering': ['Kinsenas', 'Ascend Vision'], 'Computer Vision': ['Ascend Vision', 'Wake&Brake', 'Image Relevance Engine'], OpenCV: ['Wake&Brake'], YOLO: ['Ascend Vision'], MediaPipe: ['Ascend Vision'], dlib: ['Wake&Brake'], 'Raspberry Pi': ['Wake&Brake'], Arduino: ['Wake&Brake'], React: ['Ascend Hub', 'Ascend Core', 'Ascend Vision'], 'Next.js': ['Ascend Core'], 'Node.js': ['Ascend Hub'], FastAPI: ['Ascend Core', 'Image Relevance Engine'], Flask: ['Wake&Brake'], PostgreSQL: ['Ascend Core'], Prisma: ['Ascend Core'], SQLite: ['Ascend Vision', 'Image Relevance Engine'], 'Tailwind CSS': ['Ascend Core'], 'REST APIs': ['Ascend Core', 'Wake&Brake', 'Image Relevance Engine'], 'Full-stack': ['Ascend Core'], Git: ['Ascend Hub'], Vitest: ['Ascend Core'], Playwright: ['Ascend Core'] };
 const TOME_CERTS = {}; // the certificate pictures, loaded when the book first opens
 function tomeCertsLoad() {
   for (const c of TOME_WORDS.chapters) for (const part of c.parts || [c]) for (const name of [...(part.entries || []).map(e => e.img), ...(part.badges || []).map(b => b[1])]) {
@@ -427,7 +438,7 @@ function closeTome() {
   $('#btn-about').hidden = $('#btn-talk').hidden = false;
   live.textContent = ''; crt.style.cursor = 'grab';
 }
-function tomeSay(i) { const c = TOME_PAGES[i]; live.textContent = [`Chapter ${c.ci + 1}, ${c.name}${c.label ? `, ${c.label}` : ''}.`, c.lead, ...(c.pills || []), ...(c.badges || []).map(b => b[0]), ...(c.entries || []).map(e => [e.h, e.m, e.d, ...(e.pills || [])].filter(Boolean).join(', '))].filter(Boolean).join(' '); }
+function tomeSay(i) { const c = TOME_PAGES[i]; live.textContent = [`Chapter ${c.ci + 1}, ${c.name}${c.label ? `, ${c.label}` : ''}.`, c.lead, ...(c.pills || []), ...(c.badges || []).map(b => b[0]), ...(c.entries || []).map(e => [e.h, e.m, ...[].concat(e.d), ...(e.pills || [])].filter(Boolean).join(', '))].filter(Boolean).join(' '); }
 function tomeGo(i) {
   if (!tome || tome.phase !== 'read') { if (tome && tome.phase === 'open') tome.openAt = -1e9; return; }
   if (i < 0 || i >= TOME_PAGES.length) return;
@@ -471,8 +482,12 @@ function tomeCardSpot(clientX, clientY) { // a button, picture or skill on the c
   const [sx, sy] = toScene(clientX, clientY), cx = sx - b.x, cy = sy - b.y;
   return (l.hot[tome.shown] || []).find(h => cx > h.x && cx < h.x + h.w && cy > h.y && cy < h.y + h.h) || null;
 }
-const tomeClick = (x, y) => { if (tome.phase === 'open') { tome.openAt = -1e9; return; } const c = tomeCardSpot(x, y); if (c) { c.act(x, y); return; } const h = tomeSpotAt(x, y); if (h) tomeGo(h.go); };
-function tomeHover(x, y) { const c = tomeCardSpot(x, y), h = c ? null : tomeSpotAt(x, y); tome.hover = h; crt.style.cursor = c || h ? 'pointer' : 'grab'; }
+const tomeClick = (x, y) => { if (tome.phase === 'open') { tome.openAt = -1e9; return; } const c = tomeCardSpot(x, y); if (c) { c.act(x, y); return; } if (tomeOnCard(x, y)) { tomeZoomCard(x, y); return; } const h = tomeSpotAt(x, y); if (h) tomeGo(h.go); };
+function tomeOnCard(clientX, clientY) { const b = tome.cardBox; if (!b || !tome.layout || tome.phase !== 'read' || tome.turn) return false; const [x, y] = toScene(clientX, clientY); return x > b.x && x < b.x + b.w && y > b.y && y < b.y + b.h; }
+function tomeZoomCard(x, y) { // the card's small words, opened large in the picture viewer (Cyrill's request)
+  const l = tome.layout, k = Math.min(4, Math.max(2, 1600 / l.cardW)); zoomPicture(tomeCard(tome.shown, l, k).toDataURL(), TOME_PAGES[tome.shown].name, x, y);
+}
+function tomeHover(x, y) { const c = tomeCardSpot(x, y), h = c ? null : tomeSpotAt(x, y); tome.hover = h; crt.style.cursor = c || h ? 'pointer' : tomeOnCard(x, y) ? 'zoom-in' : 'grab'; }
 function tomeKey(e) {
   const go = { ArrowRight: tome.at + 1, ArrowDown: tome.at + 1, PageDown: tome.at + 1, ArrowLeft: tome.at - 1, ArrowUp: tome.at - 1, PageUp: tome.at - 1, Home: 0, End: TOME_PAGES.length - 1 }[e.key];
   if (go !== undefined) { e.preventDefault(); tomeGo(go); }
@@ -533,7 +548,7 @@ function tomeInk(x, i, w, l) { // draws chapter i's words. Returns the height th
   }
   if (c.entries) {
     const cols = Math.min(l.cols === 1 ? (c.dense ? 2 : 1) : c.entries.length === 4 ? 2 : l.cols, c.entries.length), gap = s * 1.6, colW = (w - pad * 2 - gap * (cols - 1)) / cols; let rowTop = y, bottom = y, row = [], rowText = 0;
-    const flush = () => { for (const q of row) bottom = Math.max(bottom, tomeButton(x, `${q.e.verify[0]}  ↗`, q.cx, rowText + s * .35, s * .72, hot, () => tomeOpen(q.e.verify[1]))); row = []; rowText = 0; }; // Verify buttons line up across a row
+    const flush = () => { for (const q of row) bottom = Math.max(bottom, tomeButton(x, `${q.e.verify[0]}  ↗`, q.cx, q.ey + s * .35, s * .72, hot, () => tomeOpen(q.e.verify[1]))); row = []; rowText = 0; }; // each Verify button sits right under its own certificate text, same gap for all
     c.entries.forEach((e, n) => {
       const col = n % cols; if (n && !col) { flush(); rowTop = bottom + s * .75; } let ey = rowTop;
       // a certificate's picture sits to the left of its words
@@ -542,8 +557,8 @@ function tomeInk(x, i, w, l) { // draws chapter i's words. Returns the height th
       x.textAlign = 'left'; x.textBaseline = 'middle';
       x.fillStyle = TOME_INK; x.font = `700 ${s * 1.1}px ${TOME_SERIF}`; for (const line of tomeWrap(x, e.h, tx)) { x.fillText(line, cx, ey + s * .68); ey += s * 1.38; }
       if (e.m) { x.fillStyle = '#7a5a2e'; x.font = `600 ${s * .86}px ${TOME_SANS}`; for (const line of tomeWrap(x, e.m, tx)) { x.fillText(line, cx, ey + s * .6); ey += s * 1.26; } }
-      if (e.d) { x.fillStyle = TOME_INK; x.font = `600 ${s * .86}px ${TOME_SANS}`; for (const line of tomeWrap(x, e.d, tx)) { x.fillText(line, cx, ey + s * .6); ey += s * 1.26; } }
-      rowText = Math.max(rowText, ey); if (e.verify) row.push({ e, cx });
+      if (e.d) { x.fillStyle = TOME_INK; x.font = `600 ${s * .86}px ${TOME_SANS}`; for (const para of [].concat(e.d)) for (const line of tomeWrap(x, Array.isArray(e.d) ? `• ${para}` : para, tx)) { x.fillText(line, cx, ey + s * .6); ey += s * 1.26; } } // a list of lines shows as bullets
+      rowText = Math.max(rowText, ey); if (e.verify) row.push({ e, cx, ey });
       const skill = c.name === 'Skills' ? p => TOME_SKILL_PROJECTS[p] && (() => { tome.skill = tome.skill === p ? null : p; if (tome.layout) tome.layout.cards[i] = null; dirty = true; }) : null;
       if (e.pills) ey = tomePills(x, e.pills, cx, ey + s * .3, tx, s * .8, 'left', { hot, link: skill });
       bottom = Math.max(bottom, ey, e.img ? rowTop + s * .2 + th : 0);
@@ -558,15 +573,15 @@ function tomeInk(x, i, w, l) { // draws chapter i's words. Returns the height th
   if (c.name === 'Skills' && x !== l.measure && !(tome && tome.skill)) { x.fillStyle = '#7a5a2e'; x.font = `italic 600 ${s * .78}px ${TOME_SANS}`; x.textAlign = 'center'; x.fillText('Click a skill with ↗ to see the projects that use it.', w / 2, y - s * 1.9); }
   return y + pad * .8;
 }
-function tomeCard(i, l) {
-  const cached = l.cards[i]; if (cached) return cached;
-  const h = tomeInk(l.measure, i, l.cardW, l), c = document.createElement('canvas'); c.width = Math.ceil(l.cardW * pr); c.height = Math.ceil(h * pr);
-  const x = c.getContext('2d'); x.scale(pr, pr);
+function tomeCard(i, l, k = pr) { // k: pixels per unit; the pop-up asks for a sharper copy, which isn't cached
+  const cached = k === pr && l.cards[i]; if (cached) return cached;
+  const h = tomeInk(l.measure, i, l.cardW, l), c = document.createElement('canvas'); c.width = Math.ceil(l.cardW * k); c.height = Math.ceil(h * k);
+  const x = c.getContext('2d'); x.scale(k, k);
   const paper = x.createLinearGradient(0, 0, 0, h); paper.addColorStop(0, '#f7ecd0'); paper.addColorStop(1, '#ecdcb6'); x.fillStyle = paper; x.beginPath(); x.roundRect(1, 1, l.cardW - 2, h - 2, 10); x.fill();
   x.strokeStyle = '#7a5a2e'; x.lineWidth = 2; x.stroke(); x.strokeStyle = 'rgba(122,90,46,.45)'; x.lineWidth = 1; x.beginPath(); x.roundRect(6, 6, l.cardW - 12, h - 12, 7); x.stroke();
   x.fillStyle = TOME_GOLD; for (const [a, b] of [[12, 12], [l.cardW - 12, 12], [12, h - 12], [l.cardW - 12, h - 12]]) { x.beginPath(); x.moveTo(a, b - 5); x.lineTo(a + 5, b); x.lineTo(a, b + 5); x.lineTo(a - 5, b); x.fill(); }
   tomeInk(x, i, l.cardW, l);
-  return l.cards[i] = c;
+  return k === pr ? (l.cards[i] = c) : c;
 }
 function tomeLayout() {
   if (tome.layout && tome.layout.W === W && tome.layout.H === H && tome.layout.pr === pr) return tome.layout;

@@ -11,8 +11,8 @@
     const s = el('section'); s.append(el('h2', c.name));
     if (c.lead) s.append(el('p', c.lead));
     for (const part of c.parts || [c]) {
-      if (part.h && c.parts) s.append(el('h3', part.h));
-      for (const e of part.entries || []) s.append(el(c.name === 'Skills' ? 'h3' : 'h4', e.h), ...(e.pills ? [list(e.pills)] : [e.m, e.d].filter(Boolean).map(t => el('p', t))));
+      if ((part.label || part.h) && c.parts) s.append(el('h3', part.label || part.h));
+      for (const e of part.entries || []) s.append(el(c.name === 'Skills' ? 'h3' : 'h4', e.h), ...(e.pills ? [list(e.pills)] : [e.m, e.d].filter(Boolean).map(t => Array.isArray(t) ? list(t) : el('p', t))));
       if (part.badges) s.append(list(part.badges.map(b => b[0])));
     }
     main.append(s);

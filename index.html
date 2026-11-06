@@ -4,15 +4,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Cyrill Cajucom Portfolio</title>
 <meta name="description" content="Cyrill Gerard P. Cajucom, an aspiring software and AI engineer and 4th-year BS Computer Science student at FEU Tech. AI agents, computer vision and hardware projects.">
-<!-- Link previews. Some sites (LinkedIn, Facebook) only read og:image as a full https:// address: make it absolute once the site has its domain. -->
+<!-- Link previews. Some sites (LinkedIn, Facebook) only read og:image as a full https:// address, so it names the Vercel domain; change it if the domain changes. -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="Cyrill Cajucom, aspiring software and AI engineer">
 <meta property="og:description" content="Projects, experience, résumé and contact, inside a retro TV.">
-<meta property="og:image" content="photos/og.jpg">
+<meta property="og:image" content="https://cajucomportfolio.vercel.app/photos/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='16' rx='14' ry='11' fill='%23ffd23f' stroke='%23000' stroke-width='2'/%3E%3Ctext x='16' y='21' font-size='14' text-anchor='middle' font-family='Arial' font-weight='700'%3E%3F%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M10 3l6 6 6-6' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'/%3E%3Crect x='1.5' y='9' width='29' height='20' rx='4' fill='%23ffd23f' stroke='%23000' stroke-width='2'/%3E%3Crect x='4.5' y='12' width='18' height='14' rx='3.5' fill='%233fd0c9' stroke='%23000' stroke-width='1.5'/%3E%3Cpath d='M7 15q2-1.5 5-1.5' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' opacity='.8'/%3E%3Ccircle cx='26.5' cy='15' r='1.8'/%3E%3Ccircle cx='26.5' cy='21.5' r='1.8'/%3E%3C/svg%3E">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@600;700&family=Kaushan+Script&family=Playfair+Display:ital,wght@0,400;0,500;1,500&family=JetBrains+Mono:wght@500;600&family=Poppins:wght@600;700&family=Righteous&family=Gaegu:wght@400;700&family=Instrument+Sans:wght@400;600&family=Lilita+One&family=VT323&display=swap">
@@ -163,7 +163,7 @@ body:not(.in-works) dialog :focus-visible { outline-color: var(--yellow); }
   <div id="tv-controls">
     <button id="screen" type="button">Go inside the TV</button>
     <button id="power" type="button" aria-pressed="true">Power</button>
-    <label>Volume <input id="vol" type="range" min="0" max="100" value="0"></label>
+    <label>Volume <input id="vol" type="range" min="0" max="100" value="60"></label>
     <label>Channel <input id="chan" type="range" min="1" max="4" step="1" value="1"></label>
   </div>
   <div id="tip" hidden></div>

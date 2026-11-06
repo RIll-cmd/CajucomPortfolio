@@ -39,6 +39,13 @@ soundBtn.addEventListener('click', () => { // the same as turning the dial, so t
 });
 vol.addEventListener('input', () => { soundLabel(); if (soundOn()) soundStart(); if (soundOut) soundOut.gain.setTargetAtTime(+vol.value / 100, audioCtx.currentTime, .05); soundPlay('dial'); });
 soundLabel();
+// Sound starts on (Cyrill's request), but browsers only allow audio after the visitor's first click, tap or key, so it begins then.
+function soundWake() {
+  if (!soundOn()) return;
+  updateSound(); soundStart();
+  if (audioCtx && audioCtx.state === 'running') for (const t of ['pointerup', 'keydown']) removeEventListener(t, soundWake, true);
+}
+for (const t of ['pointerup', 'keydown']) addEventListener(t, soundWake, true);
 
 function soundStart() { // runs inside the click or dial turn, which is what lets a browser play sound
   if (soundOut || !audioCtx) return;
