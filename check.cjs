@@ -302,7 +302,7 @@ const wrapper = () => `<!doctype html><html><head><meta charset="utf-8"><meta na
     assert.ok(frame, 'the first project can be clicked');
     await page.mouse.click(...frame);
     assert.strictEqual(await page.evaluate(() => view && view.c.t), first, 'a project opens');
-    assert.ok(await page.evaluate(() => !linksBox.hidden && linksBox.querySelector('a').href.includes('github.com/RIll-cmd/')), 'the project links to its repo');
+    assert.ok(await page.evaluate(() => !linksBox.hidden && linksBox.querySelector('a').href.includes('github.com/cyrillcajucom/')), 'the project links to its repo');
     await page.waitForFunction(() => getComputedStyle(linksBox).visibility === 'visible', null, { timeout: 30000 }); // placed under the words on the first frame
     assert.ok(await page.evaluate(() => { const a = linksBox.querySelector('a'), r = a.getBoundingClientRect(); return document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2) === a; }), 'the project link can be clicked');
     await page.waitForFunction(() => view.c.shots.every(shot => shot.pics.length && shot.pics.every(pic => pic.naturalWidth > 0)), null, { timeout: 60000 });

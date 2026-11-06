@@ -33,7 +33,7 @@
   const talk = el('section'); talk.append(el('h2', 'Contact'), list([
     el('a', WORKS_WORDS.email, { href: `mailto:${WORKS_WORDS.email}` }),
     el('a', 'LinkedIn', { href: 'https://www.linkedin.com/in/cyrillcajucom/' }),
-    el('a', 'GitHub', { href: 'https://github.com/RIll-cmd' }),
+    el('a', 'GitHub', { href: 'https://github.com/cyrillcajucom' }),
   ]));
   main.append(talk);
   for (const a of main.querySelectorAll('a')) a.tabIndex = -1; // screen readers still reach them; Tab doesn't land on links nobody can see
