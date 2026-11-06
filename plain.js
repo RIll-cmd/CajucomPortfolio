@@ -32,7 +32,7 @@
 
   const talk = el('section'); talk.append(el('h2', 'Contact'), list([
     el('a', WORKS_WORDS.email, { href: `mailto:${WORKS_WORDS.email}` }),
-    el('a', 'LinkedIn', { href: 'https://www.linkedin.com/in/cyrill-gerard-cajucom-25553933a/' }),
+    el('a', 'LinkedIn', { href: 'https://www.linkedin.com/in/cyrillcajucom/' }),
     el('a', 'GitHub', { href: 'https://github.com/RIll-cmd' }),
   ]));
   main.append(talk);
