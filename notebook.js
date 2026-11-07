@@ -607,7 +607,7 @@ function* buildBook() {
 /* ---------- Opening and closing, by turning a page ---------- */
 function bookSnapshot() { const s = document.createElement('canvas'); s.width = sceneCanvas.width; s.height = sceneCanvas.height; s.getContext('2d').drawImage(sceneCanvas, 0, 0); return s; }
 function openBook(c, viaKeyboard) {
-  if (!renderer || !renderer.capabilities.isWebGL2) { openProject(c, viaKeyboard, true); return; } // can't draw the world here, so show the plain page
+  if (!renderer || !renderer.capabilities.isWebGL2) { if (typeof mobileLayout === 'function' && mobileLayout()) mobileReadNotebook(); else openProject(c, viaKeyboard, true); return; }
   if (!bookWorld && !bookBuilder) bookBuilder = buildBook();
   book = { c, viaKeyboard, phase: bookWorld ? 'ride' : 'build', x: BOOK_FLAT + 7, tx: BOOK_FLAT + 7, last: performance.now(), from: bookSnapshot(), flipAt: performance.now(), world: -1, say: null, moved: false, side: 1, spinAt: -1e9, costume: 0, hover: null, unit: .02, flingBy: 0, flingAt: 0 };
   if (COARSE) renderer.setPixelRatio(Math.min(maxPr, 1.5));
@@ -645,6 +645,7 @@ function bookClick(clientX, clientY) {
   if (!p) return;
   p.kick = performance.now(); book.say = { text: p.say, prop: p, at: p.kick }; live.textContent = p.say;
   const photo = p.name.startsWith('photo-') && BOOK_PHOTOS.find(q => q.id === p.name); if (photo) zoomPicture(photo.src, photo.cap, clientX, clientY); // a pinned photo opens large
+  else if (typeof mobileLayout === 'function' && mobileLayout()) mobileReadNote(p.name, p.say);
 }
 
 /* ---------- Drawing ---------- */
@@ -653,6 +654,7 @@ function bookWrapped(text, size, maxW) { g.font = `700 ${size}px ${BOOK_FONT}`; 
 let bookSongOn = false;
 const bookWear = () => bookSongOn ? 2 : book.world;
 function bookBubble(text, ax, ay, alpha, below = false, side = false) { // below: the thing hangs from above, so the bubble sits under it and points up
+  if (typeof mobileLayout === 'function' && mobileLayout()) { bookMobileBubble(text, ax, ay, alpha); return; }
   const size = Math.max(19, Math.min(28, H * .034)), lines = bookWrapped(text, size, Math.min(W * .62, 340)), bw = Math.max(...lines.map(l => g.measureText(l).width)) + size * 1.5, bh = lines.length * size * 1.14 + size * .95;
   if (side && ax - bw - size * 1.1 > W * .03) { // beside, to the left, pointing right: clear of the notes and titles above
     const x = ax - bw - size * 1.1, y = Math.max(H * .07, Math.min(H * .93 - bh, ay - bh * .2)), ty = Math.max(y + size * .8, Math.min(y + bh - size * .8, ay + size * .4)), edge = x + bw;
@@ -669,6 +671,16 @@ function bookBubble(text, ax, ay, alpha, below = false, side = false) { // below
   const tx = Math.max(x + size, Math.min(x + bw - size, ax)), edge = under ? y : y + bh, dir = under ? -1 : 1; // the tail leaves the edge nearest the thing, toward it
   g.beginPath(); g.moveTo(tx - size * .42, edge - dir * 1.5); g.lineTo(tx - size * .08, edge + dir * size * .6); g.lineTo(tx + size * .42, edge - dir * 1.5); g.fill(); g.beginPath(); g.moveTo(tx - size * .42, edge); g.lineTo(tx - size * .08, edge + dir * size * .6); g.lineTo(tx + size * .42, edge); g.stroke();
   g.fillStyle = '#2d2b33'; g.textAlign = 'center'; g.textBaseline = 'middle'; lines.forEach((l, i) => g.fillText(l, x + bw / 2, y + size * .95 + i * size * 1.14)); g.restore();
+}
+function bookMobileBubble(text, ax, ay, alpha) {
+  const size = H < 440 ? 17 : 20, maxW = W * .8, lines = bookWrapped(text, size, maxW), width = Math.min(W * .9, Math.max(...lines.map(line => g.measureText(line).width)) + size * 1.5);
+  const top = 150, bottom = H - 92, maxLines = Math.max(1, Math.floor((bottom - top - size) / (size * 1.2))), shown = lines.slice(0, maxLines);
+  if (lines.length > shown.length) shown[shown.length - 1] = shown[shown.length - 1].replace(/\s+\S*$/, '') + '…';
+  const height = shown.length * size * 1.2 + size, x = Math.max(W * .05, Math.min(W * .95 - width, ax - width / 2)), y = Math.max(top, Math.min(bottom - height, ay - height - 14));
+  g.save(); g.globalAlpha = alpha; g.fillStyle = '#fffef6'; g.strokeStyle = BOOK_INK; g.lineWidth = 2.5;
+  g.beginPath(); g.roundRect(x, y, width, height, 14); g.fill(); g.stroke();
+  g.fillStyle = BOOK_INK; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `700 ${size}px ${BOOK_FONT}`;
+  shown.forEach((line, i) => g.fillText(line, x + width / 2, y + size + i * size * 1.2)); g.restore();
 }
 function bookPage() { // the blank page the loader sits on
   g.fillStyle = '#f5f2e8'; g.fillRect(0, 0, W, H);
@@ -695,7 +707,7 @@ const BOOK_MAP_ICONS = [
 function bookMapPath(pts, closed) { g.beginPath(); pts.forEach(([a, b], i) => g[i ? 'lineTo' : 'moveTo'](a, b)); if (closed) g.closePath(); g.stroke(); }
 function bookMap(now) {
   const n = BOOK_MAP_ICONS.length, tall = W < H, r = tall ? 19 : 21, gap = r * .75, total = n * r * 2 + (n - 1) * gap;
-  const x0 = (tall ? (W - total) / 2 : Math.max(28, W * .065)) + r, y = tall ? 98 : 70, a = Math.min(1, Math.max(0, (now - book.flipAt - BOOK_FLIP_MS) / 400));
+  const x0 = (tall ? (W - total) / 2 : Math.max(28, W * .065)) + r, y = tall || (typeof mobileLayout === 'function' && mobileLayout()) ? 98 : 70, a = Math.min(1, Math.max(0, (now - book.flipAt - BOOK_FLIP_MS) / 400));
   if (a <= 0) return;
   book.mapHot = [];
   g.save(); g.globalAlpha = a; g.lineCap = g.lineJoin = 'round';
@@ -841,7 +853,7 @@ function drawBook(now) {
   if (!book.moved) { // how to get going, until they do
     const a = Math.min(1, Math.max(0, (now - book.flipAt - BOOK_FLIP_MS) / 500)), size2 = Math.max(18, Math.min(H * .036, 28)), bob = reduced ? 0 : Math.sin(now / 280) * 5;
     g.save(); g.globalAlpha = a; g.font = `700 ${size2}px ${BOOK_FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round'; g.lineWidth = 6; g.strokeStyle = '#fffef6';
-    const hint = COARSE ? 'swipe to ride  →' : 'scroll to ride  →'; g.translate(bob, 0); const hy = aspect < 1 ? H * .935 : H * .9; g.strokeText(hint, W / 2, hy); g.fillStyle = '#2d2b33'; g.fillText(hint, W / 2, hy); g.restore();
+    const hint = COARSE ? 'swipe to ride  →' : 'scroll to ride  →'; g.translate(bob, 0); const hy = typeof mobileLayout === 'function' && mobileLayout() ? H - 88 : aspect < 1 ? H * .935 : H * .9; g.strokeText(hint, W / 2, hy); g.fillStyle = '#2d2b33'; g.fillText(hint, W / 2, hy); g.restore();
   }
   bookFlip(now);
 }

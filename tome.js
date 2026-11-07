@@ -65,7 +65,19 @@ function tomeCertsLoad() {
     const im = TOME_CERTS[name] = new Image(); im.onload = () => { if (tome && tome.layout) { tome.layout.cards = []; dirty = true; } }; im.src = `photos/certs/${name}.jpg`;
   }
 }
-const TOME_PAGES = TOME_WORDS.chapters.flatMap((c, ci) => (c.parts || [c]).map(p => ({ ...p, name: c.name, ci })));
+const TOME_PAGES = TOME_WORDS.chapters.flatMap((c, ci) => (c.parts || [c]).flatMap(p => {
+  const page = { ...p, name: c.name, ci };
+  if (!COARSE) return [page];
+  // A phone gets shorter leaves of the same chapter, rather than shrinking all its words.
+  if (p.entries) return p.entries.flatMap(e => {
+    if (!Array.isArray(e.d) || e.d.length <= 2) return [{ ...page, entries: [e] }];
+    const pages = [];
+    for (let i = 0; i < e.d.length; i += 2) pages.push({ ...page, entries: [{ ...e, d: e.d.slice(i, i + 2) }] });
+    return pages;
+  });
+  if (p.badges) { const pages = []; for (let i = 0; i < p.badges.length; i += 2) pages.push({ ...page, badges: p.badges.slice(i, i + 2) }); return pages; }
+  return [page];
+}));
 const TOME_NUM = ['I', 'II', 'III', 'IV', 'V', 'VI'];
 const TOME_FIT_H = 17, TOME_FIT_TALL = 17.5, TOME_LIFT = 2.2; // how much height the camera keeps for the book and its pop-ups, and how far above the pages it aims
 const TOME_PW = 10, TOME_PD = 13, TOME_TOP = 1.5, TOME_GUT = .42; // page width, page depth, height of the page block, how far the pages dip at the spine
@@ -414,7 +426,7 @@ function* buildTome() {
 /* ---------- Opening, closing, turning ---------- */
 function tomeSnapshot() { const s = document.createElement('canvas'); s.width = sceneCanvas.width; s.height = sceneCanvas.height; s.getContext('2d').drawImage(sceneCanvas, 0, 0); return s; }
 function openTome(c, viaKeyboard) {
-  if (!renderer || !renderer.capabilities.isWebGL2) { openProject(c, viaKeyboard, true); return; } // can't draw the book here, so show the plain page
+  if (!renderer || !renderer.capabilities.isWebGL2) { if (typeof mobileLayout === 'function' && mobileLayout()) mobileReadExperiences(); else openProject(c, viaKeyboard, true); return; }
   if (!tomeWorld && !tomeBuilder) tomeBuilder = buildTome();
   tomeCertsLoad();
   const now = performance.now();
@@ -482,7 +494,7 @@ function tomeCardSpot(clientX, clientY) { // a button, picture or skill on the c
   const [sx, sy] = toScene(clientX, clientY), cx = sx - b.x, cy = sy - b.y;
   return (l.hot[tome.shown] || []).find(h => cx > h.x && cx < h.x + h.w && cy > h.y && cy < h.y + h.h) || null;
 }
-const tomeClick = (x, y) => { if (tome.phase === 'open') { tome.openAt = -1e9; return; } const c = tomeCardSpot(x, y); if (c) { c.act(x, y); return; } if (tomeOnCard(x, y)) { tomeZoomCard(x, y); return; } const h = tomeSpotAt(x, y); if (h) tomeGo(h.go); };
+const tomeClick = (x, y) => { if (tome.phase === 'open') { tome.openAt = -1e9; return; } if (typeof mobileLayout === 'function' && mobileLayout() && tomeOnCard(x, y)) { mobileReadChapter(); return; } const c = tomeCardSpot(x, y); if (c) { c.act(x, y); return; } if (tomeOnCard(x, y)) { tomeZoomCard(x, y); return; } const h = tomeSpotAt(x, y); if (h) tomeGo(h.go); };
 function tomeOnCard(clientX, clientY) { const b = tome.cardBox; if (!b || !tome.layout || tome.phase !== 'read' || tome.turn) return false; const [x, y] = toScene(clientX, clientY); return x > b.x && x < b.x + b.w && y > b.y && y < b.y + b.h; }
 function tomeZoomCard(x, y) { // the card's small words, opened large in the picture viewer (Cyrill's request)
   const l = tome.layout, k = Math.min(4, Math.max(2, 1600 / l.cardW)); zoomPicture(tomeCard(tome.shown, l, k).toDataURL(), TOME_PAGES[tome.shown].name, x, y);
@@ -587,13 +599,13 @@ function tomeLayout() {
   if (tome.layout && tome.layout.W === W && tome.layout.H === H && tome.layout.pr === pr) return tome.layout;
   const tall = W / H < 1, short = !tall && H < 520, compact = tall || W < 860, measure = document.createElement('canvas').getContext('2d');
   const cardW = tall ? W * .88 : short ? W * .4 : Math.min(W * .56, 800), cols = tall || short ? 1 : 3;
-  const l = { W, H, pr, tall, short, compact, measure, cardW, cols, cards: [], hot: [], size: Math.max(11.5, Math.min(15.5, tall ? W / 27 : short ? H / 27 : Math.min(W / 72, H / 46))) };
+  const l = { W, H, pr, tall, short, compact, measure, cardW, cols, cards: [], hot: [], size: Math.max(COARSE ? 14 : 11.5, Math.min(15.5, tall ? W / 27 : short ? H / 27 : Math.min(W / 72, H / 46))) };
   const room = H * (tall ? .5 : short ? .84 : .46); // the fullest page sets the size, so the book stays put between pages
   for (;;) { l.cardH = Math.max(...TOME_PAGES.map((c, i) => tomeInk(measure, i, cardW, l))); if (l.cardH <= room || l.size <= 9.5) break; l.size -= .5; }
   l.navH = compact ? 44 : 40; l.navY = short ? H * .955 - l.navH : H * (tall ? .945 : .95) - l.navH;
   l.navCx = W / 2; l.navW = Math.min(W * .86, 340);
   if (short) { l.cardX = W * .055; l.cardY = (H - l.cardH) / 2; l.free = { x: W * .46, y: H * .1, w: W * .5, h: l.navY - H * .1 }; l.navCx = l.free.x + l.free.w / 2; l.navW = Math.min(l.free.w, 300); }
-  else { l.cardX = (W - cardW) / 2; l.cardY = H * (tall ? .085 : .075); const top = l.cardY + l.cardH + H * .015; l.free = { x: W * .04, y: top, w: W * .92, h: l.navY - top }; } // starts below the card, so nothing of the scene hides under it
+  else { l.cardX = (W - cardW) / 2; l.cardY = tall ? Math.max(82, H * .10) : H * .075; const top = l.cardY + l.cardH + H * .015; l.free = { x: W * .04, y: top, w: W * .92, h: l.navY - top }; } // starts below the card, so nothing of the scene hides under it
   return tome.layout = l;
 }
 function tomeNav(l, now) {
@@ -713,7 +725,7 @@ function drawTome(now) {
     if (a > 0) { g.save(); g.globalAlpha = a; g.shadowColor = 'rgba(8,4,1,.65)'; g.shadowBlur = 26; g.shadowOffsetY = 8; g.drawImage(card, l.cardX, top + (1 - a) * (l.short ? 0 : -10), l.cardW, ch); g.restore(); }
     tomeNav(l, now);
     if (!tome.moved) {
-      const hint = COARSE ? 'swipe to turn the page' : 'scroll to turn the page', bob = reduced ? 0 : Math.sin(now / 300) * 3, size = Math.max(13, Math.min(H * .021, 16));
+      const hint = COARSE ? 'tap card to read · swipe to turn' : 'scroll to turn the page', bob = reduced ? 0 : Math.sin(now / 300) * 3, size = Math.max(13, Math.min(H * .021, 16));
       g.save(); g.font = `600 ${size}px ${TOME_SERIF}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round'; g.lineWidth = 4; g.strokeStyle = 'rgba(18,9,4,.85)'; g.strokeText(hint, l.navCx, l.navY - size * 1 + bob); g.fillStyle = '#ffe9bd'; g.fillText(hint, l.navCx, l.navY - size * 1 + bob); g.restore();
     }
   }

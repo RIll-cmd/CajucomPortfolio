@@ -27,7 +27,11 @@ body:not(.inside) #sound { bottom: auto; top: calc(clamp(16px, 3vw, 40px) + env(
 document.body.append(soundBtn);
 const soundOn = () => +vol.value > 0;
 function soundLabel() { soundBtn.innerHTML = `♪<span class="word"> Sound ${soundOn() ? 'on' : 'off'}</span>`; soundBtn.setAttribute('aria-pressed', soundOn()); soundBtn.setAttribute('aria-label', 'Sound'); }
+let soundLayoutKey = '';
 function soundSpot() { // beside Back anywhere inside the TV, so it never sits on the ticker or a box's own controls
+  const key = [document.body.classList.contains('inside'), backBtn.hidden, backBtn.textContent, soundBtn.textContent, innerWidth, innerHeight].join('|');
+  if (key === soundLayoutKey) return;
+  soundLayoutKey = key;
   const by = document.body.classList.contains('inside') && !backBtn.hidden, r = by && backBtn.getBoundingClientRect();
   soundBtn.classList.toggle('by-back', by);
   soundBtn.style.top = by ? `${r.top + (r.height - soundBtn.offsetHeight) / 2}px` : '';
@@ -58,7 +62,7 @@ function soundStart() { // runs inside the click or dial turn, which is what let
   soundMusic = audioCtx.createGain(); soundMusic.gain.value = SOUND_MUSIC_LEVEL;
   soundMusic.connect(soundTvLow).connect(soundTv).connect(soundOut);
   soundAmb = audioCtx.createGain(); soundAmb.gain.value = .5; soundAmb.connect(soundOut);
-  for (const n of SOUND_FX) soundLoad(n, `audio/${n}.mp3`);
+  for (const n of COARSE ? ['open', 'back', 'select', 'arrive', 'dial', 'dive_in', 'tv_on'] : SOUND_FX) soundLoad(n, `audio/${n}.mp3`);
 }
 function soundLoad(name, url) {
   if (soundBufs[name] !== undefined) return soundBufs[name];
@@ -66,7 +70,12 @@ function soundLoad(name, url) {
   return soundBufs[name];
 }
 function soundPlay(name, { rate = 1, gain = SOUND_LOUD[name] || 1 } = {}) {
+  if (!name || !soundOut || !soundOn()) return null;
   const b = soundBufs[name];
+  if (COARSE && b === undefined) {
+    const requested = performance.now();
+    soundLoad(name, `audio/${name}.mp3`).then(loaded => { if (loaded && performance.now() - requested < 500) soundPlay(name, { rate, gain }); });
+  }
   if (!soundOut || !soundOn() || !(b instanceof AudioBuffer)) return null;
   const s = audioCtx.createBufferSource(), v = audioCtx.createGain();
   s.buffer = b; s.playbackRate.value = rate; v.gain.value = gain;
@@ -228,7 +237,7 @@ songCard.querySelector('.song-play').addEventListener('click', () => {
   songFrame.addEventListener('load', () => songFrame && songFrame.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }), 'https://www.youtube-nocookie.com'));
   songCard.querySelector('.song-close').hidden = false; songState(true);
   songHeard = false; songCard.classList.add('loading'); const frame = songFrame;
-  setTimeout(() => { if (songFrame !== frame || songHeard) return; songStop(); songCard.classList.remove('loading'); songCard.classList.add('blocked'); const b = songCard.querySelector('.song-play'); b.querySelector('.song-label').textContent = 'Play on YouTube ↗'; window.open(SONG_WATCH(SOUND_SONG.id), '_blank', 'noopener'); }, 6000); // nothing heard from the player: this page can't show it
+  setTimeout(() => { if (songFrame !== frame || songHeard) return; songStop(); songCard.classList.remove('loading'); songCard.classList.add('blocked'); const b = songCard.querySelector('.song-play'); b.querySelector('.song-label').textContent = 'Play on YouTube ↗'; if (!COARSE) window.open(SONG_WATCH(SOUND_SONG.id), '_blank', 'noopener'); }, 6000); // a phone waits for a tap instead of opening another tab by itself
 });
 songCard.querySelector('.song-close').addEventListener('click', songStop);
 function songCardSync() { // in the corner it's a full card; while the song plays it rides along, small; leaving the notebook ends it

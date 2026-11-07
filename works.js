@@ -122,6 +122,7 @@ function worksWords(s, x, y, size, color = WORKS_CREAM, { font = WORKS_LABEL, we
   try { g.letterSpacing = '0px'; } catch { /* as above */ }
 }
 function worksPill(label, cx, cy, size, active, hovered, act) { // a soft pill with a white star at each compass point
+  if (typeof mobileLayout === 'function' && mobileLayout()) size = Math.max(16, size);
   g.font = `400 ${size}px ${WORKS_LABEL}`; const w = g.measureText(label).width + size * 3.2, h = size * 2.5, x = cx - w / 2, y = cy - h / 2;
   const l = g.createLinearGradient(0, y, 0, y + h);
   if (active) { l.addColorStop(0, '#62d8c8'); l.addColorStop(1, WORKS_TEAL); } else { l.addColorStop(0, hovered ? '#3a709f' : WORKS_DUSK); l.addColorStop(1, hovered ? '#27527a' : '#1b3c63'); }
@@ -151,13 +152,15 @@ function worksWrapWords(text, size, width, tones) { // lines of words, with room
 }
 function worksLayout() {
   const tall = W < H * .9, pad = tall ? Math.max(20, W * .07) : Math.max(24, W * .08);
+  const phoneWide = COARSE && !tall && H < 480;
   works.pages = [{ kind: 'hero' }, { kind: 'about' }, { kind: 'portfolio' }];
   for (const it of WORKS_WORDS.items) { it.on = works.filter === 'All' || it.tags.includes(works.filter); if (it.on) works.pages.push({ kind: 'work', it }); }
   works.pages.push({ kind: 'talk' });
   // About: the words on one side and the figure on the other, or stacked on a tall screen.
-  const a = { title: tall ? Math.min(W * .17, H * .1) : Math.min(W * .075, H * .15), size: tall ? worksClamp(W * .056, 18, 30) : worksClamp(Math.min(W * .027, H * .05), 17, 40) };
-  const colW = tall ? W - pad * 2 : W * .44, flow = worksWrapWords(WORKS_WORDS.about, a.size, colW, WORKS_WORDS.highlight), leading = a.size * 1.62;
-  a.x = tall ? pad : W * .48; a.titleY = H * (tall ? .12 : .17); let y = a.titleY + a.title * .9 + a.size * .9; a.words = [];
+  const a = { title: tall ? Math.min(W * .17, H * .1) : Math.min(W * .075, H * .15), size: phoneWide ? 16 : tall ? worksClamp(W * .056, 18, 30) : worksClamp(Math.min(W * .027, H * .05), 17, 40) };
+  const aboutPad = phoneWide ? Math.max(24, W * .05) : pad;
+  const colW = tall || phoneWide ? W - aboutPad * 2 : W * .44, flow = worksWrapWords(WORKS_WORDS.about, a.size, colW, WORKS_WORDS.highlight), leading = a.size * (phoneWide ? 1.35 : tall ? 1.48 : 1.62);
+  a.x = tall || phoneWide ? aboutPad : W * .48; a.titleY = phoneWide ? 64 : tall ? Math.max(112, H * .14) : H * .17; let y = a.titleY + a.title * .9 + a.size * .9; a.words = [];
   g.font = `700 ${a.size}px ${WORKS_BODY}`; // where each letter of a word starts, so the letters can arrive one by one
   flow.lines.forEach(line => { let x = a.x; for (const w of line) { a.words.push({ ...w, x, y, pad: flow.chipPad, chars: [...w.s].map((ch, j) => [ch, g.measureText(w.s.slice(0, j)).width]) }); x += w.w + flow.space; } y += leading; });
   a.pillY = y + a.size * .9; a.pillX = a.x + a.size * 5.1; works.about = a;
@@ -177,8 +180,12 @@ function worksLayout() {
 /* ---------- Under the water: animated underwater scene (photos/water/water-00..14.webp) with live caustics, light rays, and rising glossy bubbles ---------- */
 const WORKS_BOY_IMG = new Image();
 WORKS_BOY_IMG.onload = () => { dirty = true; };
-WORKS_BOY_IMG.src = 'boy.png';
-const WORKS_WATER_FRAMES = Array.from({ length: 15 }, (_, k) => { const i = new Image(); i.onload = () => { dirty = true; }; i.src = `photos/water/water-${String(k).padStart(2, '0')}.webp`; return i; });
+const WORKS_WATER_FRAMES = [];
+function worksLoadWater() {
+  if (WORKS_WATER_FRAMES.length) return;
+  if (!((COARSE && W <= 900) || W < 600)) WORKS_BOY_IMG.src = 'boy.png';
+  for (let k = 0; k < 15; k++) { const i = new Image(); i.onload = () => { dirty = true; }; i.src = `photos/water/water-${String(k).padStart(2, '0')}.webp`; WORKS_WATER_FRAMES.push(i); }
+}
 function worksPaintWater() { return document.createElement('canvas'); }
 function worksBubble(bx, by, r, t, p, alpha = 1) {
   const wob = reduced ? 0 : Math.sin(t * 3.8 + p) * .065, rx = r * (1 + wob), ry = r * (1 - wob);
@@ -196,18 +203,20 @@ function worksBubble(bx, by, r, t, p, alpha = 1) {
 }
 function worksDrawWater(waterY, t) {
   const tall = works.tall, ready = WORKS_WATER_FRAMES.filter(im => im.complete && im.naturalWidth);
+  const phoneWater = (COARSE && W <= 900) || W < 600;
   const tailH = H * .42, base = g.createLinearGradient(0, waterY, 0, waterY + H + tailH);
   base.addColorStop(0, '#3ff6fd'); base.addColorStop(.16, '#158ee1'); base.addColorStop(.42, '#064baa'); base.addColorStop(.7, '#011892'); base.addColorStop(H / (H + tailH), '#00088d'); base.addColorStop(1, 'rgba(14,29,57,0)');
   g.fillStyle = base; g.fillRect(0, Math.max(0, waterY), W, H + tailH);
   const drawFrame = (im, alpha) => {
     if (!im || !im.naturalWidth) return;
     g.save(); g.globalAlpha = alpha;
-    if (!tall) {
+    if (!tall && !phoneWater) {
       const dw = Math.min(Math.round(580 * H / 720), Math.round(W * .47));
       g.drawImage(im, 0, 0, 580, 720, 0, waterY, dw, H);
       g.drawImage(im, 580, 0, 700, 720, dw - 1, waterY, W - dw + 1, H);
     } else {
       g.drawImage(im, 580, 0, 700, 720, 0, waterY, W, H);
+      if (phoneWater || !tall) { g.restore(); return; } // phones show clear water behind the copy; desktop keeps its figure
       const a = works.about, clear = a.pillY + a.size * 1.45, oy = Math.max(clear - H * .03, H * .46), ch = Math.ceil(H - oy), cw = Math.ceil(Math.min(W * .92, ch * 580 / 720));
       if (!works.charSheet || works.charSheet.width !== cw || works.charSheet.height !== ch) { works.charSheet = document.createElement('canvas'); works.charSheet.width = cw; works.charSheet.height = ch; }
       const sc = works.charSheet.getContext('2d'); sc.clearRect(0, 0, cw, ch); sc.drawImage(im, 0, 0, 580, 720, 0, 0, cw, ch);
@@ -303,6 +312,7 @@ function worksBakeTitle() { // the swirl, the crescents, the vines and the word'
 const worksAbout = () => { $('#about').classList.add('no-keys'); $('#about').showModal(); };
 $('#about').addEventListener('close', () => $('#about').classList.remove('no-keys'));
 function openWorks(c, viaKeyboard) {
+  worksLoadWater();
   const now = performance.now();
   document.body.classList.add('in-works'); // dialogs opened from here wear Projects' look
   works = { c, viaKeyboard, y: 0, page: 0, pull: 0, acc: 0, lock: 0, arrive: now, last: now, at: now, filter: 'All', hot: [], hover: null, key: '', flash: 1 };
@@ -383,6 +393,7 @@ function worksFooterBake() { // the wave, its grain and its sparkles, once per s
   return c;
 }
 function worksFooter(sy, t) {
+  if (typeof mobileLayout === 'function' && mobileLayout()) { worksMobileFooter(sy); return; }
   if (!works.footer || works.footer.key !== `${W}x${H}`) works.footer = { c: worksFooterBake(), key: `${W}x${H}` };
   const top = H * .56 + sy * 1.2; g.drawImage(works.footer.c, 0, top, W, H * .5);
   const tall = works.tall, logo = worksClamp(Math.min(W * .06, H * .085), 28, 72), left = works.pad + 6, small = worksClamp(H * .021, 12, 16), name = WORKS_WORDS.name.toUpperCase();
@@ -405,6 +416,26 @@ function worksFooter(sy, t) {
     if (on) { g.strokeStyle = WORKS_TEAL; g.lineWidth = 2.5; g.stroke(); }
     g.save(); WORKS_ICONS[n](cx, cy, r); g.restore();
     if (works.k > .7) works.hot.push({ x: cx - r - 4, y: iy - r - 4, w: r * 2 + 8, h: r * 2 + 8, act: () => window.open(links[n], '_blank', 'noopener'), label: `footer-${n}` });
+  });
+}
+function worksMobileFooter(sy) {
+  if (!works.footer || works.footer.key !== `${W}x${H}`) works.footer = { c: worksFooterBake(), key: `${W}x${H}` };
+  const short = H < 440, top = H * (short ? .48 : .50) + sy * 1.2;
+  g.drawImage(works.footer.c, 0, top, W, H * .5);
+  if (!short) {
+    const left = Math.max(28, W * .08), logo = Math.min(32, W * .08), ly = H * .62 + sy;
+    worksWords(WORKS_WORDS.name.toUpperCase(), left, ly, logo, WORKS_CREAM, { align: 'left' });
+    const my = Math.min(H - 190, H * .62 + logo + 16) + sy;
+    worksWords(WORKS_WORDS.email, left, my, 14, WORKS_CREAM, { align: 'left', font: WORKS_BODY, weight: 600 });
+    g.font = `600 14px ${WORKS_BODY}`;
+    if (works.k > .7) works.hot.push({ x: left, y: my - 25, w: g.measureText(WORKS_WORDS.email).width, h: 50, act: () => window.open(WORKS_LINKS().Gmail, '_blank', 'noopener'), label: 'footer-mail' });
+    worksWords('© 2026 CYRILL CAJUCOM', W / 2, H - 92 + sy, 12, WORKS_CREAM, { font: WORKS_BODY, weight: 600 });
+  }
+  const links = WORKS_LINKS(), names = Object.keys(WORKS_ICONS).filter(n => links[n]), step = Math.min(56, (W - 64) / Math.max(1, names.length - 1)), x0 = (W - (names.length - 1) * step) / 2, y = H - (short ? 120 : 140) + sy;
+  names.forEach((name, i) => {
+    const x = x0 + i * step; g.fillStyle = WORKS_CREAM; g.beginPath(); g.arc(x, y, 22, 0, 7); g.fill();
+    g.save(); WORKS_ICONS[name](x, y, 22); g.restore();
+    if (works.k > .7) works.hot.push({ x: x - 27, y: y - 27, w: 54, h: 54, act: () => window.open(links[name], '_blank', 'noopener'), label: `footer-${name}` });
   });
 }
 const WORKS_LINKS = () => Object.fromEntries([...document.querySelectorAll('#contact .socials a')].map(a => [a.textContent.trim(), a.href])); // the Say hello dialog's links, so they live in one place
@@ -460,6 +491,16 @@ const WORKS_DRAW = {
     g.globalAlpha = 1;
   },
   portfolio(p, sy, k, now, t, since) {
+    if (typeof mobileLayout === 'function' && mobileLayout() && H < 480) {
+      const size = 15, x = W * .44, width = W * .51, bottom = H - 145;
+      g.font = `600 ${size}px ${WORKS_BODY}`;
+      const lines = wrapLines(WORKS_WORDS.portfolio, width), leading = size * 1.45, y = Math.max(76, (76 + bottom - lines.length * leading) / 2);
+      g.globalAlpha = k;
+      worksScript(WORKS_WORDS.portfolioTitle, W * .22, (76 + bottom) / 2 + sy, Math.min(W * .13, H * .2), -.08);
+      lines.forEach((line, i) => worksWords(line, x, y + i * leading + size / 2 + sy, size, WORKS_CREAM, { font: WORKS_BODY, weight: 600, align: 'left' }));
+      g.globalAlpha = 1;
+      return;
+    }
     const o = works.portfolio, tall = works.tall, arrive = n => reduced ? 1 : worksEase((since - n) / 600), cy = H * (tall ? .32 : .36) + sy * .6;
     // Sparkles round the word: four big yellow ones close in, a scatter of small cream ones twinkling further out.
     const span = o.title * 1.7, tw = n => reduced ? 1 : .75 + .25 * Math.sin(t * 2.2 + n * 1.9);
@@ -468,7 +509,8 @@ const WORKS_DRAW = {
     // The word, big and tilted, settling in from slightly lower.
     const e = arrive(80); g.globalAlpha = k * e; worksScript(WORKS_WORDS.portfolioTitle, W / 2, cy + (1 - e) * 40, o.title * (1.25 + .1 * (1 - e)), -.08);
     // Under it: the line about the projects on teal strips, and the filters.
-    let y = H * (tall ? .6 : .64) + sy;
+    const phone = typeof mobileLayout === 'function' && mobileLayout();
+    let y = (phone ? Math.min(H * .53, H - 150 - o.lines.length * o.size * 2.55) : H * (tall ? .6 : .64)) + sy;
     o.lines.forEach((line, i) => {
       g.font = `600 ${o.size}px ${WORKS_BODY}`; const sw = g.measureText(line).width + o.size * 1.8, sh = o.size * 2.1, f = arrive(500 + i * 90);
       g.globalAlpha = k * f; g.fillStyle = 'rgba(5,12,30,.4)'; g.beginPath(); g.roundRect(W / 2 - sw / 2 + 3, y + 5 + (1 - f) * 20, sw, sh, sh / 2); g.fill();
@@ -479,7 +521,7 @@ const WORKS_DRAW = {
     g.font = `400 ${works.pillSize}px ${WORKS_LABEL}`; const widths = WORKS_WORDS.filters.map(f => g.measureText(f).width + works.pillSize * 3.2), space = works.pillSize * works.pillGap, total = widths.reduce((a, b) => a + b) + space * (widths.length - 1);
     let x = (W - total) / 2; y += works.pillSize * 2.2;
     g.globalAlpha = k * arrive(700 + o.lines.length * 90);
-    WORKS_WORDS.filters.forEach((f, i) => { worksPill(f, x + widths[i] / 2, y, works.pillSize, works.filter === f, works.hover === f, k > .7 ? () => worksSetFilter(f) : null); x += widths[i] + space; });
+    if (!(typeof mobileLayout === 'function' && mobileLayout())) WORKS_WORDS.filters.forEach((f, i) => { worksPill(f, x + widths[i] / 2, y, works.pillSize, works.filter === f, works.hover === f, k > .7 ? () => worksSetFilter(f) : null); x += widths[i] + space; });
     g.globalAlpha = 1;
   },
   work(p, sy, k, now, t) {

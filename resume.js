@@ -27,7 +27,7 @@ const resumeEase = t => { t = resumeClamp(t); return t * t * (3 - 2 * t); };
 /* ---------- Pictures, fetched once ---------- */
 function resumeLoad() {
   if (resumePics) return resumePics;
-  const pic = src => { const i = new Image(); i.onload = () => { dirty = true; }; i.src = src; return i; }, frames = n => Array.from({ length: RESUME_HANDS[n].tips.length }, (_, k) => pic(`photos/hands/${n}-${String(k).padStart(2, '0')}.webp`));
+  const pic = src => { if (COARSE && src === 'photos/me-barong.jpg') return null; const i = new Image(); i.onload = i.onerror = () => { if (resume) resume.L = null; dirty = true; }; i.src = src; return i; }, frames = n => Array.from({ length: RESUME_HANDS[n].tips.length }, (_, k) => pic(`photos/hands/${n}-${String(k).padStart(2, '0')}.webp`));
   return resumePics = { world: pic('photos/hands/world.webp'), veil: pic('photos/hands/veil.webp'), glass: pic('photos/hands/glass.webp'), tie: pic('photos/me-tie.jpg'), barong: pic('photos/me-barong.jpg'), flyrank: pic('photos/flyrank.webp'), feutech: pic('photos/feutech.webp'), spusm: pic('photos/spusm.webp'), smnhs: pic('photos/smnhs.webp'), robot: frames('robot'), human: frames('human'), point: frames('point'), works: WORKS_WORDS.items.map(it => pic(`photos/works/${it.shots[0].names[0]}.jpg`)) };
 }
 function resumeSpritesMake() { // data and blossom petals drifting through the air: soft lights, near and far, petals, and bits
@@ -46,7 +46,8 @@ function resumeOrb() { // the little planet on the dock
 
 /* ---------- Laying out, once for each screen size ---------- */
 function resumeMeasure(L, dt = 0) { // places each section on its own full-screen slot so one scroll steps cleanly from part to part
-  const r = resume, topY = L.narrow ? 66 : 72, botY = H - (L.narrow ? 82 : 88), viewH = Math.max(160, botY - topY);
+  const r = resume, topY = L.mobile ? (L.tall ? 140 : 94) : L.narrow ? 66 : 72, botY = H - (L.mobile ? 94 : L.narrow ? 82 : 88), viewH = Math.max(L.mobile ? 1 : 160, botY - topY);
+  L.readTop = topY; L.readBottom = botY;
   const secs = [], panels = [], stops = [], tops = new Array(L.blocks.length);
   let cur = null, moving = false;
   L.blocks.forEach((b, i) => {
@@ -69,6 +70,7 @@ function resumeMeasure(L, dt = 0) { // places each section on its own full-scree
     sec.slotY = slotY;
     sec.padTop = sec.h <= viewH ? topY + (viewH - sec.h) * .42 : sec.h <= viewH + 48 ? Math.max(58, topY - (sec.h - viewH) * .4) : topY;
     sec.span = sec.h > viewH + 48 ? sec.h - viewH : 0;
+    if (L.mobile) { sec.padTop = topY + Math.max(0, (viewH - sec.h) * .42); sec.span = Math.max(0, sec.h - viewH); }
     const steps = sec.span > 0 ? Math.ceil(sec.span / (viewH * .78)) : 0;
     for (let k = 0; k <= steps; k++) stops.push({ y: slotY + (steps ? sec.span * k / steps : 0), name: sec.name });
     let y = slotY + sec.padTop;
@@ -86,7 +88,7 @@ function resumeMeasure(L, dt = 0) { // places each section on its own full-scree
 }
 function resumeLayout() {
   if (resume.L && resume.L.W === W && resume.L.H === H && resume.L.pr === pr) return resume.L;
-  const tall = W / H < 1, narrow = W < 760, L = { W, H, pr, tall, narrow, blocks: [], hot: [], max: 0 };
+  const tall = W / H < 1, narrow = W < 760, L = { W, H, pr, tall, narrow, mobile: (COARSE && W <= 900) || W < 600, blocks: [], hot: [], max: 0 };
   const colW = Math.min(W * (tall ? .92 : .8), 1040), x0 = (W - colW) / 2, pad = tall ? 20 : 34, inner = colW - pad * 2, left = x0 + pad;
   const title = resumeClamp(tall ? W * .1 : Math.min(W * .05, H * .09), 32, 64), row = resumeClamp(tall ? W * .056 : Math.min(W * .022, H * .04), 19, 28), note = resumeClamp(row * .64, 14.5, 17), mid = left + inner * .46, midW = inner * .54;
   const serif = (s, w = 500) => `${w} ${s}px ${RESUME_SERIF}`, sans = (s, w = 500) => `${w} ${s}px ${RESUME_SANS}`, mono = s => `500 ${s}px ${RESUME_MONO}`;
@@ -114,6 +116,7 @@ function resumeLayout() {
     a.h = Math.max(y, tall ? 0 : photoH);
   }
   const entries = (list, photo, name) => {
+    if (photo && (L.mobile || !resumePics?.[photo]?.naturalWidth)) photo = null;
     panelOn();
     const pw = photo ? (tall ? colW * .48 : Math.min(inner * .22, H * .25)) : 0, b = add({ kind: 'plain', h: 0 }), w = photo && !tall ? inner - pw - pad : inner; let y = 0;
     if (photo) { const ph = pw * 1418 / 941; b.pics.push({ img: photo, x: tall ? (W - pw) / 2 : left + inner - pw, y: 0, w: pw, h: ph, r: 12 }); if (tall) y = ph + pad * .7; b.minH = ph; }
@@ -474,7 +477,7 @@ function resumeCode(name, p, cx, cy, size, alpha, time, melt = 0) {
   g.restore();
 }
 function resumeTop(L) { // a ruler across the top, reading how connected we are, then where in the résumé
-  const r = resume, w = L.narrow ? W * .42 : Math.min(W * .34, 420), cx = L.narrow ? 16 + w / 2 : W / 2, y = 22 + (L.narrow ? 6 : 0), prog = r.phase === 'read' ? r.y / Math.max(1, L.max) : r.a * .5 + r.hold * .5, n = 44, gap = 11, off = (prog * n * gap) % gap;
+  const r = resume, w = L.narrow ? W * .42 : Math.min(W * .34, 420), cx = L.mobile ? (L.tall ? W / 2 : 30 + w / 2) : L.narrow ? 16 + w / 2 : W / 2, y = L.mobile && L.tall ? 80 : 22 + (L.narrow ? 6 : 0), prog = r.phase === 'read' ? r.y / Math.max(1, L.max) : r.a * .5 + r.hold * .5, n = 44, gap = 11, off = (prog * n * gap) % gap;
   const grab = r.phase === 'read', on = grab && (r.scrub || (r.hover && r.hover.go === 'ruler'));
   L.ruler = grab ? { x: cx - w / 2 - 10, y: y - 10, w: w + 20, h: 52 } : null; // in the résumé it can be dragged to scrub through the parts
   g.save(); g.fillStyle = on ? 'rgba(255,255,255,.82)' : 'rgba(255,255,255,.6)'; g.strokeStyle = 'rgba(15,143,127,.35)'; g.lineWidth = 1; g.beginPath(); g.roundRect(cx - w / 2 - 10, y - 10, w + 20, 52, 26); g.fill(); g.stroke(); g.restore(); // a frosted pill, so it reads on the glass
@@ -530,7 +533,10 @@ function drawResume(now) {
     if (r.trail.length > 1) { g.lineCap = g.lineJoin = 'round'; for (let i = 1; i < r.trail.length; i++) { const a = r.trail[i - 1], b = r.trail[i], k = 1 - (now - b[2]) / 1100; g.strokeStyle = `rgba(255,255,255,${k * .95})`; g.lineWidth = 2 + k * 6; g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.stroke(); } }
     if (r.seen) { g.save(); g.shadowColor = '#fff'; g.shadowBlur = 16; g.fillStyle = '#fff'; g.beginPath(); g.arc(r.tx, r.ty2, 8, 0, 7); g.fill(); g.restore(); }
     const size2 = Math.max(16, Math.min(W * .045, 22)); g.font = `500 ${size2}px ${RESUME_MONO}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.save(); g.shadowColor = 'rgba(10,40,36,.6)'; g.shadowBlur = 10; g.fillStyle = '#fff'; g.fillText(COARSE ? 'DRAW A CIRCLE' : 'HOLD AND DRAW A CIRCLE', W / 2, H * .38); g.restore();
+    if (!L.mobile) {
     const sk = COARSE ? 'Skip' : 'Skip  (Enter)'; g.font = `600 14px ${RESUME_SANS}`; const sw = g.measureText(sk).width + 32, sx = L.narrow ? 16 : W / 2 - sw / 2, sy = 22; g.fillStyle = r.hover && r.hover.go === 'skip' ? 'rgba(255,255,255,.34)' : 'rgba(255,255,255,.2)'; g.beginPath(); g.roundRect(sx, sy, sw, 36, 18); g.fill(); g.fillStyle = '#fff'; g.fillText(sk, sx + sw / 2, sy + 19); g.textAlign = 'left'; g.textBaseline = 'alphabetic'; hot.push({ x: sx, y: sy, w: sw, h: 36, go: 'skip' });
+    }
+    g.textAlign = 'left'; g.textBaseline = 'alphabetic';
   } else if (r.phase !== 'read') {
     // The world, the hands, and the name fading away as you go in.
     r.a = resumeClamp(r.y / (H * 1.1)); const a = r.a; if (r.phase === 'title' && a > .01) r.phase = 'world';
@@ -622,6 +628,7 @@ function drawResume(now) {
     const s = r.y + (r.pull || 0) * .35, tops = L.tops, panels = L.panels;
     let section = 'About'; for (const sec of L.secs) if (s >= sec.slotY - H * .45) section = sec.name;
     r.section = section;
+    if (L.mobile) { g.save(); g.beginPath(); g.rect(0, L.readTop - 6, W, L.readBottom - L.readTop + 6); g.clip(); }
     for (const p of panels) { const top = p.from - s; if (top > H || p.to - s < 0) continue; g.fillStyle = 'rgba(255,255,255,.62)'; g.strokeStyle = 'rgba(255,255,255,.95)'; g.lineWidth = 1; g.beginPath(); g.roundRect(L.colX, top, L.colW, p.to - p.from, 22); g.fill(); g.stroke(); }
     g.textAlign = 'left'; g.textBaseline = 'alphabetic';
     L.blocks.forEach((b, i) => {
@@ -648,6 +655,10 @@ function drawResume(now) {
         for (let i = 0; i < strips; i++) { const nz = .5 + .5 * Math.sin(i * 1.7 + m.seed) * Math.cos(i * .53 + m.seed * 1.3); g.drawImage(im, i * sw * k, 0, sw * k + 1, im.height, i * sw, -m.dir * e * H * (.12 + nz * .45), sw + 1, H); }
         g.restore();
       }
+    }
+    if (L.mobile) {
+      g.restore();
+      for (const h of hot) { const end = Math.min(L.readBottom, h.y + h.h); h.y = Math.max(L.readTop - 6, h.y); h.h = Math.max(0, end - h.y); }
     }
     const dockHot = []; resumeDock(L, dockHot, 1, dt); hot.unshift(...dockHot); resumeTop(L);
     if (r.wash > 0) { r.wash = Math.max(0, r.wash - dt / (reduced ? .01 : .7)); g.fillStyle = `rgba(250,253,252,${resumeEase(r.wash)})`; g.fillRect(0, 0, W, H); }

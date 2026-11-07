@@ -49,31 +49,31 @@ const TOUR_GUIDES = {
   works: () => ({ title: 'Projects', moves: [
     ['wait', 'First the sky loads and carries you up to a door.'],
     ['click', `${tap()} the door${COARSE ? '' : ', or press Enter,'} to go through.`],
-    ['wheel', `${COARSE ? 'Swipe' : 'Scroll, swipe or use ↑ ↓'} to move one section at a time.`],
+    ['wheel', `${COARSE ? 'Swipe or use the bottom arrows' : 'Scroll, swipe or use ↑ ↓'} to move one section at a time.`],
     ['click', `The tabs pick a kind: ${WORKS_WORDS.filters.join(', ')}.${COARSE ? '' : ' ← → switch them too.'}`],
     ['zoom', `${tap()} a project to open its page.`],
     ['back', 'Back returns to the board.']] }),
   view: () => ({ title: 'A project', moves: [
-    ['wheel', `${COARSE ? 'Swipe' : 'Scroll, swipe or use ↑ ↓'}: one part per screen. The stars on the right show where you are.`],
-    ['zoom', `${tap()} a screenshot to see it large; ${tapLow()} again${COARSE ? '' : ' or press Esc'} to close it.`],
+    ['wheel', `${COARSE ? 'Swipe or use the bottom arrows' : 'Scroll, swipe or use ↑ ↓'}: one part per screen. The stars on the right show where you are.`],
+    ['zoom', COARSE ? 'Tap a screenshot to see it large. Close returns to the project.' : `${tap()} a screenshot to see it large; ${tapLow()} again or press Esc to close it.`],
     ['link', "The buttons under the project's words open the code on GitHub, or the live site."],
     ['back', 'Back returns to the list of projects.']] }),
   resume: () => ({ title: 'Résumé', moves: [
     ['circle', COARSE ? 'Press and draw a circle on the glass with your finger.' : 'Hold the mouse button down and draw a circle on the glass.'],
     ['wheel', `${COARSE ? 'Swipe up' : 'Scroll down'} into the sky.`],
     ['hold', `${COARSE ? 'Press' : 'Press the mouse'} and hold until the two hands touch.`],
-    ['key', `Skip${COARSE ? '' : ', or Enter,'} jumps ahead at any step.`],
+    ['key', COARSE ? 'Read résumé skips the intro at any step.' : 'Skip, or Enter, jumps ahead at any step.'],
     ['wheel', `Then read: ${COARSE ? 'swipe' : 'scroll or ↑ ↓'} one part at a time, or drag the ruler at the top.`],
     ['talk', `The bar at the bottom says hello, and its menu jumps to a section. ${tap()} a photo to see it large.`]] }),
   book: () => ({ title: 'Personal', moves: [
-    ['drag', `${COARSE ? 'Swipe' : 'Scroll, drag or use ← →'} to ride along the notebook.`],
-    ['click', `${tap()} things on the page: they talk. Pinned photos open large.`],
+    ['drag', `${COARSE ? 'Swipe or use the bottom arrows' : 'Scroll, drag or use ← →'} to ride along the notebook.`],
+    ['click', COARSE ? 'Tap notes to read them. Pinned photos open large. Tap the name at the bottom to choose a world.' : `${tap()} things on the page: they talk. Pinned photos open large.`],
     ['click', `The icons at the top are the five worlds: ${tapLow()} one to ride straight there.`],
     ['music', 'In Up late, the card on the desk plays a song: Play, Pause, and ✕ to stop it.'],
     ['back', 'Back closes the notebook.']] }),
   tome: () => ({ title: 'Experiences', moves: [
     ['wheel', `${COARSE ? 'Swipe' : 'Scroll, swipe, drag or use ← →'} to turn the page.`],
-    ['click', 'Every page is a chapter. The bar along the bottom jumps straight to one.'],
+    ['click', COARSE ? 'Tap the parchment card for larger, scrollable text and links. The arrows turn its pages.' : 'Every page is a chapter. The bar along the bottom jumps straight to one.'],
     ['back', 'Back closes the book.']] }),
 };
 // Which box is open, as the guides name them. Projects' gate and its list share one guide.
@@ -220,7 +220,10 @@ function tourTick() {
   const here = mode === 'inside' ? tourPlace() : null;
   helpBtn.hidden = !here;
   if (here) {
-    const r = soundBtn.getBoundingClientRect(); helpBtn.style.top = `${r.top}px`; helpBtn.style.height = `${r.height}px`; helpBtn.style.right = `${innerWidth - r.left + 8}px`;
+    const placement = [here, soundBtn.style.top, soundBtn.style.right, soundBtn.textContent, innerWidth, innerHeight].join('|');
+    if (helpBtn.dataset.placement !== placement) {
+      const r = soundBtn.getBoundingClientRect(); helpBtn.style.top = `${r.top}px`; helpBtn.style.height = `${r.height}px`; helpBtn.style.right = `${innerWidth - r.left + 8}px`; helpBtn.dataset.placement = placement;
+    }
     const key = `box-${here === 'view' ? 'works' : here}`;
     const ready = !(book && book.phase !== 'ride') && !(tome && tome.phase !== 'read'); // not over a loading screen, where it would run out unseen
     if (!tourSeen[key] && !tour && ready) { tourMark(key); helpBtn.classList.add('new'); tourBubbleOn(); }

@@ -45,6 +45,12 @@ body { margin: 0; background: #050404; color: var(--paper); font-family: var(--b
 }
 .hint { bottom: calc(14px + env(safe-area-inset-bottom, 0px)); transition: opacity .4s; }
 .loading { top: 50%; }
+.loading { left: 50%; right: auto; width: min(320px, calc(100% - 48px)); transform: translate(-50%, -50%); }
+.loading p { margin: 0 0 16px; }
+.loading progress { display: block; width: 100%; height: 8px; accent-color: var(--amber); }
+.loading small { display: block; margin: 12px 0 20px; font-size: 16px; letter-spacing: .02em; }
+.loading button { pointer-events: auto; min-height: 44px; padding: 10px 16px; border: 1px solid var(--amber); border-radius: 6px; color: var(--amber); background: #100e09; font: 18px var(--mono); cursor: pointer; }
+.loading [data-retry] { margin-right: 8px; }
 #room:not(.ready) .hint { opacity: 0; }
 #room.ready .loading { display: none; }
 .zoom .hint, .zoom #tip { opacity: 0; }
@@ -135,22 +141,26 @@ dialog button:hover, dialog .socials a:hover { background: #27527a; }
 dialog button:not(.ghost) { background: #3fc1b0; color: #14284b; }
 dialog button:not(.ghost):hover { background: #62d8c8; }
 dialog :focus-visible { outline-color: #ff8a5c; }
-body:not(.in-works) dialog:not(#zoom):not(#guide):not(#leave) { background: #0d0d0e; color: var(--paper); border: 2px solid var(--paper); border-radius: 8px; box-shadow: 6px 7px 0 rgba(0,0,0,.6), 0 18px 60px rgba(0,0,0,.7); }
-body:not(.in-works) dialog:not(#zoom):not(#guide):not(#leave)::backdrop { background: rgba(0,0,0,.72); }
+body:not(.in-works) dialog:not(#zoom):not(#guide):not(#leave):not(#phone-reader):not(#phone-jump) { background: #0d0d0e; color: var(--paper); border: 2px solid var(--paper); border-radius: 8px; box-shadow: 6px 7px 0 rgba(0,0,0,.6), 0 18px 60px rgba(0,0,0,.7); }
+body:not(.in-works) dialog:not(#zoom):not(#guide):not(#leave):not(#phone-reader):not(#phone-jump)::backdrop { background: rgba(0,0,0,.72); }
 body:not(.in-works) dialog .tape { display: inline-block; margin: 4px 0 18px; padding: 6px 16px 8px; font: 400 clamp(26px, 5vw, 40px)/1.05 var(--lettering, "Lilita One"), Impact, sans-serif; text-transform: uppercase; color: #000; text-shadow: none; background: var(--yellow); border: 3px solid #000; border-radius: 8px; box-shadow: 4px 5px 0 rgba(0,0,0,.6); transform: rotate(-2deg); }
-body:not(.in-works) dialog:not(#zoom):not(#leave) p { font: 500 15px/1.6 var(--body); color: var(--paper); }
+body:not(.in-works) dialog:not(#zoom):not(#leave):not(#phone-reader):not(#phone-jump) p { font: 500 15px/1.6 var(--body); color: var(--paper); }
 body:not(.in-works) dialog .address { font: 400 clamp(24px, 5vw, 32px)/1.1 var(--mono); color: var(--yellow); letter-spacing: .02em; }
 body:not(.in-works) dialog .topics li { background: var(--yellow); color: #000; font: 400 19px/1 var(--mono); border-radius: 4px; padding: 5px 10px; }
 body:not(.in-works) .keys dt { font: 400 21px/1 var(--mono); color: var(--yellow); }
 body:not(.in-works) .keys dd { font: 500 13px/1.45 var(--body); color: var(--paper); }
-body:not(.in-works) dialog:not(#guide):not(#zoom):not(#leave) button, body:not(.in-works) dialog .socials a { border: 2px solid var(--paper); border-radius: 6px; background: #000; color: var(--paper); font: 400 20px/1 var(--mono); letter-spacing: .03em; }
-body:not(.in-works) dialog:not(#guide):not(#zoom):not(#leave) button:hover, body:not(.in-works) dialog .socials a:hover { background: var(--paper); color: #000; }
-body:not(.in-works) dialog:not(#guide):not(#zoom):not(#leave) button:not(.ghost) { background: var(--yellow); border-color: var(--yellow); color: #000; }
-body:not(.in-works) dialog:not(#guide):not(#zoom):not(#leave) button:not(.ghost):hover { background: #fff36b; }
+body:not(.in-works) dialog:not(#guide):not(#zoom):not(#leave):not(#phone-reader):not(#phone-jump) button, body:not(.in-works) dialog .socials a { border: 2px solid var(--paper); border-radius: 6px; background: #000; color: var(--paper); font: 400 20px/1 var(--mono); letter-spacing: .03em; }
+body:not(.in-works) dialog:not(#guide):not(#zoom):not(#leave):not(#phone-reader):not(#phone-jump) button:hover, body:not(.in-works) dialog .socials a:hover { background: var(--paper); color: #000; }
+body:not(.in-works) dialog:not(#guide):not(#zoom):not(#leave):not(#phone-reader):not(#phone-jump) button:not(.ghost) { background: var(--yellow); border-color: var(--yellow); color: #000; }
+body:not(.in-works) dialog:not(#guide):not(#zoom):not(#leave):not(#phone-reader):not(#phone-jump) button:not(.ghost):hover { background: #fff36b; }
 body:not(.in-works) dialog :focus-visible { outline-color: var(--yellow); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+@media (pointer: coarse) and (max-width: 900px), (max-width: 600px) {
+  #back { top: calc(10px + env(safe-area-inset-top, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); max-width: calc(100vw - 124px); min-height: 44px; }
+  #links { max-width: calc(100% - 40px); }
 }
 </style>
 
@@ -158,7 +168,12 @@ body:not(.in-works) dialog :focus-visible { outline-color: var(--yellow); }
   <h1 class="sr-only">Cyrill Cajucom, portfolio</h1>
   <canvas id="room3d" aria-hidden="true"></canvas>
   <div class="vignette"></div>
-  <p class="loading">Warming up the tube...</p>
+  <div class="loading" role="status" aria-live="polite">
+    <p id="load-title">Warming up the tube...</p>
+    <progress id="load-progress" max="100" value="0" aria-label="Loading the TV room"></progress>
+    <small id="load-detail">Getting the room ready · 0%</small>
+    <button type="button" data-retry hidden>Try again</button><button id="load-skip" type="button" disabled>Continue to portfolio</button>
+  </div>
   <p class="hint">Click the screen to go inside. The dials work too.</p>
   <div id="tv-controls">
     <button id="screen" type="button">Go inside the TV</button>
@@ -251,10 +266,10 @@ body:not(.in-works) dialog :focus-visible { outline-color: var(--yellow); }
   <div class="row"><button type="button" class="ghost" data-close>Stay here</button><button type="button" id="leave-go">Take me there</button></div>
 </dialog>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/environments/RoomEnvironment.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/utils/BufferGeometryUtils.js"></script>
+<script src="vendor/three-r147/three.min.js"></script>
+<script src="vendor/three-r147/GLTFLoader.js"></script>
+<script src="vendor/three-r147/RoomEnvironment.js"></script>
+<script src="vendor/three-r147/BufferGeometryUtils.js"></script>
 <script>
 const $ = s => document.querySelector(s);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -516,7 +531,13 @@ function stepFocus(d) {
   if (focus === stories && zoomGoal) { stepStory(d); return; }
   const i = focus ? items.indexOf(focus) : -1; setFocus(items[(i + d + items.length) % items.length]);
 }
-function syncBack() { backBtn.textContent = focus === stories && zoomGoal && storyStage === 'row' ? '◀ Back to stack' : view || zoomGoal ? '◀ Back to board' : '⏏ Back to room'; }
+function syncBack() {
+  if (mode !== 'inside') return;
+  const inSection = view || gate || book || tome || resume || works || zoomGoal;
+  const label = focus === stories && zoomGoal && storyStage === 'row' && !view && !gate && !book && !tome && !resume && !works ? '◀ Back to stack' : view && works ? '◀ Back to projects' : inSection ? '◀ Back to board' : '⏏ Back to room';
+  if (backBtn.textContent !== label) backBtn.textContent = label;
+  backBtn.hidden = noRoom && !inSection;
+}
 
 /* ---------- Scene drawing (2D canvas, then pushed through the CRT shader) ---------- */
 const gl = crt.getContext('webgl', { antialias: false, alpha: false });
@@ -917,7 +938,7 @@ function stackRelease(sx) { // far enough, or a quick flick, sends it back; othe
 function stackHit(clientX, clientY) { const [sx, sy] = toScene(clientX, clientY), [px, py] = place(stories), [cw, ch] = stackSize(); return Math.abs(sx - px) < cw / 2 && Math.abs(sy - py) < ch / 2; }
 /* ---------- Experiences, selected: the old wood of the table, dithered, warm, rippling ---------- */
 // From Cyrill's recipe: blurred photo behind, 13 px dither cells by brightness, contrast 115, 28% grey, a soft-light gold tint, ripples, bloom, vignette.
-const woodPic = new Image(); woodPic.src = 'textures/wood-old.jpg';
+const woodPic = new Image(); woodPic.src = COARSE ? 'textures/mobile/wood-old.jpg' : 'textures/wood-old.jpg';
 const BAYER4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(v => (v + .5) / 16);
 let wood = null;
 function drawWood(now) {
@@ -1070,8 +1091,13 @@ function drawReticle(now) {
 }
 function wrapLines(s, maxW) {
   const lines = []; let line = '';
-  for (const word of s.split(' ')) {
+  for (const word of String(s).split(/\s+/)) {
     if (line && g.measureText(line + ' ' + word).width > maxW) { lines.push(line); line = word; } else line = line ? line + ' ' + word : word;
+    if (g.measureText(line).width > maxW) {
+      let chunk = '';
+      for (const ch of line) { if (chunk && g.measureText(chunk + ch).width > maxW) { lines.push(chunk); chunk = ch; } else chunk += ch; }
+      line = chunk;
+    }
   }
   return [...lines, line];
 }
@@ -1102,7 +1128,8 @@ function projectWords(c, x, y, w, size, split, draw) { // returns where the word
   let right = x;
   lines.forEach((line, i) => {
     const bw = Math.min(w - i * tag * .5, widthOf(line)), by = y + i * (blockH + gap), bx = x + i * tag * .5; right = Math.max(right, bx + bw);
-    if (draw) { g.fillStyle = 'rgba(5,12,30,.45)'; g.beginPath(); g.roundRect(bx + 4, by + 6, bw, blockH, 12); g.fill(); g.fillStyle = WORKS_CREAM; g.beginPath(); g.roundRect(bx, by, bw, blockH, 12); g.fill(); worksWords(line, bx + bw / 2, by + blockH / 2 + tag * .04, tag, WORKS_NAVY); }
+    const fitTag = Math.min(tag, tag * (bw - tag * .5) / Math.max(1, widthOf(line) - tag * .9));
+    if (draw) { g.fillStyle = 'rgba(5,12,30,.45)'; g.beginPath(); g.roundRect(bx + 4, by + 6, bw, blockH, 12); g.fill(); g.fillStyle = WORKS_CREAM; g.beginPath(); g.roundRect(bx, by, bw, blockH, 12); g.fill(); worksWords(line, bx + bw / 2, by + blockH / 2 + tag * .04, fitTag, WORKS_NAVY); }
   });
   y += lines.length * (blockH + gap) + size * .2;
   // What kind of project, on a coral pill under the tag's right end.
@@ -1139,41 +1166,80 @@ function projectPlay(x, y, r) { // a round play button over a demo video's still
   g.fillStyle = WORKS_CORAL; g.beginPath(); g.moveTo(x - r * .3, y - r * .45); g.lineTo(x + r * .5, y); g.lineTo(x - r * .3, y + r * .45); g.closePath(); g.fill();
 }
 function drawProject() {
-  const { c, p } = view, now = performance.now(), t = reduced ? 0 : now / 1000, ease = 1 - (1 - p) ** 3, split = W > H * 1.05 && W >= 760;
+  const { c, p } = view, now = performance.now(), t = reduced ? 0 : now / 1000, ease = 1 - (1 - p) ** 3, split = W > H * 1.05 && W >= 760 && !(typeof mobileLayout === 'function' && mobileLayout());
   // The left side (all of it when tall), and the words' column.
   const lx = split ? Math.max(28, W * .05) : 0, lw = split ? W * .5 : W, mid = lx + lw / 2, colX = split ? W * .6 : Math.max(20, W * .07), colW = split ? W * .95 - colX : W - colX * 2;
   const cw = split ? lw : Math.min(W - 40, 640), bodySize = Math.max(15, Math.min(19, (split ? colW : cw) * (split ? .042 : .03))), width = Math.min(cw, 640), caption = Math.max(15, Math.min(18, cw * .028));
   if (c.shots) worksLoadShots(c); // once; the pictures may not have loaded yet if the page opened without the list
   if (!c.shots) { const bw = Math.round(Math.min(cw, H * .62 * 1.6)); c.heroBmp = c.heroBmp || bitmap(c, bw, Math.round(bw * .62)); c.detailBmp = c.detailBmp || bitmap(c, cw, Math.round(cw * .46), 1.7); }
   g.font = `${bodySize}px ${WORKS_BODY}`;
-  const feats = (c.features || []).map(f => wrapLines(f, width - bodySize * 4.2)), pad = bodySize * 1.1;
+  const feats = (c.features || []).map((f, i) => Object.assign(wrapLines(f, width - bodySize * 4.2), { sourceId: `feature:${i}` })), pad = bodySize * 1.1;
   const groups = Math.ceil(feats.length / 6), each = Math.ceil(feats.length / Math.max(1, groups)), chunks = Array.from({ length: groups }, (_, i) => feats.slice(i * each, (i + 1) * each)); // a long list reads better over two parts
+  const paginate = list => {
+    if (!COARSE && W >= 600) return [list];
+    const pages = []; let page = [], height = 0;
+    const available = Math.max(bodySize * 4, H - 220);
+    for (const lines of list) {
+      const limit = Math.max(1, Math.floor((available - bodySize * .55) / (bodySize * 1.45)));
+      for (let i = 0; i < lines.length; i += limit) {
+        const part = Object.assign(lines.slice(i, i + limit), { sourceId: lines.sourceId }), h = part.length * bodySize * 1.45 + bodySize * .55;
+        if (page.length && height + h > available) { pages.push(page); page = []; height = 0; }
+        page.push(part); height += h;
+      }
+    }
+    if (page.length) pages.push(page);
+    return pages;
+  };
   const parts = []; // each draws itself centred on its own screen, given the top of its block
   if (!split) { const size = Math.max(15, Math.min(18, W * .042)), h = projectWords(c, colX, 0, colW, size, false, false).bottom; parts.push({ h: h + 70, words: true, draw: y => { const at = projectWords(c, colX, y, colW, size, false, true); view.linksAt = at.links; } }); }
-  const shotPart = (pic, cap, video) => { const ar = pic && pic.naturalWidth ? pic.naturalWidth / pic.naturalHeight : 16 / 10, pw = Math.min(cw, H * (split ? .66 : .6) * ar), ph = pw / ar;
-    return { h: ph + caption * 3.2, draw: y => { // each picture as big as fits, framed, and under it what it shows on a frosted strip
+  const shotPart = (pic, cap, video) => { const ar = pic && pic.naturalWidth ? pic.naturalWidth / pic.naturalHeight : 16 / 10; let pw = Math.min(cw, H * (split ? .66 : .6) * ar), ph = pw / ar;
+    g.font = `400 ${caption}px ${WORKS_LABEL}`;
+    let capLines = cap && (COARSE || W < 600) ? wrapLines(cap, pw - caption * 2.4) : [cap], capH = caption * (1 + capLines.length * 1.2);
+    if (typeof mobileLayout === 'function' && mobileLayout()) for (let pass = 0; pass < 3; pass++) {
+      const room = Math.max(50, H - 166 - Math.max(caption * 3.2, capH + caption * 1.1));
+      if (ph <= room) break;
+      ph = room; pw = Math.min(cw, ph * ar);
+      capLines = cap ? wrapLines(cap, Math.max(40, pw - caption * 2.4)) : ['']; capH = caption * (1 + capLines.length * 1.2);
+    }
+    return { key: `media:${video?.video || pic?.src || cap}`, label: cap || (video ? 'Demo video' : 'Screenshot'), h: ph + Math.max(caption * 3.2, capH + caption * 1.1), draw: y => { // each picture as big as fits, framed, and under it what it shows on a frosted strip
       if (!pic || !pic.naturalWidth) return;
       const px = mid - pw / 2; projectFrame(px, y, pw, ph, 14, () => g.drawImage(pic, px, y, pw, ph)); view.zoomHot.push({ x: px, y, w: pw, h: ph, pic, cap, video }); if (video) projectPlay(mid, y + ph / 2, Math.max(28, Math.min(pw, ph) * .12)); else projectMagnifier(px + pw - 26, y + 26);
-      if (cap) { g.font = `400 ${caption}px ${WORKS_LABEL}`; const sw = Math.min(pw, g.measureText(cap).width + caption * 2.4), sh = caption * 2.1, sy = y + ph + caption * 1.1; g.fillStyle = 'rgba(8,26,92,.6)'; g.strokeStyle = 'rgba(244,236,216,.35)'; g.lineWidth = 1.2; g.beginPath(); g.roundRect(mid - sw / 2, sy, sw, sh, sh / 2); g.fill(); g.stroke(); worksWords(cap, mid, sy + sh / 2 + caption * .04, caption, WORKS_CREAM); }
+      if (cap) { g.font = `400 ${caption}px ${WORKS_LABEL}`; const sw = Math.min(pw, Math.max(...capLines.map(line => g.measureText(line).width)) + caption * 2.4), sh = COARSE || W < 600 ? capH : caption * 2.1, sy = y + ph + caption * 1.1; g.fillStyle = 'rgba(8,26,92,.6)'; g.strokeStyle = 'rgba(244,236,216,.35)'; g.lineWidth = 1.2; g.beginPath(); g.roundRect(mid - sw / 2, sy, sw, sh, sh / 2); g.fill(); g.stroke(); capLines.forEach((line, i) => worksWords(line, mid, sy + sh / 2 + (i - (capLines.length - 1) / 2) * caption * 1.2 + caption * .04, caption, WORKS_CREAM)); }
     } }; };
   const shots = c.shots || [];
   if (c.demo) parts.push(shotPart(c.demo.pic, c.demo.cap, c.demo)); // the demo video comes first
   if (shots.length) parts.push(shotPart(shots[0].pics[0], shots[0].cap));
   const listPart = (title, list) => { const panelH = list.reduce((n, l) => n + l.length * bodySize * 1.45 + bodySize * .55, 0) + pad * 1.4;
-    return { h: 50 + panelH, draw: y => {
+    return { key: ['What it does', "And there's more"].includes(title) ? 'features' : title, anchors: list.map(lines => lines.sourceId), label: title, h: 50 + panelH, draw: y => {
       worksWords(title, mid, y, Math.max(24, Math.min(40, cw * .06)), WORKS_CREAM, { font: WORKS_SCRIPT }); y += 50;
       const left = mid - width / 2; g.fillStyle = 'rgba(8,26,92,.55)'; g.strokeStyle = 'rgba(244,236,216,.3)'; g.lineWidth = 1.5; g.beginPath(); g.roundRect(left, y, width, panelH, 20); g.fill(); g.stroke(); // a frosted panel, a coral star for each
       y += pad + bodySize * .5;
       list.forEach(ls => { worksStar(left + pad + bodySize * .3, y, bodySize * .42, WORKS_CORAL); ls.forEach(line => { text(g, line, left + pad + bodySize * 1.5, y, bodySize, WORKS_BODY, WORKS_CREAM, 'left'); y += bodySize * 1.45; }); y += bodySize * .55; });
     } }; };
-  chunks.forEach((list, ci) => parts.push(listPart(ci ? "And there's more" : 'What it does', list)));
-  const wrapAll = list => list.map(f => wrapLines(f, width - bodySize * 4.2));
-  if (c.results) parts.push(listPart('Results', wrapAll(c.results))); // the numbers, then the hardest problem it solved
-  if (c.hard) parts.push(listPart('The hardest part', wrapAll([c.hard])));
+  (COARSE || W < 600 ? paginate(feats) : chunks).forEach((list, ci) => parts.push(listPart(ci ? "And there's more" : 'What it does', list)));
+  const wrapAll = list => { g.font = `${bodySize}px ${WORKS_BODY}`; return list.map(f => Object.assign(wrapLines(f, width - bodySize * 4.2), { sourceId: f })); };
+  if (c.results) paginate(wrapAll(c.results)).forEach(list => parts.push(listPart('Results', list))); // the numbers, then the hardest problem it solved
+  if (c.hard) paginate(wrapAll([c.hard])).forEach(list => parts.push(listPart('The hardest part', list)));
   for (const shot of shots.slice(1)) parts.push(shotPart(shot.pics[0], shot.cap));
   if (!c.shots) { parts.push({ h: c.heroBmp.height / maxPr, draw: y => g.drawImage(c.heroBmp, mid - c.heroBmp.width / maxPr / 2, y, c.heroBmp.width / maxPr, c.heroBmp.height / maxPr) }); parts.push({ h: Math.round(cw * .46), draw: y => g.drawImage(c.detailBmp, mid - cw / 2, y, cw, Math.round(cw * .46)) }); }
   parts.push({ h: 90, draw: y => { worksStar(mid - 110, y + 20, 7, WORKS_TEAL); worksStar(mid + 110, y + 20, 7, WORKS_TEAL); worksWords('End of case study', mid, y + 20, 20, 'rgba(244,236,216,.75)'); worksWords('Back to the surface with Escape or Back', mid, y + 62, 15, 'rgba(244,236,216,.5)'); } });
+  if (!split && (COARSE || W < 600) && parts[0].words && parts[0].h > H - 160) {
+    const first = parts.shift(), available = Math.max(80, H - 160), step = Math.max(40, available - 28), count = Math.ceil((first.h - 28) / step), pages = [];
+    for (let i = 0; i < count; i++) {
+      const offset = Math.min(i * step, first.h - available);
+      pages.push({ h: available, words: true, fraction: offset / Math.max(1, first.h - available), draw: y => { g.save(); g.beginPath(); g.rect(0, y, W, available); g.clip(); first.draw(y - offset); g.restore(); } });
+    }
+    parts.unshift(...pages); // overlap keeps a line readable on at least one complete screen
+  }
   view.parts = parts.length; view.max = (parts.length - 1) * H;
+  view.partInfo = parts.map((part, i) => part.words ? 'Introduction' : part.label || (i === parts.length - 1 ? 'End of case study' : 'Project details'));
+  view.partKeys = parts.map((part, i) => ({ key: part.words ? 'intro' : part.key || (i === parts.length - 1 ? 'end' : `detail:${i}`), anchors: part.anchors, fraction: part.fraction || 0 }));
+  if (view.restorePart) {
+    const wanted = view.restorePart, matches = view.partKeys.map((part, i) => ({ ...part, i })).filter(part => part.key === wanted.key);
+    const found = wanted.key === 'intro' ? matches.sort((a, b) => Math.abs(a.fraction - wanted.fraction) - Math.abs(b.fraction - wanted.fraction))[0] : matches.find(part => !wanted.anchors?.length || part.anchors?.includes(wanted.anchors[0])) || matches[0];
+    view.scroll = view.target = Math.max(0, Math.min(parts.length - 1, found?.i || 0)) * H;
+    view.restorePart = null;
+  }
   projectNight(t);
   view.zoomHot = []; g.globalAlpha = ease;
   parts.forEach((part, i) => { const at = i * H - view.scroll + H / 2 + (1 - ease) * 50; if (Math.abs(at - H / 2) < H) part.draw(at - part.h / 2); });
@@ -1185,7 +1251,7 @@ function drawProject() {
   g.globalAlpha = 1;
   // The links are real buttons, placed under the words: beside the picture when wide, with the first part when tall.
   if (view.linksAt && !linksBox.hidden) {
-    const [lxs, lys] = view.linksAt, [cx, cy] = toClient(lxs, lys), on = split || Math.abs(view.scroll) < H * .5;
+    const [lxs, lys] = view.linksAt, [cx, cy] = toClient(lxs, lys), on = split || ((COARSE || W < 600) ? parts[Math.round(view.scroll / H)]?.words && cy >= 65 && cy + linksBox.offsetHeight <= H - 24 : Math.abs(view.scroll) < H * .5);
     Object.assign(linksBox.style, { left: `${cx}px`, top: `${cy}px`, maxWidth: `${(split ? colW : W - colX * 2)}px`, visibility: on ? '' : 'hidden', opacity: ease });
   }
   const n = parts.length, step = Math.min(20, H * .6 / n), rx = split ? (lx + lw + colX) / 2 : W - Math.max(13, W * .028), top = H / 2 - step * (n - 1) / 2, at = Math.round(view.scroll / H); // where you are
@@ -1342,7 +1408,7 @@ function flickerAt(now) {
 
 async function initRoom() {
   if (!window.THREE || !THREE.GLTFLoader || !gl) throw Error('3D unavailable');
-  renderer = new THREE.WebGLRenderer({ canvas: $('#room3d'), antialias: true, powerPreference: 'high-performance' });
+  renderer = new THREE.WebGLRenderer({ canvas: $('#room3d'), antialias: !COARSE, powerPreference: 'high-performance' });
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.physicallyCorrectLights = true;
@@ -1355,21 +1421,26 @@ async function initRoom() {
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene3d.environment = pmrem.fromScene(new THREE.RoomEnvironment(), .04).texture;
 
-  const aniso = renderer.capabilities.getMaxAnisotropy(), loader = new THREE.TextureLoader();
+  const manager = new THREE.LoadingManager();
+  if (COARSE) manager.setURLModifier(url => url.replace(/(models\/[^/]+\/textures\/)([^/]+\.jpg)$/, '$1mobile/$2'));
+  manager.onProgress = (url, loaded, total) => loadingProgress(Math.min(90, Math.round(loaded / total * 90)), `Loading room assets (${loaded}/${total})`);
+  const aniso = COARSE ? 2 : renderer.capabilities.getMaxAnisotropy(), loader = new THREE.TextureLoader(manager);
   const map = async (url, rx, ry, srgb) => {
     const t = await loader.loadAsync(url);
     t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry); t.anisotropy = aniso;
     if (srgb) t.encoding = THREE.sRGBEncoding;
     return t;
   };
-  const surface = async (name, rx, ry) => new THREE.MeshStandardMaterial({
-    map: await map(`textures/${name}.jpg`, rx, ry, true), normalMap: await map(`textures/${name}-nor.jpg`, rx, ry), roughnessMap: await map(`textures/${name}-rough.jpg`, rx, ry), envMapIntensity: .03,
-  });
+  const surface = async (name, rx, ry) => {
+    const base = COARSE ? 'textures/mobile/' : 'textures/';
+    const [diffuse, normal, roughness] = await Promise.all([map(`${base}${name}.jpg`, rx, ry, true), map(`${base}${name}-nor.jpg`, rx, ry), map(`${base}${name}-rough.jpg`, rx, ry)]);
+    return new THREE.MeshStandardMaterial({ map: diffuse, normalMap: normal, roughnessMap: roughness, envMapIntensity: .03 });
+  };
   const WALL_W = 14, WALL_H = 6, FLOOR_D = 7;
   const [wallMat, floorMat, tvScene, cabinetScene] = await Promise.all([
     surface('brick', WALL_W / .95, WALL_H / .95), surface('floor', WALL_W / 1.7, FLOOR_D / 1.7),
     // .json and .wasm are plain glTF and its buffer, renamed because the artifact host won't serve .gltf or .bin.
-    new THREE.GLTFLoader().loadAsync('models/Television_01/Television_01.json'), new THREE.GLTFLoader().loadAsync('models/modern_wooden_cabinet/modern_wooden_cabinet.json'),
+    new THREE.GLTFLoader(manager).loadAsync('models/Television_01/Television_01.json'), new THREE.GLTFLoader(manager).loadAsync('models/modern_wooden_cabinet/modern_wooden_cabinet.json'),
   ]);
   wallMat.normalScale.set(1.6, 1.6);
 
@@ -1442,7 +1513,7 @@ async function initRoom() {
   sparks.visible = false; scene3d.add(sparks);
 
   // Dive effect, refined from the glitch and bloom CodePen as one pass: torn rows, colour split, dropped blocks, bloom, flash.
-  fxTarget = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
+  fxTarget = new THREE.WebGLRenderTarget(1, 1, { type: COARSE ? THREE.UnsignedByteType : THREE.HalfFloatType, samples: COARSE ? 0 : 4 });
   fxScene = new THREE.Scene(); fxCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
   fxMaterial = new THREE.ShaderMaterial({
     uniforms: { map: { value: fxTarget.texture }, amount: { value: 0 }, time: { value: 0 }, flash: { value: 0 } },
@@ -1480,7 +1551,7 @@ async function initRoom() {
   scene3d.add(new THREE.HemisphereLight(0x8fa3c8, 0x241a12, .03));
   const lamp = new THREE.SpotLight(0xffc896, 1.5, 7, .62, 1, 2);
   lamp.position.set(-.5, 3.1, 2.1); lamp.target.position.set(0, .7, TV_Z);
-  lamp.castShadow = true; lamp.shadow.mapSize.set(2048, 2048); lamp.shadow.radius = 6; lamp.shadow.bias = -.0004; lamp.shadow.camera.near = .5; lamp.shadow.camera.far = 7;
+  lamp.castShadow = true; lamp.shadow.mapSize.set(COARSE ? 1024 : 2048, COARSE ? 1024 : 2048); lamp.shadow.radius = 6; lamp.shadow.bias = -.0004; lamp.shadow.camera.near = .5; lamp.shadow.camera.far = 7;
   scene3d.add(lamp, lamp.target);
   // A spot aimed away from the TV, so its glow lands on the cabinet and floor but not back on its own glass.
   tvSpill = new THREE.SpotLight(0x9fc0ff, 1, 5, 1.2, 1, 2);
@@ -1492,6 +1563,9 @@ async function initRoom() {
   resize();
   powerAt = performance.now(); // the TV warms up as the room appears
   camera.position.copy(home.pos); camLook.v.copy(home.look);
+  loadingProgress(95, 'Lighting the TV');
+  renderer.render(scene3d, camera); // compile and paint before dismissing the warm-up screen
+  loadingProgress(100, 'Ready');
   room.classList.add('ready');
 }
 
@@ -1520,6 +1594,8 @@ function renderRoom(now) {
   if (screenMesh.visible && roomFrames++ % 2 === 0) { paintScreen(now); screenTex.needsUpdate = true; } // TV picture at half rate: it costs a repaint and a texture upload
   let fx = 0, flash = 0, finish = null;
   if (dive) {
+    if (COARSE && !reduced && dive.last) dive.t0 += Math.max(0, now - dive.last - 64);
+    dive.last = now; // a slow phone must still show the flight instead of jumping to its end
     const t = DIVE_MS ? Math.min(1, (now - dive.t0) / DIVE_MS) : 1, e = t < .5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
     camera.position.lerpVectors(dive.from, dive.to.pos, e); camLook.v.lerpVectors(dive.fromLook, dive.to.look, e);
     const nearScreen = dive.outward ? 1 - t : t; // effects build as the camera nears the glass, in both directions
@@ -1555,6 +1631,7 @@ function screenPoint(local = [SCREEN.x, SCREEN.y]) { // viewport px of a spot on
 let layoutShape = null;
 function resize() {
   if (!innerWidth || !innerHeight) return; // hidden or collapsed window: a 0 size would poison the camera with NaN
+  const mobilePosition = typeof mobileCapturePosition === 'function' ? mobileCapturePosition() : null;
   W = innerWidth; H = innerHeight;
   const nextPr = Math.min(devicePixelRatio || 1, 2, Math.sqrt(3.7e6 / (W * H))); // sharp on phones and retina, capped so 4K doesn't choke the shader
   if (nextPr !== maxPr) { maxPr = nextPr; items.forEach(c => { c.bmp = null; }); }
@@ -1570,10 +1647,14 @@ function resize() {
   items.forEach(c => { c.heroBmp = c.detailBmp = null; });
   paper = null; // shortcut: raked marks are lost when the window changes size, fine while they're only play
   dirty = true;
+  if (renderer) {
+    renderer.setPixelRatio(COARSE && (gate || mode === 'room' || mode === 'dive') ? Math.min(maxPr, 1.25) : COARSE && (book || tome) ? Math.min(maxPr, 1.5) : maxPr); renderer.setSize(W, H, false);
+  }
   if (roomReady) {
-    renderer.setPixelRatio(COARSE && gate ? Math.min(maxPr, 1.25) : COARSE && (book || tome) ? Math.min(maxPr, 1.5) : maxPr); renderer.setSize(W, H, false); frameRoom();
+    frameRoom();
     if (mode === 'room' && !camera.position.lengthSq()) { camera.position.copy(home.pos); camLook.v.copy(home.look); } // first real size after loading while hidden
   }
+  if (mobilePosition) mobileRestorePosition(mobilePosition);
 }
 addEventListener('resize', resize);
 
@@ -1620,7 +1701,9 @@ function step(dt) {
 let lastFrame = 0, clearK = 0; // clearK: how far the TV effect is turned down, for the pages made of reading (a project, the résumé, Experiences)
 function frame(now) {
   requestAnimationFrame(frame);
+  if (document.hidden || (typeof mobileLayout === 'function' && mobileLayout() && document.querySelector('dialog[open]'))) { lastFrame = now; return; }
   const dt = now - lastFrame; lastFrame = now;
+  syncBack();
   step(dt);
   if (mode !== 'room') { // the portfolio only needs drawing once you're heading inside
     if (dirty) {
@@ -1741,7 +1824,7 @@ function openProject(c, viaKeyboard = false, passedGate = false) {
 function closeProject() {
   const c = view.c, viaKeyboard = view.viaKeyboard;
   view = null; glitch = reduced ? 0 : 1; dirty = true; linksBox.hidden = true; linksBox.removeAttribute('style');
-  syncBack(); live.textContent = ''; backBtn.hidden = noRoom;
+  syncBack(); live.textContent = '';
   if (viaKeyboard) navButtons.get(c).focus();
 }
 const goBack = () => { if (view) closeProject(); else if (gate) closeGate(); else if (book) closeBook(); else if (tome) closeTome(); else if (resume) closeResume(); else if (works) closeWorks(); else if (zoomGoal && focus === stories && storyStage === 'row') { if (rowFocusGoal) rowFocusGoal = 0; else { storyStage = 'stack'; syncBack(); } } else if (zoomGoal) clearFocus(); else leave(); };
@@ -1800,6 +1883,14 @@ function endDrag(e) {
   if (!drag) return;
   const clicked = drag.moved < 6 && e.type === 'pointerup', { startX, startY, vy, at, rake, slide } = drag;
   drag = null; crt.style.cursor = 'grab';
+  if (e.type === 'pointercancel') {
+    if (view) view.scroll = view.target;
+    if (works) works.pull = 0;
+    if (tome) tome.dragX = 0;
+    if (resume) { resume.holding = false; resume.scrub = null; resume.pull = 0; resume.path = []; }
+    stackDrag = null; hover = null; dirty = true;
+    return;
+  }
   if (e.pointerType === 'touch') hover = null;
   if (gate) { if (clicked) gateClick(); return; }
   if (book) { if (book.phase === 'ride') { if (clicked) bookClick(e.clientX, e.clientY); else if (e.type === 'pointerup') bookFling(); } return; }
@@ -1826,6 +1917,7 @@ crt.addEventListener('pointerup', endDrag);
 crt.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; [reticle.px, reticle.py] = toScene(e.clientX, e.clientY); reticle.on = mode === 'inside' && !view && !gate && !book && !tome && !resume && !works; if (reticleLive()) crt.style.cursor = 'none'; else if (crt.style.cursor === 'none') crt.style.cursor = 'grab'; }); // the brackets stand in for the system cursor
 crt.addEventListener('pointerleave', () => { reticle.on = false; reticle.ready = false; });
 crt.addEventListener('pointercancel', endDrag);
+crt.addEventListener('lostpointercapture', e => { if (drag) endDrag({ type: 'pointercancel', pointerType: e.pointerType }); });
 crt.addEventListener('wheel', e => {
   if (mode !== 'inside') return;
   e.preventDefault();
@@ -1849,6 +1941,7 @@ crt.addEventListener('wheel', e => {
 }, { passive: false });
 addEventListener('keydown', e => {
   if (mode !== 'inside' || document.querySelector('dialog[open]')) return;
+  if (typeof mobileLayout === 'function' && mobileLayout() && e.key !== 'Escape' && e.target.closest('button, a, input, select, textarea')) return;
   if (e.key === 'Escape' || e.key === 'Backspace') { goBack(); return; }
   if (gate) { if ((e.key === 'Enter' || e.key === ' ') && document.activeElement !== backBtn) { e.preventDefault(); gateClick(); } return; }
   if (book) { const step = { ArrowRight: 7, ArrowDown: 7, ArrowLeft: -7, ArrowUp: -7 }[e.key]; if (step) { e.preventDefault(); if (book.phase === 'ride') bookMove(step); } return; }
@@ -1934,6 +2027,7 @@ $('#zoom').addEventListener('pointerdown', e => { zoomDownX = e.clientX; });
 $('#zoom').addEventListener('click', e => { // a swipe flips; any other click puts it away
   if (e.target.tagName === 'VIDEO') return; // the video's own controls
   if (zoomList && Math.abs(e.clientX - zoomDownX) > 40) return zoomStep(e.clientX < zoomDownX ? 1 : -1);
+  if (typeof mobileLayout === 'function' && mobileLayout() && e.target !== $('#zoom')) return;
   $('#zoom').close();
 });
 for (const [sel, d] of [['.prev', -1], ['.next', 1]]) $(`#zoom ${sel}`).addEventListener('click', e => { e.stopPropagation(); zoomStep(d); });
@@ -1946,10 +2040,23 @@ document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click
 document.querySelectorAll('dialog').forEach(d => d.addEventListener('click', e => { if (e.target === d) d.close(); }));
 $('#copy').addEventListener('click', async e => {
   try { await navigator.clipboard.writeText($('#address').textContent); e.target.textContent = 'Copied'; }
-  catch { getSelection().selectAllChildren($('#address')); e.target.textContent = 'Press Ctrl+C to copy'; }
+  catch { getSelection().selectAllChildren($('#address')); e.target.textContent = COARSE ? 'Touch and hold the address to copy' : 'Press Ctrl+C to copy'; }
 });
 
 /* ---------- Boot ---------- */
+let loadPercent = 0;
+document.addEventListener('DOMContentLoaded', () => { $('#load-skip').disabled = false; });
+function loadingProgress(percent, detail) {
+  loadPercent = Math.max(loadPercent, percent);
+  $('#load-progress').value = loadPercent;
+  $('#load-detail').textContent = `${detail} · ${loadPercent}%`;
+}
+$('#load-skip').addEventListener('click', () => {
+  if (mode !== 'room') return;
+  noRoom = !roomReady;
+  mode = 'dive'; resize(); arrive(); syncBack();
+});
+$('.loading [data-retry]').addEventListener('click', () => location.reload());
 if (COARSE) {
   $('.hint').textContent = 'Tap the screen to go inside';
   $('.keys').innerHTML = [['Tap', 'Look closer, tap again to open'], ['Swipe', 'Next or previous screen'], ['Swipe sideways on Stories', 'Next or previous picture'], ['Drag', 'Tug the board'], ['Back', 'Back to the board, then the room']].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
@@ -1962,7 +2069,11 @@ Promise.all([`40px Anton`, `40px "Lilita One"`, `30px VT323`, `400 20px "Instrum
 // If the 3D room can't load, the portfolio still has to work: skip straight to it.
 initRoom().catch(err => {
   console.warn('3D room unavailable:', err);
-  noRoom = true; mode = 'dive'; backBtn.hidden = true; resize(); arrive();
+  noRoom = true;
+  $('#load-title').textContent = 'The TV room could not load';
+  $('#load-detail').textContent = 'Try again, or continue to the portfolio.';
+  $('.loading [data-retry]').hidden = false;
+  syncBack();
 });
 </script>
 <script src="gate.js"></script>
@@ -1974,3 +2085,4 @@ initRoom().catch(err => {
 <script src="sound.js"></script>
 <script src="tour.js"></script>
 <script src="plain.js"></script>
+<script src="mobile.js"></script>
