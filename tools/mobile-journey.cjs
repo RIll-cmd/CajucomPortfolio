@@ -3,7 +3,7 @@ const assert = require('node:assert/strict'), fs = require('node:fs'), path = re
 let chromium; try { ({ chromium } = require('playwright-core')); } catch { ({ chromium } = require('../.check-tmp/node_modules/playwright-core')); }
 const root = path.resolve(__dirname, '..'), out = path.join(root, '.check-tmp');
 fs.mkdirSync(out, { recursive: true });
-const types = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.wasm': 'application/wasm', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.png': 'image/png', '.mp3': 'audio/mpeg', '.mp4': 'video/mp4' };
+const types = { '.html': 'text/html', '.svg': 'image/svg+xml', '.js': 'text/javascript', '.json': 'application/json', '.wasm': 'application/wasm', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.png': 'image/png', '.mp3': 'audio/mpeg', '.mp4': 'video/mp4' };
 const server = http.createServer((req, res) => {
   const name = decodeURIComponent(req.url.split('?')[0]), f = path.resolve(root, '.' + (name === '/' ? '/index.html' : name));
   if (!f.startsWith(root + path.sep) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); return res.end(); }
@@ -67,11 +67,13 @@ async function buttonFits(page, locator) {
       await page.locator('#phone-jump button').filter({ hasText: /^Contact$/ }).tap();
       await page.waitForFunction(() => works.pages[works.page].kind === 'talk');
       await page.evaluate(() => { works.y = works.page * H; works.arrive = works.at = performance.now() - 20000; drawScene(); });
-      const footer = await page.evaluate(() => works.hot.filter(h => h.label.startsWith('footer-')).map(h => {
-        const [x, y] = toClient(h.x, h.y), [right, bottom] = toClient(h.x + h.w, h.y + h.h); return { label: h.label, x, y, right, bottom };
+      await page.locator('#phone-socials').waitFor({ state: 'visible' });
+      const footer = await page.locator('#phone-socials a').evaluateAll(links => links.map(a => {
+        const r = a.getBoundingClientRect(); return { label: a.getAttribute('aria-label'), x:r.x, y:r.y, right:r.right, bottom:r.bottom, width:r.width };
       }));
+      assert.equal(footer.length, 5, 'all five social links are present');
       const navTop = (await page.locator('#phone-nav').boundingBox()).y;
-      for (const b of footer) assert.ok(b.x >= 8 && b.right <= width - 8 && b.y >= 60 && b.bottom < navTop && b.bottom - b.y >= 44, 'footer link stays clear of the nav: ' + JSON.stringify(b));
+      for (const b of footer) assert.ok(b.x >= 8 && b.right <= width - 8 && b.y >= 60 && b.bottom < navTop && b.width >=44 && b.bottom - b.y >= 44, 'footer link stays clear of the nav: ' + JSON.stringify(b));
       await snap(page, `${width}-${height}-footer`);
       await page.locator('#back').tap(); await page.waitForFunction(() => !works);
 

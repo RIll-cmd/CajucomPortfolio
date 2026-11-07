@@ -423,20 +423,14 @@ function worksMobileFooter(sy) {
   const short = H < 440, top = H * (short ? .48 : .50) + sy * 1.2;
   g.drawImage(works.footer.c, 0, top, W, H * .5);
   if (!short) {
-    const left = Math.max(28, W * .08), logo = Math.min(32, W * .08), ly = H * .62 + sy;
+    const left = Math.max(28, W * .08), logo = Math.min(32, W * .08), ly = Math.min(H * .62, H - 254) + sy;
     worksWords(WORKS_WORDS.name.toUpperCase(), left, ly, logo, WORKS_CREAM, { align: 'left' });
-    const my = Math.min(H - 190, H * .62 + logo + 16) + sy;
+    const my = H - 222 + sy;
     worksWords(WORKS_WORDS.email, left, my, 14, WORKS_CREAM, { align: 'left', font: WORKS_BODY, weight: 600 });
     g.font = `600 14px ${WORKS_BODY}`;
     if (works.k > .7) works.hot.push({ x: left, y: my - 25, w: g.measureText(WORKS_WORDS.email).width, h: 50, act: () => window.open(WORKS_LINKS().Gmail, '_blank', 'noopener'), label: 'footer-mail' });
-    worksWords('© 2026 CYRILL CAJUCOM', W / 2, H - 92 + sy, 12, WORKS_CREAM, { font: WORKS_BODY, weight: 600 });
   }
-  const links = WORKS_LINKS(), names = Object.keys(WORKS_ICONS).filter(n => links[n]), step = Math.min(56, (W - 64) / Math.max(1, names.length - 1)), x0 = (W - (names.length - 1) * step) / 2, y = H - (short ? 120 : 140) + sy;
-  names.forEach((name, i) => {
-    const x = x0 + i * step; g.fillStyle = WORKS_CREAM; g.beginPath(); g.arc(x, y, 22, 0, 7); g.fill();
-    g.save(); WORKS_ICONS[name](x, y, 22); g.restore();
-    if (works.k > .7) works.hot.push({ x: x - 27, y: y - 27, w: 54, h: 54, act: () => window.open(links[name], '_blank', 'noopener'), label: `footer-${name}` });
-  });
+  // Phone social links are real SVG anchors on their own panel, clear of the painted wave.
 }
 const WORKS_LINKS = () => Object.fromEntries([...document.querySelectorAll('#contact .socials a')].map(a => [a.textContent.trim(), a.href])); // the Say hello dialog's links, so they live in one place
 const WORKS_DRAW = {
@@ -566,9 +560,17 @@ const WORKS_DRAW = {
     g.restore();
   },
   talk(p, sy, k, now, t) {
+    if (typeof mobileLayout === 'function' && mobileLayout() && H < 440) {
+      g.globalAlpha = k;
+      worksWords(WORKS_WORDS.ask, W / 2, 68 + sy, 13, WORKS_CREAM, { font: WORKS_BODY, weight: 600 });
+      worksScript(WORKS_WORDS.talk, W * .25, H * .33 + sy, Math.min(W * .11, H * .15));
+      worksPill('Contact', W * .76, H * .33 + sy, 16, false, works.hover === 'Contact', k > .7 ? () => $('#contact').showModal() : null);
+      worksFooter(sy, t); g.globalAlpha = 1; return;
+    }
     g.globalAlpha = k;
     works.clouds.slice(0, 2).forEach((c, i) => { g.save(); g.translate(-W * .15, H * (i ? .36 : .46) + sy * (i ? 1.1 : .7)); g.scale(1, -1); g.drawImage(c, 0, 0, W * 1.3, H * .95); g.restore(); });
-    const size = Math.min(W * (works.tall ? .19 : .12), H * .2), cy = H * .36 + sy;
+    const phoneCompact = typeof mobileLayout === 'function' && mobileLayout() && H < 600;
+    const size = phoneCompact ? Math.min(W * .17, H * .12) : Math.min(W * (works.tall ? .19 : .12), H * .2), cy = H * (phoneCompact ? .28 : .36) + sy;
     worksWords(WORKS_WORDS.ask, W / 2, cy - size * .85, Math.max(13, Math.min(W * .032, H * .036)), WORKS_CREAM, { spread: 1.5 });
     worksScript(WORKS_WORDS.talk, W / 2, cy, size);
     worksPill('Contact', W / 2, cy + size * .95, worksClamp(W * .02, 14, 22), works.hover === 'Contact', works.hover === 'Contact', k > .7 ? () => $('#contact').showModal() : null);

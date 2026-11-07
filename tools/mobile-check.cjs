@@ -7,7 +7,7 @@ try { ({ chromium } = require('playwright-core')); }
 catch { ({ chromium } = require('../.check-tmp/node_modules/playwright-core')); }
 const root = path.resolve(__dirname, '..'), out = path.join(root, '.check-tmp');
 fs.mkdirSync(out, { recursive: true });
-const types = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.wasm': 'application/wasm', '.jpg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.mp3': 'audio/mpeg', '.mp4': 'video/mp4' };
+const types = { '.html': 'text/html', '.svg': 'image/svg+xml', '.js': 'text/javascript', '.json': 'application/json', '.wasm': 'application/wasm', '.jpg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.mp3': 'audio/mpeg', '.mp4': 'video/mp4' };
 const server = http.createServer((req, res) => {
   const name = decodeURIComponent(req.url.split('?')[0]);
   const file = path.resolve(root, '.' + (name === '/' ? '/index.html' : name));

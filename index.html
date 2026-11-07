@@ -1122,6 +1122,7 @@ function projectNight(t) {
 // per scroll, swipe or arrow key (each picture with what it shows under it, what it does, the end), star dots between the two.
 // On a tall screen the words come first, as the first part, and everything stacks in one column.
 function projectWords(c, x, y, w, size, split, draw) { // returns where the words end and where the links go
+  const breaks = [y];
   const tag = Math.min(w * .13, 62, H * .08), names = c.t.toUpperCase().split(' '), blockH = tag * 1.42, gap = tag * .16;
   const widthOf = s => { g.font = `400 ${tag}px ${WORKS_LABEL}`; return g.measureText(s).width + tag * .9; };
   const lines = widthOf(names.join(' ')) <= w ? [names.join(' ')] : names; // one tag if the name fits, else a word a tag, stepping right
@@ -1132,15 +1133,17 @@ function projectWords(c, x, y, w, size, split, draw) { // returns where the word
     if (draw) { g.fillStyle = 'rgba(5,12,30,.45)'; g.beginPath(); g.roundRect(bx + 4, by + 6, bw, blockH, 12); g.fill(); g.fillStyle = WORKS_CREAM; g.beginPath(); g.roundRect(bx, by, bw, blockH, 12); g.fill(); worksWords(line, bx + bw / 2, by + blockH / 2 + tag * .04, fitTag, WORKS_NAVY); }
   });
   y += lines.length * (blockH + gap) + size * .2;
+  breaks.push(y);
   // What kind of project, on a coral pill under the tag's right end.
   const kind = (c.tags ? `${c.tags[0]} project` : c.c).toUpperCase(), ks = Math.max(12, size * .78);
   g.font = `400 ${ks}px ${WORKS_LABEL}`; const kw = g.measureText(kind).width + ks * (2.2 + kind.length * .12), kh = ks * 2.2;
   if (draw) { g.fillStyle = WORKS_CORAL; g.beginPath(); g.roundRect(right - kw, y, kw, kh, kh / 2); g.fill(); worksWords(kind, right - kw / 2, y + kh / 2 + ks * .04, ks, WORKS_NAVY, { spread: ks * .12 }); }
   y += kh + size * 1.6;
+  breaks.push(y - size * .8);
   // What it is, and beside it (below it, when tall) the topics.
   const copyW = split ? w * .6 : w; g.font = `600 ${size}px ${WORKS_BODY}`; const copy = wrapLines(c.copy || COPY, copyW);
   const top = y;
-  for (const line of copy) { if (draw) text(g, line, x, y, size, WORKS_BODY, 'rgba(244,236,216,.94)', 'left'); y += size * 1.62; }
+  for (const line of copy) { if (draw) text(g, line, x, y, size, WORKS_BODY, 'rgba(244,236,216,.94)', 'left'); y += size * 1.62; breaks.push(y - size * .81); }
   const topics = c.topics || [], ts = Math.max(11, size * .78);
   let ty = split ? top - size * .5 : y + size * .6, tx = split ? x + w * .68 : x;
   if (topics.length) {
@@ -1148,14 +1151,14 @@ function projectWords(c, x, y, w, size, split, draw) { // returns where the word
     ty += ts * 1.9;
     for (const topic of topics) {
       g.font = `400 ${ts}px ${WORKS_LABEL}`; const pw = g.measureText(topic).width + ts * 2.2, ph = ts * 2.1;
-      if (!split && tx + pw > x + w) { tx = x; ty += ph + 8; }
+      if (!split && tx + pw > x + w) { breaks.push(ty + ph / 2 + 4); tx = x; ty += ph + 8; }
       if (draw) { g.fillStyle = WORKS_TEAL; g.beginPath(); g.roundRect(tx, ty - ph / 2, pw, ph, ph / 2); g.fill(); worksWords(topic, tx + pw / 2, ty + ts * .04, ts, '#0b2e2a'); }
       if (split) ty += ph + 8; else tx += pw + 8;
     }
     if (!split) y = ty + ts * 1.6;
   }
   const bottom = Math.max(y, split ? ty : 0);
-  return { bottom, links: [x, bottom + size * .6] };
+  return { bottom, breaks, links: [x, bottom + size * .6] };
 }
 function projectMagnifier(x, y) { // a cream badge with a magnifying glass, at a screenshot's corner
   g.fillStyle = 'rgba(20,40,75,.85)'; g.strokeStyle = WORKS_CREAM; g.lineWidth = 2; g.beginPath(); g.arc(x, y, 16, 0, 7); g.fill(); g.stroke();
@@ -1191,7 +1194,7 @@ function drawProject() {
     return pages;
   };
   const parts = []; // each draws itself centred on its own screen, given the top of its block
-  if (!split) { const size = Math.max(15, Math.min(18, W * .042)), h = projectWords(c, colX, 0, colW, size, false, false).bottom; parts.push({ h: h + 70, words: true, draw: y => { const at = projectWords(c, colX, y, colW, size, false, true); view.linksAt = at.links; } }); }
+  if (!split) { const size = Math.max(15, Math.min(18, W * .042)), measured = projectWords(c, colX, 0, colW, size, false, false); parts.push({ h: measured.bottom + 70, breaks: measured.breaks, words: true, draw: y => { const at = projectWords(c, colX, y, colW, size, false, true); view.linksAt = at.links; } }); }
   const shotPart = (pic, cap, video) => { const ar = pic && pic.naturalWidth ? pic.naturalWidth / pic.naturalHeight : 16 / 10; let pw = Math.min(cw, H * (split ? .66 : .6) * ar), ph = pw / ar;
     g.font = `400 ${caption}px ${WORKS_LABEL}`;
     let capLines = cap && (COARSE || W < 600) ? wrapLines(cap, pw - caption * 2.4) : [cap], capH = caption * (1 + capLines.length * 1.2);
@@ -1224,12 +1227,15 @@ function drawProject() {
   if (!c.shots) { parts.push({ h: c.heroBmp.height / maxPr, draw: y => g.drawImage(c.heroBmp, mid - c.heroBmp.width / maxPr / 2, y, c.heroBmp.width / maxPr, c.heroBmp.height / maxPr) }); parts.push({ h: Math.round(cw * .46), draw: y => g.drawImage(c.detailBmp, mid - cw / 2, y, cw, Math.round(cw * .46)) }); }
   parts.push({ h: 90, draw: y => { worksStar(mid - 110, y + 20, 7, WORKS_TEAL); worksStar(mid + 110, y + 20, 7, WORKS_TEAL); worksWords('End of case study', mid, y + 20, 20, 'rgba(244,236,216,.75)'); worksWords('Back to the surface with Escape or Back', mid, y + 62, 15, 'rgba(244,236,216,.5)'); } });
   if (!split && (COARSE || W < 600) && parts[0].words && parts[0].h > H - 160) {
-    const first = parts.shift(), available = Math.max(80, H - 160), step = Math.max(40, available - 28), count = Math.ceil((first.h - 28) / step), pages = [];
-    for (let i = 0; i < count; i++) {
-      const offset = Math.min(i * step, first.h - available);
-      pages.push({ h: available, words: true, fraction: offset / Math.max(1, first.h - available), draw: y => { g.save(); g.beginPath(); g.rect(0, y, W, available); g.clip(); first.draw(y - offset); g.restore(); } });
+    const first = parts.shift(), available = Math.max(80, H - 160), pages = [];
+    let start = 0;
+    while (start < first.h) {
+      const offset = start, candidates = (first.breaks || []).filter(y => y > offset + 20 && y <= offset + available);
+      const end = first.h - offset <= available ? first.h : candidates.length ? Math.max(...candidates) : Math.min(first.h, offset + available), height = end - offset;
+      pages.push({ h: height, words: true, fraction: offset / first.h, draw: y => { g.save(); g.beginPath(); g.rect(0, y, W, height); g.clip(); first.draw(y - offset); g.restore(); } });
+      start = end;
     }
-    parts.unshift(...pages); // overlap keeps a line readable on at least one complete screen
+    parts.unshift(...pages); // break between whole title blocks and lines instead of clipping through their letters
   }
   view.parts = parts.length; view.max = (parts.length - 1) * H;
   view.partInfo = parts.map((part, i) => part.words ? 'Introduction' : part.label || (i === parts.length - 1 ? 'End of case study' : 'Project details'));
@@ -1251,7 +1257,7 @@ function drawProject() {
   g.globalAlpha = 1;
   // The links are real buttons, placed under the words: beside the picture when wide, with the first part when tall.
   if (view.linksAt && !linksBox.hidden) {
-    const [lxs, lys] = view.linksAt, [cx, cy] = toClient(lxs, lys), on = split || ((COARSE || W < 600) ? parts[Math.round(view.scroll / H)]?.words && cy >= 65 && cy + linksBox.offsetHeight <= H - 24 : Math.abs(view.scroll) < H * .5);
+    const [lxs, lys] = view.linksAt, [cx, cy] = toClient(lxs, lys), on = split || ((COARSE || W < 600) ? parts[Math.round(view.scroll / H)]?.words && cy >= 65 && cy + linksBox.offsetHeight <= H - 82 : Math.abs(view.scroll) < H * .5);
     Object.assign(linksBox.style, { left: `${cx}px`, top: `${cy}px`, maxWidth: `${(split ? colW : W - colX * 2)}px`, visibility: on ? '' : 'hidden', opacity: ease });
   }
   const n = parts.length, step = Math.min(20, H * .6 / n), rx = split ? (lx + lw + colX) / 2 : W - Math.max(13, W * .028), top = H / 2 - step * (n - 1) / 2, at = Math.round(view.scroll / H); // where you are

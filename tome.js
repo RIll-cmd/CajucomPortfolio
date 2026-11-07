@@ -723,7 +723,7 @@ function drawTome(now) {
     const top = l.short ? (H - ch) / 2 : l.cardY;
     tome.cardBox = { x: l.cardX, y: top, w: l.cardW, h: ch };
     if (a > 0) { g.save(); g.globalAlpha = a; g.shadowColor = 'rgba(8,4,1,.65)'; g.shadowBlur = 26; g.shadowOffsetY = 8; g.drawImage(card, l.cardX, top + (1 - a) * (l.short ? 0 : -10), l.cardW, ch); g.restore(); }
-    tomeNav(l, now);
+    if (!(typeof mobileLayout === 'function' && mobileLayout())) tomeNav(l, now);
     if (!tome.moved) {
       const hint = COARSE ? 'tap card to read · swipe to turn' : 'scroll to turn the page', bob = reduced ? 0 : Math.sin(now / 300) * 3, size = Math.max(13, Math.min(H * .021, 16));
       g.save(); g.font = `600 ${size}px ${TOME_SERIF}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round'; g.lineWidth = 4; g.strokeStyle = 'rgba(18,9,4,.85)'; g.strokeText(hint, l.navCx, l.navY - size * 1 + bob); g.fillStyle = '#ffe9bd'; g.fillText(hint, l.navCx, l.navY - size * 1 + bob); g.restore();

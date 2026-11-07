@@ -217,6 +217,7 @@ const SONG_WATCH = id => `https://www.youtube.com/watch?v=${id}`;
 const songSay = (func) => songFrame && songFrame.contentWindow && songFrame.contentWindow.postMessage(JSON.stringify({ event: 'command', func, args: [] }), 'https://www.youtube-nocookie.com');
 function songState(playing) { // the player said whether it's playing: the headphones follow it
   songOn = playing; const b = songCard.querySelector('.song-play'); b.querySelector('.song-label').textContent = playing ? 'Pause' : songCard.classList.contains('blocked') ? 'Play on YouTube ↗' : 'Play'; b.classList.toggle('on', playing);
+  b.setAttribute('aria-pressed', String(playing));
   if (typeof bookSongOn !== 'undefined' && bookSongOn !== playing) { bookSongOn = playing; if (book) book.spinAt = performance.now(); } // a spin to change outfit
 }
 function songStop() { songFrame = null; songCard.querySelector('.song-player').innerHTML = ''; songCard.querySelector('.song-close').hidden = true; songState(false); }
