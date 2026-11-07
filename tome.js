@@ -4,7 +4,7 @@
 const TOME_WORDS = {
   cover: 'Experiences',
   chapters: [
-    { name: 'Summary', lead: "Completed FlyRank AI's Backend AI Engineering internship: nine backend builds and an AI image-matching capstone. 4th-year BS Computer Science student at FEU Institute of Technology, specializing in software engineering, Dean's Lister, looking for a 500-hour internship. 20 certifications, from SAP and PMI to seven Claude Academy courses.", pills: ['1 internship', '20 certifications', "Dean's Lister", 'Open to internships'] },
+    { name: 'Summary', lead: "Completed FlyRank AI's Backend AI Engineering and AI Fluency tracks: nine backend builds and an AI image-matching capstone. 4th-year BS Computer Science student at FEU Institute of Technology, specializing in software engineering, Dean's Lister, looking for a 500-hour internship. 21 certifications, from SAP and PMI to seven Claude Academy courses.", pills: ['1 internship', '21 certifications', "Dean's Lister", 'Open to internships'] },
     { name: 'Experience', entries: [{ h: 'Backend AI Engineering Intern', m: 'FlyRank AI, Jul 2026 to Nov 2026. Manila, remote', d: [
       'Backend AI Engineering track: nine builds plus a capstone, each a public GitHub repo built in staged, tested commits.',
       'REST APIs in Python and FastAPI: a CRUD task API with data validation and Swagger docs, moved from SQLite to PostgreSQL in Docker Compose with a persistent volume.',
@@ -24,6 +24,7 @@ const TOME_WORDS = {
     ] },
     { name: 'Certifications', parts: [
       { label: 'Professional', entries: [
+        { h: 'Certificate of Completion: AI Fluency', m: 'FlyRank AI, Nov 7, 2026', img: 'flyrank-ai-fluency', big: true, d: 'Internship program, Jul 1 to Nov 7, 2026. ID FR-D11-56722-B329D', verify: ['Verify', 'https://internship.flyrank.ai/verify/FR-D11-56722-B329D?first_name=Cyrill'] },
         { h: 'Certificate of Completion: Backend AI Engineering', m: 'FlyRank AI, Nov 2026', img: 'flyrank-backend-ai', big: true, d: 'Internship program, Jul to Nov 2026. ID FR-D11-A9E5F-E68A6', verify: ['Verify', 'https://internship.flyrank.ai/verify/FR-D11-A9E5F-E68A6?first_name=Cyrill'] },
         { h: 'SAP Certified: SAP Generative AI Developer', m: 'SAP, Nov 2026', img: 'sap-generative-ai-developer', big: false, verify: ['Verify', 'https://www.credly.com/badges/3318fc34-2d85-41db-85e4-ef2c0fc727b9'] },
         { h: 'SAP Certified: Positioning the Autonomous Enterprise', m: 'SAP, Jul 2026', img: 'sap-autonomous-enterprise', big: true, verify: ['Verify', 'https://www.credly.com/badges/a696c2ef-883c-4170-b81c-14a42787a711'] },
